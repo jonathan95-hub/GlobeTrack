@@ -16,7 +16,7 @@ const userSchema = new schema({
   },
 
   birthDate: {
-    type: Date, // Es de tipo Date para manejar la fecha
+    type: String
   },
 
   // Foto de perfil con una imagen por defecto por si el usuario no pusiera ninguna
@@ -107,7 +107,8 @@ const userSchema = new schema({
       ref: "Comment",
     },
   ],
-});
+},
+{timestamps: true});
 
 const usersModel = mongoose.model("User", userSchema, "users");
 
