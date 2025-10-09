@@ -1,11 +1,13 @@
+ const userModel = require("../models/userModels"); // Importamos el modelo de usuario
+ const bcrypt = require("bcrypt");
+ const jwt = require(`jsonwebtoken`);
 
- const userModel = require("../models/userModels") // Importamos el modelo de usuario
- const bcrypt = require("bcrypt")
+
  const signup = async (req, res) => { 
     try { // creamos un try catch para manejo de errores
         const {name, lastName, email, password, country, city, birthDate} = req.body; // hacemos un destructuring del body
-        if(!password || password.length < 8){ // Si los caracteres de password son menor a 8 saldra un alerta indicando el mensaje
-          return res.status(400).send({status: "Failed", message: "Password requires 8 or more characters"})
+        if(!password || password.length < 8){ // Si los caracteres de password son menor a 8 hara un return lo que cortara el codigo y devolverá el mensaje de que es necesario 8 caracteres
+          return res.status(400).send({status: "Failed", message: "Password requires 8 or more characters"}) 
         }
         
         const newUser = { // creamos un objeto que tiene los campos del body
@@ -26,6 +28,41 @@
         res.status(500).send({status: 'Failed', error: error.message}) // si ocurriese algun error saldra el status 500 y el mensaje del error
     }
  }
+ 
+
+// Función para crear eel token
+const generateToken = (payload, isRefresh) => { // le pasamos por parametros el payload y isRefresh
+    if(isRefresh){ // si isRefresh exite 
+        return jwt.sign(payload, process.env.SECRET_TOKEN_REFRESH, {expiresIn: '60min'}) // entonces devuelve el token creado de refresco que se hace con payload que son los datos del usuario y con la palabra secreta y expira en 60 min
+    }
+    return jwt.sign(payload, process.env.SECRET_TOKEN, {expiresIn: '15min'}); // en caso de que isRefresh no exista se hara el mismo proceso pero con la otra palabra secreta y genera un token de 15 min
+}
 
 
- module.exports = {signup} // exportamos las funciones 
+
+ const login = async (req, res) => {
+    try {
+        const {email, password} = req.body; // recojemos el email y el password del body
+        const user = await userModel.findOne({email: email}) // buscamos por finOne para traer un objeto de userModel, buscando el email
+        if(!user){ // si user no existe
+            return  res.status(404).send('Invalid email or password') // devolvemos un 404 y un mensaje que el email o la contraseña es invalido, 
+        }
+        
+        const validate = await bcrypt.compare(password, user.password) // usamos el compare de bcrypt con la contraseña escrita y la contraseña del usuario
+        if(!validate){
+            return res.status(404).send("Invalid email or password") // si la validacion falla devolvemos el mensaje de email o contraseña invalidos
+        }
+        const payload ={ // creamos un objeto con el _id del user y el name del user
+            _id: user._id,
+            name: user.name,
+        }
+        const token = generateToken(payload, false) 
+        const token_refresh = generateToken(payload, true)
+        res.status(200).send({user, token, token_refresh, status: "Success", message: "validated user"})
+    } catch (error) {
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+      
+ }
+
+ module.exports = {signup, login} // exportamos las funciones 

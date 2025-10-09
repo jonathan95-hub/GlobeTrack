@@ -27,7 +27,7 @@ const postSchema = new schema({
     likes: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Users"
+            ref: "User"
         }
     ],
     // Arrat de objetos que es el id de la colección comentarios
@@ -36,9 +36,22 @@ const postSchema = new schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Comment"
         }
-    ]
+    ],
+    location: {
+        type: {
+            type: String,
+            enum: ["Point"], // Tipo de dato GeoJSON
+            required: true
+        },
+        coordinates: {
+            type: [Number], // Array de numeros, longitud y latitud
+            required: true
+        }
+    }
+    
 },
 {timestamps: true})
+postSchema.index({ location: '2dsphere' });
 
 const postModel = mongoose.model("Post", postSchema, "Posts")
 

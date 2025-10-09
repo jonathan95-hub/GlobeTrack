@@ -5,7 +5,7 @@ const schema = mongoose.Schema // creamos una constante para acceder mas facil a
 const commentSchema = new schema({
     user:  {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Users',
+        ref: 'User',
         required: true
     },
     post: {
