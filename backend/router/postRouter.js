@@ -1,11 +1,11 @@
 const express = require('express') // Importamos express
 const router = express.Router() // creamos una constante para manejar mejor router de express
 
-const {createPost, getPost, deletePost, commentPost} = require("../controllers/postController")
-
+const {createPost, getPost, deletePost} = require("../controllers/postController")
+const {verification} = require("../middelwares/authentication")
 router.get("/allpost", getPost)
-router.post("/create", createPost)
-router.delete("/:postId", deletePost)
-router.post("/:postId", commentPost)
+router.post("/create", verification, createPost)
+router.delete("/:postId",  verification, deletePost)
+
 
 module.exports = router
