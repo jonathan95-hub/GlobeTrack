@@ -1,6 +1,6 @@
 const postModel = require("../models/postModel") // Importamos el modelo de las publicaciones
-const usersModel = require("../models/userModels")
-const { post } = require("../router/authRouter")
+
+
 
 const createPost = async (req, res) => {
     try {
@@ -84,5 +84,16 @@ const deleteLike = async(req, res) => {
     
 }
 
+const editPost = async (req, res) => {
+    try {
+        const postId = req.params.postId
+        const newPost = req.body
+        const post = await postModel.findByIdAndUpdate(postId, newPost, {new: true})
+        res.status(201).send({post, status: "Success", message: "Post updated"})
+    } catch (error) {
+        es.status(500).send({ status: "Failed", error: error.message });
+    }
+}
 
-module.exports = {createPost, getPost, deletePost, likePost, deleteLike}
+
+module.exports = {createPost, getPost, deletePost, likePost, deleteLike, editPost}
