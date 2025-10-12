@@ -7,7 +7,8 @@ const createPost = async (req, res) => {
          const post = req.body // recibimos por el body la publicacion
          console.log(post)
          const newPost = await postModel.create(post) // creamos la constante newPost para crear un nuevo post con la informacion del body antes recogida como parametro
-         res.status(201).send({newPost, status: "Success", message: "Created post"}) // recibimos como respuesta el nuevo post con un mensaje de Creada nueva publicación
+         const populatePost = await postModel.findById(newPost._id).populate("user", "name photoProfile") // buscamos el nuevo post por su Id y hacemos populate con referencia a user y sacamos el nombre y la imagen del usuario
+         res.status(201).send({newPost: populatePost, status: "Success", message: "Created post"}) // recibimos como respuesta el nuevo post con un mensaje de Creada nueva publicación
     } catch (error) {
         res.status(500).send({status: "Failed", error: error.message})
     }
@@ -91,9 +92,36 @@ const editPost = async (req, res) => {
         const post = await postModel.findByIdAndUpdate(postId, newPost, {new: true})
         res.status(201).send({post, status: "Success", message: "Post updated"})
     } catch (error) {
-        es.status(500).send({ status: "Failed", error: error.message });
+        res.status(500).send({ status: "Failed", error: error.message });
     }
 }
+ const topPost =async (req, res) => {
+    try {
+         const post = await postModel.aggregate([
+        {
+            $project: {
+                title:  1,
+                text: 1,
+                user: 1,
+                numberLikes: {$size: "$likes"},
+                numberComment:{$size: "$comment"}
+            }
+        },
+        {$sort: {numberLikes: -1, numberComment: -1}},
+        {$limit:10}
+    ])
 
+    const populate = await postModel.populate(post, {path: "user", select: "name photoProfile"})
 
-module.exports = {createPost, getPost, deletePost, likePost, deleteLike, editPost}
+    res.status(200).send({
+        status: "Success",
+        message: "Top 10 post with most likes",
+        post: populate
+    })
+    } catch (error) {
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+
+ }
+
+module.exports = {createPost, getPost, deletePost, likePost, deleteLike, editPost, topPost}

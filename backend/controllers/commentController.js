@@ -19,4 +19,38 @@ const createComment = async (req, res) => {
     }
 }
 
-module.exports = {createComment}
+const deleteComment = async (req, res) => {
+    try {
+        const commentId  = req.params.commentId
+        const userId = req.payload._id
+
+        const comment = await commentModel.findById(commentId)
+        if(!comment){
+            return res.status(404).send({status: "Success", message: "Comment not found"})
+        }
+
+        if(comment.user.toString() !== userId.toString()){
+            return res.status(401).send({status: "Failed", message: "You cannot delete this comment"})
+
+        }
+        await commentModel.findByIdAndDelete(commentId)
+        await postModel.findByIdAndUpdate(comment.post, {$pull: {comment: commentId}})
+        res.status(200).send({status: "Success", message: "Comment deleted "})
+    } catch (error) {
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+}
+
+const editComment = async (req, res) => {
+    try {
+         const commentId = req.params.commentId
+    const upload = req.body
+
+    const newComment = await commentModel.findByIdAndUpdate(commentId, upload, {new: true})
+    res.status(200).send({newComment, status: "Success", message: "Comment updated"})
+    } catch (error) {
+         res.status(500).send({ status: "Failed", error: error.message });
+    }
+   
+}
+module.exports = {createComment, deleteComment, editComment}

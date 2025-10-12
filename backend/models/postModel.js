@@ -6,7 +6,7 @@ const postSchema = new schema({
     // Hace referencia al usuario que escribio el post y es requerido
     user: { 
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
+        ref: "User",
         required: true
     },
     // campo title que es requerido para crear el post
