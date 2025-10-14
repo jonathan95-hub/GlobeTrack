@@ -10,10 +10,6 @@ const countrySchema = new schema({
         type: Object,
         required: true
     },
-    regions:[{ // Referencia a las regiones del Pais
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Regions"
-    }],
     userVisited:[{ // Usuarios que lo han visitado
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
