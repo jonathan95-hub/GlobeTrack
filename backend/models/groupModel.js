@@ -19,7 +19,7 @@ const groupSchema = new schema({
         ref: "user",
         required: true
     },
-    memebers: [
+    members: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "user"

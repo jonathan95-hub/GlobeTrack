@@ -52,6 +52,11 @@ const userSchema = new schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
   },
+  group:{
+    type:[ mongoose.Schema.Types.ObjectId],
+    ref: "Group"
+
+  },
   visitedDestinations: [
     // Es un array de objetos
     {
