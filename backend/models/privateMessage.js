@@ -16,14 +16,10 @@ const privateMessageSchema = new schema({
     content: {
         type: String,
         required: true,
-    },
-    isRead: {
-        type: Boolean, 
-        default: false
     }
         
     
-})
+}, {timestamps: true})
 
 const privateMessageModel = mongoose.model("PrivateMessage", privateMessageSchema, "privateMessage")
 

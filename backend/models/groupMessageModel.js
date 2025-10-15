@@ -20,7 +20,7 @@ const groupMessageSchema = new schema ({
 
     }
 
-})
+}, {timestamps: true})
 
 const groupMessageModel = mongoose.model("GroupMessage", groupMessageSchema, "groupMessage")
 

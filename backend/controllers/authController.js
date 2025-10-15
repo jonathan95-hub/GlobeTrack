@@ -65,4 +65,19 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
       
  }
 
+ const refreshToken = (req, res) =>{
+  try {
+    const payload = {
+      _id: req.payload._id,
+      name: req.payload.name,
+    }
+    
+    const token = generateToken(payload, false)
+    const token_refresh = generateToken(payload, true)
+    res.status(200).send({token, token_refresh})
+  } catch (error) {
+      res.status(500).send({ status: "Failed", error: error.message });
+  }
+}
+
  module.exports = {signup, login} // exportamos las funciones 

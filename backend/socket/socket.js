@@ -2,7 +2,7 @@ const {Server} = require("socket.io")
 
 
 const configSocket = (server) => {
-    const io = new Server(server, {
+    let io = new Server(server, {
         cors: {
             origin: "*",
             methods: ["GET", "POST", "DELETE"], 
@@ -32,6 +32,7 @@ const configSocket = (server) => {
         })
     })
     return io
+    
 }
 
 module.exports = configSocket;

@@ -31,7 +31,7 @@ const groupSchema = new schema({
             ref: "message"
         }
     ]
-})
+}, {timestamps:true})
 
 const groupModel = mongoose.model("Groups", groupSchema, "groups")
 

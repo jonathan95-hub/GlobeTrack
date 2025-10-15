@@ -52,7 +52,7 @@ const userSchema = new schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: "User",
   },
-  group:{
+  groups:{
     type:[ mongoose.Schema.Types.ObjectId],
     ref: "Group"
 
