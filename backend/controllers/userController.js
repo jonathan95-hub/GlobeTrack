@@ -15,6 +15,15 @@ const editUser = async (req, res) => {
   }
 };
 
+const allUser = async(req, res) =>{
+  try {
+    const users = await userModel.find()
+    res.status(200).send({users, status: "Success", message: "All users obtained"})
+  } catch (error) {
+     res.status(500).send({status: "Failed", error: error.message });
+  }
+}
+
 const getUserWithMoreFollowers = async (req, res) => {
   try {
     const user = await userModel.aggregate([
@@ -191,5 +200,6 @@ module.exports = {
   howManyFollowing,
   getCountryvisited,
   getCountryDesired,
+  allUser
 
 };

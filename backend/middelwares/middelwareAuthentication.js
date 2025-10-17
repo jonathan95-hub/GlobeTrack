@@ -1,4 +1,5 @@
-const jwt = require("jsonwebtoken") // Importamos jsonwebtoken
+const jwt = require("jsonwebtoken"); // Importamos jsonwebtoken
+
 
 // Esta función servira para verificar si el token del usuario es generado en esta web 
 const verification = async (req, res, next) => { // pasamos los parametros req, res y next
@@ -15,4 +16,16 @@ const verification = async (req, res, next) => { // pasamos los parametros req, 
     }
 }
 
-module.exports = {verification}
+const adminAuth = async(req, res, next) => {
+    try {
+        const user = req.payload
+        if(user.isAdmin === "user"){
+            return res.status(401).send({status: "Failed", message: "Access denied"})
+        }
+        next()
+    } catch (error) {
+        res.status(500).send("Token is not valid");
+    }
+}
+
+module.exports = {verification, adminAuth}

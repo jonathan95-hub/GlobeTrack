@@ -45,6 +45,12 @@ const userSchema = new schema({
   city: {
     type: String,
   },
+
+  isAdmin:{
+    type: String,
+    enum:["user", "admin"],
+    default: "user"
+  },
   followers: {
     type: [mongoose.Schema.Types.ObjectId], // Guardara el ObjectId del usuario que te sigue
     ref: "User", // hace referencia al esquema user

@@ -4,7 +4,7 @@ const http = require("http") // importamos http
 require('dotenv').config(); // importamos dotenv
 
 const connection = require("./connectionDataBase/connection") // Importamos y guardamos en una constante el archivo de conexion a la base de datos
-const configSocket = require("./socket/socket") // Importamos y guardamos en una constante el archivo de la configuracion de socket
+const configSocket = require("./config/configSocket") // Importamos y guardamos en una constante el archivo de la configuracion de socket
 const socketMiddelware = require('./middelwares/middelwareSocket');
 
 const app = express() // Creamos una constante que es igual a express
