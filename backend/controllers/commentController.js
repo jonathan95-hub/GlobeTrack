@@ -1,5 +1,7 @@
 const commentModel = require("../models/commentModel")
+const notificationsModel = require("../models/norificationModel")
 const postModel =   require("../models/postModel")
+const usersModel = require("../models/userModels")
 
 const createComment = async (req, res) => {
     try {
@@ -12,6 +14,23 @@ const createComment = async (req, res) => {
             text
         })
         await postModel.findByIdAndUpdate(postId, {$push:{comment: newComment._id}}) // Luego busca en postModel el id que sea igual a el postId del params, y añade a el campo comment el id del newComment 
+        
+        const post = await postModel.findById(postId).populate("user", "name lastName")
+        if(post.user._id.toString() !== userId.toString()){
+            const senderUser = await usersModel.findById(userId).select("name lastName")
+            const fullName = `${senderUser.name} ${senderUser.lastName}`
+            const notification = await notificationsModel.create({
+                receiver: post.user._id,
+                sender: userId,
+                type: "comment",
+                referenceId: newComment._id,
+                message: `${fullName} comentó en tu publicación`
+            })
+            if(req.io) {
+                req.io.to(post.user._id.toString()).emit("newNotification", notification)
+            }
+        }
+
         res.status(201).send({status: "Success", message: "Comment created",  comment: newComment})
 
     } catch (error) {

@@ -2,7 +2,7 @@ const express = require('express') // Importamos express
 const router = express.Router() // creamos una constante para manejar mejor router de express
 
 const {createPost, getPost, deletePost, likePost, deleteLike, editPost, topPost, getPostUser, getUserLikes, getCommentPost} = require("../controllers/postController")
-const {verification} = require("../middelwares/authentication")
+const {verification} = require("../middelwares/middelwareAuthentication")
 router.get("/allpost", getPost)
 router.get("/top", verification, topPost)
 router.post("/create", verification, createPost)

@@ -80,4 +80,4 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
   }
 }
 
- module.exports = {signup, login} // exportamos las funciones 
+ module.exports = {signup, login, refreshToken} // exportamos las funciones 

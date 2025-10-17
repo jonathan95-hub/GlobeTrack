@@ -21,8 +21,9 @@ const userRouter = require("./router/userRouter") // Creamos la constante userRo
 const countryRouter = require("./router/countryRouter") // Creamos la constante countryRouter para traer las rutas de los paises
 const ranckingRouter = require("./router/ranckingPhotoRouter") // Creamos la constante rancking para traer las rutas de las fotos del rancking
 const groupRouter = require("./router/groupRouter"); // Creamos la constante groupRouter para traer las rutas de los grupos
-const groupMessage = require("./router/groupMessageRouter")
-const privateMessage = require("./router/privateMessageRouter")
+const groupMessageRouter = require("./router/groupMessageRouter")
+const privateMessageRouter = require("./router/privateMessageRouter")
+const notificationRouter = require("./router/notificationRouter")
 
 app.use(cors()) // Permite la conexion entre el back y el front
 app.use(express.json()) // convierte automáticamente el JSON que se envía desde req.body.
@@ -35,8 +36,9 @@ app.use("/user", userRouter)
 app.use("/country", countryRouter)
 app.use("/rancking", ranckingRouter)
 app.use("/group", groupRouter)
-app.use("/groupmessage", groupMessage)
-app.use("/privatemessage", privateMessage)
+app.use("/groupmessage", groupMessageRouter)
+app.use("/privatemessage", privateMessageRouter)
+app.use("/notification", notificationRouter)
 
 connection()
 const PORT = process.env.PORT || 4000

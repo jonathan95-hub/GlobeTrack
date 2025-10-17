@@ -11,7 +11,7 @@ const {
   getOneTopVisited,
   getOneTopDesired,
 } = require("../controllers/countryController");
-const { verification } = require("../middelwares/authentication");
+const { verification } = require("../middelwares/middelwareAuthentication");
 
 router.get("/topdesired", getFiveCountryMoreDesired); // Endpoint para traer los 5 paises mas deseados
 router.get("/topvisited/topone", getOneTopVisited); // Endpoint para traer el pais mas visitado

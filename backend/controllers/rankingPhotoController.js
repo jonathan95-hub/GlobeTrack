@@ -1,5 +1,7 @@
 
+const notificationsModel = require("../models/norificationModel")
 const ranckingPhotoModel = require("../models/rankingPhotoModel")
+const usersModel = require("../models/userModels")
 
 const createPhoto = async(req, res) => {
     try {
@@ -25,6 +27,20 @@ const addVoteAndDeleteVote = async (req, res) => {
         }
         else{
             await ranckingPhotoModel.findByIdAndUpdate(photoId,{$addToSet: {votes: userId}})
+            if(photo.user.toString() !== userId.toString()){
+                const senderUser = await usersModel.findById(userId).select("name lastName")
+                const fullName = `${senderUser.name} ${senderUser.lastName}`
+                const notification = await notificationsModel.create({
+                    receiver: photo.user,
+                    sender: userId,
+                    type: "rankingVote",
+                    referenceId: photo._id,
+                    message: `${fullName} votó tu foto`
+                })
+                if(req.io){
+                    req.io.to(photo.user._id.toString()).emit("newNotification", notification)
+                }
+            }
             res.status(200).send({status: "Success", message: "you have voted for this photo"})
         }
         

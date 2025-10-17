@@ -5,6 +5,7 @@ const groupSchema = new schema({
     name:{
         type: String,
         required: true,
+        minlength: [3 ,"The name must be at least 3 characters long."]
     },
     photoGroup :{
         type: String,
@@ -30,6 +31,13 @@ const groupSchema = new schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "message"
         }
+    ],
+    userConnect: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+        
     ]
 }, {timestamps:true})
 

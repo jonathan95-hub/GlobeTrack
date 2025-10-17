@@ -12,6 +12,11 @@ const configSocket = (server) => {
     io.on("connection", (socket) => {
         console.log("User coneccted", socket.id)
 
+        socket.on("joinUser", (userId) => {
+            socket.join(userId)
+            console.log(`user${socket.id} joined personal room ${userId}`)
+        })
+
         socket.on("joinGroup", (groupId) => {
             socket.join(groupId);
             console.log(`User ${socket.id} joined group ${groupId}`)

@@ -1,5 +1,7 @@
+const notificationsModel = require("../models/norificationModel");
 const postModel = require("../models/postModel"); // Importamos el modelo de las publicaciones
-const mongoose = require("mongoose");
+const usersModel = require("../models/userModels");
+
 
 
 const createPost = async (req, res) => {
@@ -76,6 +78,7 @@ const likePost = async (req, res) => {
   try {
     const userId = req.payload._id; // traemos el id del usuario atraves del payload que viene de la funcion de verificacion anterior
     const postId = req.params.postId; // recogemos el id del post atraves del aprams
+    
 
     // Buscamos el post por id y lo actualizamos, metemos en los parametros el postId que contiene el id del post
     // Agregamos el valor de userId que es id del usuario con el operador addToSet para evitar duplicados ya que
@@ -88,7 +91,27 @@ const likePost = async (req, res) => {
         { $addToSet: { likes: userId } },
         { new: true }
       )
-      .populate("likes", "name");
+      .populate("likes", "name").populate("user", "name lastName")
+
+      if(!post){
+        return res.status(404).send({status: "Failed", message: "PosT not found"})
+      }
+      if(post.user._id.toString() !== userId.toString()){
+        const senderUser = await usersModel.findById(userId).select("name lastName")
+        const fullName = `${senderUser.name} ${senderUser.lastName}`
+        const notification = await notificationsModel.create({
+          receiver: post.user._id,
+          sender: userId,
+          type: "like",
+          referenceId: post._id,
+          message: `A ${fullName} le a gustado tu publicación`
+          
+        })
+        
+        if( req.io){
+          req.io.to(post.user._id.toString()).emit("newNotification", notification)
+        }
+      }
     res.status(200).send({ post, status: "Success", message: "Liked post" });
   } catch (error) {
     res.status(500).send({ status: "Failed", error: error.message });
@@ -97,7 +120,7 @@ const likePost = async (req, res) => {
 
 const deleteLike = async (req, res) => {
   try {
-    const userId = req.payload._id; // Traeemo el id del usuario con el payload
+    const userId = req.payload._id; // Traemos el id del usuario con el payload
     const postId = req.params.postId; // obtenemos el id el psot por el params
     // buscamos por id el post con el id obtenido en postId luego usamos el operador $pull para eliminar  automaticamente el id
     // del usuario en likes

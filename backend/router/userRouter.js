@@ -2,7 +2,7 @@ const express = require('express') // Importamos express
 const router = express.Router() // creamos una constante para manejar mejor router de express
 
 const {editUser, getUserById, getUserWithMoreFollowers, followAndUnfollow, howManyFollowers, howManyFollowing, getCountryvisited, getCountryDesired} = require("../controllers/userController")
-const { verification } = require('../middelwares/authentication')
+const { verification } = require('../middelwares/middelwareAuthentication')
 
 router.get("/morefollowers", verification, getUserWithMoreFollowers)
 router.patch("/edit/:userId", verification, editUser)

@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const{createPhoto, addVoteAndDeleteVote, obtainedAllPhoto} = require("../controllers/ranckingPhotoController");
-const { verification } = require("../middelwares/authentication");
+const{createPhoto, addVoteAndDeleteVote, obtainedAllPhoto} = require("../controllers/rankingPhotoController");
+const { verification } = require("../middelwares/middelwareAuthentication");
 
 router.get("/allphotos", verification, obtainedAllPhoto)
 router.post("/create", verification, createPhoto)

@@ -1,6 +1,7 @@
 const groupMessageModel = require("../models/groupMessageModel")
 const groupModel = require("../models/groupModel")
-const {getIO} = require("../socket/socket")
+const notificationsModel = require("../models/norificationModel")
+
 const sendMessage = async(req, res) => {
     try {
     const groupId = req.params.groupId // cojemos el id del grupo de params
@@ -26,11 +27,40 @@ const sendMessage = async(req, res) => {
     await groupModel.findByIdAndUpdate(groupId, {$push: {messages: newMessage._id}}) //buscamos el grupo por su id y actualizamos añadiendo al campo message el id del mensage creado
 
     req.io.to(newMessage.group.toString()).emit("messageSend", { newMessage });
+
+    const isDisconneted = group.members.filter(
+    memberId => 
+        !group.userConnect.map(id => id.toString()).includes(memberId.toString()) && 
+        memberId.toString() !== userId.toString() 
+);
+   for(const receiverId of isDisconneted){
+    const existing = await notificationsModel.findOne({
+        receiver: receiverId,
+        type: "groupMessage",
+        referenceId: groupId,
+        isRead: false
+    });
+
+    if(!existing){
+        const notification = await notificationsModel.create({
+            receiver:receiverId,
+            sender:userId,
+            type: "groupMessage",
+            referenceId: groupId,
+            message: `tienes nuevos mensajes en el grupo ${group.name}`
+        })
+        if (req.io) {
+      req.io.to(receiverId.toString()).emit("newNotification", notification);
+    }
+    }
+   }
     res.status(201).send({newMessage, groupId, status: "Success", message: "message send"})
     } catch (error) {
        res.status(500).send({ status: "Failed", error: error.message }); 
     }
 }
+
+
  const getMessage = async (req, res) => {
     try {
         const userId = req.payload._id

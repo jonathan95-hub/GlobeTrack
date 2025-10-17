@@ -1,4 +1,6 @@
+const notificationsModel = require("../models/norificationModel")
 const privateMessageModel = require("../models/privateMessage")
+const usersModel = require("../models/userModels")
 
 
 const sendMessagePrivate = async (req, res) => {
@@ -7,13 +9,29 @@ const sendMessagePrivate = async (req, res) => {
         const receptorUserId = req.params.receptorUserId
         const {content} = req.body
 
-        const send = await privateMessage.create({
+        const send = await privateMessageModel.create({
             sender: userId,
             receiver: receptorUserId,
             content: content
         })
         req.io.to(userId.toString()).emit("newPrivateMessage", send);
-     req.io.to(receptorUserId.toString()).emit("newPrivateMessage", send);
+        req.io.to(receptorUserId.toString()).emit("newPrivateMessage", send);
+
+        if(userId.toString() !== receptorUserId.toString()){
+            const senderUser = await usersModel.findById(userId).select("name lastName")
+            const fullName = `${senderUser.name} ${senderUser.lastName}`
+            const notification = await notificationsModel.create({
+                receiver: receptorUserId,
+                sender: userId,
+                type: "privateMessage",
+                referenceId: send._id,
+                message: `${fullName} te envió un mensaje privado`
+            })
+            if(req.io){
+                req.io.to(receptorUserId.toString()).emit("newNotification", notification)
+            }
+        }
+
         res.status(201).send({send, status: "Success", message: "Message send"})
     } catch (error) {
          res.status(500).send({status: "Failed", error: error.message}) 

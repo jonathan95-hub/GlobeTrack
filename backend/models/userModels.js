@@ -16,7 +16,8 @@ const userSchema = new schema({
   },
 
   birthDate: {
-    type: String
+    type: String,
+    required: true
   },
 
   // Foto de perfil con una imagen por defecto por si el usuario no pusiera ninguna

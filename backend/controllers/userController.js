@@ -1,3 +1,4 @@
+const notificationsModel = require("../models/norificationModel");
 const userModel = require("../models/userModels");
 
 
@@ -91,6 +92,17 @@ const followAndUnfollow = async (req, res) => {
       await userModel.findByIdAndUpdate(userId, {
         $addToSet: { followers: myId },
       });
+      const senderUser = await userModel.findById(myId).select("name lastName")
+      const fullName = `${senderUser.name} ${senderUser.lastName}`
+      const notification = await notificationsModel.create({
+        receiver:userId,
+        sender: myId,
+        type: "follow",
+        message: `${fullName} te siguió`
+      })
+      if (req.io) {
+  req.io.to(userId.toString()).emit("newNotification", notification);
+}
 
       return res
         .status(200)
