@@ -1,25 +1,101 @@
+const logger = require("../config/configWiston");
 const notificationsModel = require("../models/norificationModel");
 const userModel = require("../models/userModels");
+const getRequestInfo = require("../utils/requestInfo") // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
 
 
 const editUser = async (req, res) => {
   try {
+    const{ip, userAgent} = getRequestInfo(req)
     const userId = req.params.userId;
     const updateUser = req.body;
+     if(!updateUser.name.trim() || !updateUser.lastName.trim() || !updateUser.email.trim() || !updateUser.country.trim() || !updateUser.city.trim()){
+      logger.info("All fields must be filled in to be able to edit",{
+        meta: {
+          _id: userId,
+          endpoint: "user/edit/:userId",
+          ip,
+          userAgent,
+          body: updateUser
+        }
+      })
+      return res.status(400).send({status: "Failed", message: "All fields must be filled in to be able to edit"})
+    }
     const user = await userModel.findByIdAndUpdate(userId, updateUser, {
       new: true,
     });
+    const fullname = `${user.name} ${user.lastName}` // Creamos la funcion fullName para concatenar el name y el lastName del usuario
+    if(!user){
+      logger.warn("User not found during edit attempt",{
+        meta:{
+          _id: userId,
+          endpoint: "user/edit/:userId",
+          ip,
+          userAgent
+        }
+      })
+       return res.status(404).send({ status: "Failed", message: "User not found"
+      })
+    }
+    if(user._id.toString() !== userId && user.isAdmin !== "admin"){
+      logger.warn("An attempt was made to modify a user without being the owner or administrator",{
+        meta: {
+          _id: userId,
+          user: fullname,
+          email: user.email,
+          endpoint: "/user/edit/:userId",
+          ip, 
+          userAgent
+        }
+      })
+      return res.status(401).send({status:"Failed", message: "You cannot edit this user because you are not an administrator or the owner user."})
+      
+    }
+     
+    logger.info("Edit user",{
+      meta:{
+        _id: user._id,
+        user: fullname,
+        endpoint: "user/edit/:userId",
+        ip,
+        userAgent,
+        body: updateUser
+
+      }
+    })
     res.status(200).send({ user, status: "Success", message: "Edited User" });
   } catch (error) {
+    logger.error("Edit user error", {
+            meta: { error: error.message, endpoint: "user/edit/:userId" }
+        });
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 
 const allUser = async(req, res) =>{
   try {
+    const {ip, userAgent} = getRequestInfo(req)
+    const userId = req.payload._id
+    const admin = await userModel.findById(userId)
     const users = await userModel.find()
+
+    logger.info("Admin accessed all users",{
+      meta:{
+        _id: userId,
+        user: `${admin.name} ${admin.lastName}`,
+        email: admin.email,
+        endpoint: "/user/all",
+        ip,
+        userAgent
+
+      }
+    })
+
     res.status(200).send({users, status: "Success", message: "All users obtained"})
   } catch (error) {
+    logger.error("Edit user error", {
+            meta: { error: error.message, endpoint: "/user/all" }
+        });
      res.status(500).send({status: "Failed", error: error.message });
   }
 }
@@ -189,6 +265,24 @@ const getCountryDesired = async (req, res) => {
   }
 };
 
+const deletedUser = async(req, res) => {
+  try {
+    const userId = req.payload._id
+    const id = req.params.id
+    const user = await userModel.findById(userId)
+    if(user._id.toString() === id || user.isAdmin === "admin"){
+      const deleted = await userModel.findByIdAndDelete(id)
+      res.status(200).send({deleted, status: "Success", message: "User deleted successfully"})
+      
+    }
+    else{
+       return res.status(403).send({ status: "Failed", message: "Not authorized to delete this user" });
+    }
+    
+  } catch (error) {
+     res.status(500).send({ status: "Failed", error: error.message });
+  }
+}
 
 
 module.exports = {
@@ -200,6 +294,7 @@ module.exports = {
   howManyFollowing,
   getCountryvisited,
   getCountryDesired,
-  allUser
+  allUser,
+  deletedUser
 
 };

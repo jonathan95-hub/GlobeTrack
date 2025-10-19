@@ -1,18 +1,30 @@
+const logger = require("../config/configWiston");
 const notificationsModel = require("../models/norificationModel");
 const postModel = require("../models/postModel"); // Importamos el modelo de las publicaciones
 const usersModel = require("../models/userModels");
+const getRequestInfo = require("../utils/requestInfo");
 
 
 
 const createPost = async (req, res) => {
   try {
+    const{ip,userAgent} = getRequestInfo(req)
+    const userId = req.payload._id
     const post = req.body; // recibimos por el body la publicacion
-    console.log(post);
-    const newPost = await postModel.create(post); // creamos la constante newPost para crear un nuevo post con la informacion del body antes recogida como parametro
+    const newPost = await postModel.create(post,{user: userId}); // creamos la constante newPost para crear un nuevo post con la informacion del body antes recogida como parametro
     const populatePost = await postModel
       .findById(newPost._id)
       .populate("user", "name photoProfile"); // buscamos el nuevo post por su Id y hacemos populate con referencia a user y sacamos el nombre y la imagen del usuario
-    res
+      logger.info("Post created successfully",{
+        meta: {
+          userId,
+          endpoint: "/post/create",
+          postId: newPost._id,
+          content: post,
+          ip,
+          userAgent
+        }
+      })
       .status(201)
       .send({
         newPost: populatePost,
@@ -20,6 +32,12 @@ const createPost = async (req, res) => {
         message: "Created post",
       }); // recibimos como respuesta el nuevo post con un mensaje de Creada nueva publicación
   } catch (error) {
+    logger.error("Error creating post", {
+      meta: {
+        error: error.message,
+        endpoint: "/post/create",
+      },
+    });
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -47,9 +65,12 @@ const getPost = async (req, res) => {
   }
 };
 
-// el payload viene de la funcion anterior de verificacion
+
 const deletePost = async (req, res) => {
   try {
+    const{ip, userAgent} = getRequestInfo(req)
+    const userId = req.payload._id // el id viene del token
+    const user = await usersModel.findById(userId)
     const postId = req.params.postId; // En params esta el id del post
     const post = await postModel.findById(postId); // creamos la funcion post en la que buscamos el post por su Id
     if (!post) {
@@ -60,16 +81,42 @@ const deletePost = async (req, res) => {
     }
     // si el Id el usuario en el post no es igual al id del payload entonces devolvemos un 401 con un mensaje de que no puede eleminar ese post
     // esto sirver para que solamente el dueño del post pueda eliminarlo
-    if (post.user.toString() !== req.payload._id) {
+    if (post.user.toString() !== user._id || user.isAdmin !== "admin") {
+      logger.warn("An attempt was made to delete the post without being the creator or administrator",{
+        meta:{
+          _id: userId,
+          user: `${user.name} ${user.lastName}`,
+          email: user.email,
+          endpoint: "/post/delete/:postId",
+          ip,
+          userAgent
+        }
+      })
       return res
         .status(401)
         .send({ status: "Failed", message: "You cannot delete this post" });
     }
     const deletePost = await postModel.findByIdAndDelete(postId); // buscamos el post por el id y eliminamos
+    logger.info("Post deleted successfully",{
+      meta: {
+        _id: userId,
+        user: `${user.name} ${user.lastName}`,
+        email: user.email,
+        endpoint: "/post/delete/:postId",
+        ip,
+        userAgent
+      }
+    })
     res
       .status(200)
       .send({ status: "Success", message: "deleted post", deletePost });
   } catch (error) {
+     logger.error("Error creating post", {
+      meta: {
+        error: error.message,
+        endpoint: "/post/delete/:postId",
+      },
+    });
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -148,13 +195,46 @@ const deleteLike = async (req, res) => {
 
 const editPost = async (req, res) => {
   try {
+    const{ip, userAgent} = getRequestInfo(req)
+    const userId = req.payload._id
+    const user = await usersModel.findById(userId)
+
     const postId = req.params.postId;
     const newPost = req.body;
-    const post = await postModel.findByIdAndUpdate(postId, newPost, {
-      new: true,
-    });
-    res.status(201).send({ post, status: "Success", message: "Post updated" });
+    const post = await postModel.findById(postId).populate("user")
+    if(!post){
+      return res.status(404).send({ status: "Failed", message: "Post not found" });
+    }
+    if(post.user._id.toString() !== userId && user.isAdmin !== "admin" ){
+      logger.warn("An attempt was made to edit the post without being the creator or administrator",{
+        meta: {
+          _id: userId,
+          user: `${user.name} ${user.lastName}`,
+          email: user.email,
+          endpoint: "/post/edit/:postId"
+        }
+      })
+      return res.status(401).send({status: "Failed", message: "You cannot edit this post because you are not the owner or an administrator"})
+    }
+    logger.info("Post edited succesfully",{
+      meta:{
+        _id: userId,
+        user: `${user.name} ${user.lastName}`,
+        email: user.email,
+        endpoint: "/post/edit/:postId",
+        ip,
+        userAgent
+      }
+    })
+    const updatePost = await postModel.findByIdAndUpdate(postId, newPost, {new: true})
+    res.status(200).send({ updatePost, status: "Success", message: "Post updated" });
   } catch (error) {
+    logger.error("Error creating post", {
+      meta: {
+        error: error.message,
+        endpoint: "/post/edit/:postId",
+      },
+    });
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };

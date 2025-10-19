@@ -29,6 +29,8 @@ const userSchema = new schema({
     type: String,
     required: true,
     unique: true, // Es unico, asi evitamos que el mismo correo lo usen varias cuentas
+    match: [/.+@.+\..+/, "Please enter a valid email address"], // expresion regular para validar que hay @ y .
+    // dice asi la expresion al menos un caracter antes de @, el caracter @ tiene que estar incluido, el . tiene que estar incluido, y al menos un caracter despues de 
   },
   password: {
     type: String,

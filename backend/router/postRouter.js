@@ -12,7 +12,7 @@ router.get("/userpost/comment/:postId", verification, getCommentPost)
 router.patch("/:postId", verification, editPost)
 router.post("/like/:postId", verification, likePost)
 router.delete("/like/:postId", verification, deleteLike)
-router.delete("/:postId",  verification, deletePost)
+router.delete("delete/:postId",  verification, deletePost)
 
 
 module.exports = router

@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken"); // Importamos jsonwebtoken
+const logger = require("../config/configWiston");
+const usersModel = require("../models/userModels");
 
 
 // Esta función servira para verificar si el token del usuario es generado en esta web 
@@ -18,8 +20,23 @@ const verification = async (req, res, next) => { // pasamos los parametros req, 
 
 const adminAuth = async(req, res, next) => {
     try {
-        const user = req.payload
-        if(user.isAdmin === "user"){
+        const ip = req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+        const userAgent = req.headers["user-agent"]
+        const userId = req.payload
+        if(userId.isAdmin === "user"){
+            const user = await usersModel.findById(userId)
+            const fullname = `${user.name} ${user.lastName}`
+            logger.warn("The user has attempted to access the restricted area for administrators",{
+                meta: {
+                id: user._id,
+                user: fullname,
+                email: user.email,
+                ip, 
+                userAgent
+                }
+             
+
+            })
             return res.status(401).send({status: "Failed", message: "Access denied"})
         }
         next()

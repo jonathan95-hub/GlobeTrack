@@ -24,11 +24,12 @@ const groupRouter = require("./router/groupRouter"); // Creamos la constante gro
 const groupMessageRouter = require("./router/groupMessageRouter")
 const privateMessageRouter = require("./router/privateMessageRouter")
 const notificationRouter = require("./router/notificationRouter")
+const auditRouter = require("./router/logRouter")
 
 app.use(cors()) // Permite la conexion entre el back y el front
 app.use(express.json()) // convierte automáticamente el JSON que se envía desde req.body.
 
-
+app.use("/audit", auditRouter)
 app.use("/auth", atRouter) 
 app.use("/post", postRouter)
 app.use("/comment", commentRouter)
@@ -39,6 +40,7 @@ app.use("/group", groupRouter)
 app.use("/groupmessage", groupMessageRouter)
 app.use("/privatemessage", privateMessageRouter)
 app.use("/notification", notificationRouter)
+
 
 connection()
 const PORT = process.env.PORT || 4000
