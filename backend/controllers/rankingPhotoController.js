@@ -1,15 +1,55 @@
 
+const logger = require("../config/configWiston")
 const notificationsModel = require("../models/norificationModel")
+const rankingPhotoModel = require("../models/rankingPhotoModel")
 const ranckingPhotoModel = require("../models/rankingPhotoModel")
 const usersModel = require("../models/userModels")
+const getRequestInfo = require("../utils/requestInfo")
 
 const createPhoto = async(req, res) => {
     try {
-        const photo = req.body
-        const newPhoto = await ranckingPhotoModel.create(photo)
-        res.status(200).send({newPhoto, status: "Success", message: "Photo created"})
+        const{ip, userAgent} = getRequestInfo(req)
+        const userId = req.payload._id
+        const user = await usersModel.findById(userId)
+
+        const {image, country} = req.body
+        if(!image || !country){
+            logger.warn("Missing required fields to create ranking photo",{
+                meta:{
+                    _id: userId,
+                    user: `${user.name} ${user.lastName}`,
+                    email: user.email,
+                    endpoint: "/ranking/create",
+                    ip,
+                    userAgent
+                }
+            })
+            return res.status(400).send({status: "Failed", message: "Image and country are required"})
+        }
+        const newPhoto = await rankingPhotoModel.create({
+            user: userId,
+            image,
+            country
+        })
+        logger.info(`${user.name} ${user.lastName} successfully published a photo in the ranking`,{
+            meta:{
+                 _id: userId,
+                    user: `${user.name} ${user.lastName}`,
+                    email: user.email,
+                    endpoint: "/ranking/create",
+                    ip,
+                    userAgent
+            }
+        })
+        res.status(201).send({newPhoto, status: "Success", message: "Photo created"})
 
     } catch (error) {
+        logger.error("Error create photo", {
+      meta: {
+        error: error.message,
+        endpoint: "/ranking/create",
+      },
+    });
          res.status(500).send({ status: "Failed", error: error.message });
     }
 }
@@ -68,6 +108,65 @@ const obtainedAllPhoto = async (req, res) => {
    
 }
 
+const deletePhoto = async(req, res) => {
+    try {
+        const {ip,userAgent} = getRequestInfo(req)
+        const userId = req.payload._id
+        const user = await usersModel.findById(userId)
+        const photoId = req.params.photoId
+        const photo = await rankingPhotoModel.findById(photoId)
+        if(!photo){
+            logger.warn("An attempt was made to delete a photo that does not exist",{
+                meta:{
+                    _id: userId,
+                    user: `${user.name} ${user.lastName}`,
+                    email: user.email,
+                    endpoint: "/ranking/delete/:photoId",
+                    ip,
+                    userAgent
+                }
+            })
+            return res.status(404).send({status: "Failed", message: "Photo in the ranking not found"})
+
+        }
+        const isAdmin = user.isAdmin === "admin"
+        if(photo.user.toString() !== userId.toString() && !isAdmin){
+            logger.warn(`${user.name} ${user.lastName} tried to delete a photo without being the creator or administrator `,{
+                meta:{
+                     _id: userId,
+                    user: `${user.name} ${user.lastName}`,
+                    email: user.email,
+                    endpoint: "/ranking/delete/:photoId",
+                    ip,
+                    userAgent
+                }
+            })
+            return res.status(401).send({status: "Failed", message: "You cannot delete this photo if you are not the author of the photo or an administrator user"})
+        }
+        const deletePhoto = await rankingPhotoModel.findByIdAndDelete(photoId)
+        logger.info(`${user.name} ${user.lastName} successfully deleted the photo`,{
+            meta:{
+                 _id: userId,
+                    user: `${user.name} ${user.lastName}`,
+                    email: user.email,
+                    endpoint: "/ranking/delete/:photoId",
+                    ip,
+                    userAgent
+            }
+        })
+        res.status(200).send({deletePhoto, status: "Success", message: "Photo deleted successfully"})
+
+    } catch (error) {
+        logger.error("Error deleting photo", {
+      meta: {
+        error: error.message,
+        endpoint: "/ranking/delete/:photoId",
+      },
+    });
+    res.status(500).send({ status: "Failed", error: error.message });
+    }
+}
 
 
-module.exports = {createPhoto, addVoteAndDeleteVote, obtainedAllPhoto}
+
+module.exports = {createPhoto, addVoteAndDeleteVote, obtainedAllPhoto, deletePhoto}

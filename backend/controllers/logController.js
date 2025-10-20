@@ -176,4 +176,67 @@ const allLog = async (req, res) => {
     res.status(500).send({ status: "Failed", error: error.message });
     }
  }
-module.exports = { allLog, getLogInfo,getLogInfo,getLogWarn, getLogError };
+
+ const deleteAllLog = async( req, res) => {
+    try {
+        const userId = req.payload._id
+        const user = await usersModel.findById(userId)
+       
+        const deleteLog = await logModel.deleteMany({})
+        res.status(200).send(deleteLog, {status: "Success", message: `${user.name} deleted from logs` })
+               
+    } catch (error) {
+         logger.error("Delete All Logs error", {
+            meta: { error: error.message, endpoint: "/audit/deleteAll" }
+        });
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+ }
+
+ const deleteLogInfo = async(req, res) => {
+    try {
+        const userId  = req.payload._id
+        const logInfo = await logModel.deleteMany({level: "info"})
+        const user = await usersModel.findById(userId)
+        res.status(200).send({logInfo, status: "Success", message: `${user.name} ${user.lastName} deleted from logs type Info` })
+        
+    } catch (error) {
+        logger.error("Delete All Logs error", {
+            meta: { error: error.message, endpoint: "/audit/logInfo" }
+        });
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+ }
+
+const deleteLogWar = async(req, res) => {
+    try {
+        const userId  = req.payload._id
+        const logInfo = await logModel.deleteMany({level: "warn"})
+        const user = await usersModel.findById(userId)
+        res.status(200).send({logInfo, status: "Success", message: `${user.name} ${user.lastName} deleted from logs type warn` })
+        
+    } catch (error) {
+        logger.error("Delete All Logs error", {
+            meta: { error: error.message, endpoint: "/audit/logWarn" }
+        });
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+ }
+
+ const deleteLogError = async(req, res) => {
+    try {
+        const userId  = req.payload._id
+        const logInfo = await logModel.deleteMany({level: "error"})
+        const user = await usersModel.findById(userId)
+        res.status(200).send({logInfo, status: "Success", message: `${user.name} ${user.lastName} deleted from logs type error` })
+        
+    } catch (error) {
+        logger.error("Delete All Logs error", {
+            meta: { error: error.message, endpoint: "/audit/logError" }
+        });
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+ }
+
+
+module.exports = { allLog, getLogInfo,getLogInfo,getLogWarn, getLogError, deleteAllLog, deleteLogInfo, deleteLogWar, deleteLogError };

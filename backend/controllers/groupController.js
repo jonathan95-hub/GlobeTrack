@@ -1,30 +1,48 @@
 const groupMessageModel = require("../models/groupMessageModel");
 const groupModel = require("../models/groupModel");
 const usersModel = require("../models/userModels");
+const getRequestInfo = require("../utils/requestInfo");
+const logger = require("../config/configWiston")
 
 const createGroup = async (req, res) => {
   try {
+    const {ip, userAgent} = getRequestInfo(req)
     const userId = req.payload._id;
-
+    const user = await usersModel.findById(userId)
     const group = req.body;
     const newGroup = await groupModel.create(group);
-    const addAdmin = newGroup.admin.toString() === userId.toString();
+   
 
     if (!newGroup.members.includes(userId)) {
       await groupModel.findByIdAndUpdate(newGroup._id, {
         $addToSet: { members: userId },
+        creatorGroup: userId
       });
       await usersModel.findByIdAndUpdate(userId, {
         $addToSet: { groups: newGroup._id },
       });
     }
+    logger.info(`${user.name} ${user.lastName} created a group `,{
+      meta:{
+        _id: userId,
+        user: `${user.name} ${user.lastName}`,
+        email: user.email,
+        group: newGroup.name,
+        endpoint: "/group/create",
+        ip,
+        userAgent
+      }
+    })
     res
       .status(201)
       .send(
-        { newGroup, addAdmin, status: "Success", message: "Group Created" },
-        { new: true }
+        { newGroup, status: "Success", message: "Group Created" },
+
       );
   } catch (error) {
+    logger.error("Create group error", {
+            meta: { error: error.message, endpoint: "/group/create" }
+        });
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -62,33 +80,71 @@ const getGroupIncludesUser = async(req, res) => {
 
 const deletedGroup = async (req, res) => {
   try {
+    const {ip, userAgent} = getRequestInfo(req)
     const userId = req.payload._id;
+    const user = await usersModel.findById(userId)
     const groupId = req.params.groupId;
     const group = await groupModel.findById(groupId);
     if (!group) {
+      logger.info("You cannot delete a group that does not exist",{
+        meta:{
+          _id: userId,
+          user: `${user.name} ${user.lastName}`,
+          email: user.email,
+          endpoint: "/group/delete/:groupId",
+          ip,
+          userAgent
+        }
+      })
       return res
         .status(404)
         .send({ status: "Failed", message: "Group not found" });
     }
-    const isAdmin = group.admin.toString() === userId.toString();
+    const creatorGroup = group.creatorGroup.toString() === userId.toString();
 
-    if (!isAdmin) {
+    if (!creatorGroup && user.isAdmin !== "admin") {
+      logger.warn("A user who is not the group creator or administrator has attempted to delete the group",{
+        meta:{
+          _id: userId,
+          user: `${user.name} ${user.lastName}`,
+          email: user.email,
+          group: group.name,
+          endpoint: "/group/delete/:groupId",
+          ip,
+          userAgent
+        }
+      })
       return res
         .status(401)
         .send({
           status: "Failed",
-          message: "Only the administrator can delete the group",
+          message: "Only administrator users or creators of the group can delete it",
         });
     } else {
       await groupModel.findByIdAndDelete(groupId);
       await groupMessageModel.deleteMany({ group: groupId });
       await usersModel.updateMany(
         { groups: groupId },
-        { $pull: { groups: groupId } }
+        { $pull: { groups: groupId } },
+        
       );
-      res.status(200).send({ status: "Success", message: "Group is deleted" });
+      logger.info(`the group ${group.name} has been successfully eliminated`,{
+        meta:{
+          _id: userId,
+          user: `${user.name} ${user.lastName}`,
+          email: user.email,
+          group: group.name,
+          endpoint: "/group/delete/:groupId",
+          ip,
+          userAgent
+        }
+      })
+      res.status(200).send({ status: "Success", message: "Group is deleted successfully" });
     }
   } catch (error) {
+    logger.error("Delete group error", {
+            meta: { error: error.message, endpoint: "/group/delete/:groupId" }
+        });
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -240,6 +296,64 @@ const obtainedUserOnline = async(req, res) => {
     
   }
 }
+
+const editGroup = async(req, res) =>{
+  try {
+    const{ip, userAgent} = getRequestInfo(req)
+    const userId = req.payload._id
+    const user = await usersModel.findById(userId)
+    const groupId = req.params.groupId
+    const group = await groupModel.findById(groupId)
+    const {name,description} = req.body
+
+    if(!group){
+      logger.warn("An attempt has been made to edit a group that does not exist",{
+        meta:{
+          _id: userId,
+          user:`${user.name} ${user.lastName}`,
+          email: user.email,
+           endpoint: "/group/edit/:groupId",
+          ip,
+          userAgent
+        }
+      })
+      return res.status(404).send({ status: "Failed", message: "Group not found" });
+    }
+
+    if(group.creatorGroup.toString() !== userId && user.isAdmin !== "admin"){
+      logger.warn(`the user ${user.name} ${user.lastName} is not the creator of the group nor is an administrator and has attempted to edit the group`,{
+        meta:{
+          _id: userId,
+          user: `${user.name} ${user.lastName}`,
+          email: user.email,
+          group: group.name,
+          endpoint: "/group/edit/:groupId",
+          ip,
+          userAgent
+        }
+      })
+      return res.status(401).send({status: "Failed", message: "Only the group creator or an administrator user can edit the group"})
+    }
+    const groupEdit = await groupModel.findByIdAndUpdate(groupId,{name: name.trim(),description}, {new: true})
+    logger.info("The group was successfully edited",{
+      meta:{
+         _id: userId,
+          user: `${user.name} ${user.lastName}`,
+          email: user.email,
+          group: group.name,
+          endpoint: "/group/edit/:groupId",
+          ip,
+          userAgent
+      }
+    })
+    res.status(200).send({groupEdit, status: "Success", message: "Group edited successfully"})
+  } catch (error) {
+     logger.error("Edit group error", {
+            meta: { error: error.message, endpoint: "/group/edit/:groupId" }
+        });
+    res.status(500).send({ status: "Failed", error: error.message });
+  }
+}
 module.exports = {
   createGroup,
   deletedGroup,
@@ -249,5 +363,6 @@ module.exports = {
   getMembersOfGroup,
   getGroup,
   getGroupIncludesUser,
-  obtainedUserOnline
+  obtainedUserOnline,
+  editGroup
 };

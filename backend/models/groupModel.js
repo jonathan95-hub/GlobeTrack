@@ -15,15 +15,11 @@ const groupSchema = new schema({
         type: String,
         default: ""
     },
-    admin: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
-        required: true
-    },
+    
     members: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "user"
+            ref: "User"
         }
     ],
     messages: [
@@ -38,7 +34,12 @@ const groupSchema = new schema({
             ref: "User"
         }
         
-    ]
+    ], 
+    creatorGroup:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    }
 }, {timestamps:true})
 
 const groupModel = mongoose.model("Groups", groupSchema, "groups")

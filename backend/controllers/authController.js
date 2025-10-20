@@ -3,7 +3,7 @@
  const jwt = require(`jsonwebtoken`);
  const logger = require("../config/configWiston")
  const getRequestInfo = require("../utils/requestInfo"); // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
-const { error } = require("winston");
+
 
 
  const signup = async (req, res) => { 

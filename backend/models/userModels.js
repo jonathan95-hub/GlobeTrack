@@ -51,7 +51,7 @@ const userSchema = new schema({
   isAdmin:{
     type: String,
     enum:["user", "admin"],
-    default: "user"
+    default: "User"
   },
   followers: {
     type: [mongoose.Schema.Types.ObjectId], // Guardara el ObjectId del usuario que te sigue
