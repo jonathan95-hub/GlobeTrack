@@ -2,12 +2,15 @@ const express = require('express'); // Importamos express
 const cors = require(`cors`) // Importamos cors
 const http = require("http") // importamos http
 require('dotenv').config(); // importamos dotenv
+const swaggerUi = require("swagger-ui-express")
 
 const connection = require("./connectionDataBase/connection") // Importamos y guardamos en una constante el archivo de conexion a la base de datos
 const configSocket = require("./config/configSocket") // Importamos y guardamos en una constante el archivo de la configuracion de socket
 const socketMiddelware = require('./middelwares/middelwareSocket');
+const swaggerSpec = require('./config/swaggerConfig');
 
 const app = express() // Creamos una constante que es igual a express
+
 const server = http.createServer(app) // Guardamos en una constante el metodo createServer de http con parametros app
 
  const io = configSocket(server) 
@@ -24,7 +27,8 @@ const groupRouter = require("./router/groupRouter"); // Creamos la constante gro
 const groupMessageRouter = require("./router/groupMessageRouter")
 const privateMessageRouter = require("./router/privateMessageRouter")
 const notificationRouter = require("./router/notificationRouter")
-const auditRouter = require("./router/logRouter")
+const auditRouter = require("./router/logRouter");
+
 
 app.use(cors()) // Permite la conexion entre el back y el front
 app.use(express.json()) // convierte automáticamente el JSON que se envía desde req.body.
@@ -41,6 +45,7 @@ app.use("/groupmessage", groupMessageRouter)
 app.use("/privatemessage", privateMessageRouter)
 app.use("/notification", notificationRouter)
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 connection()
 const PORT = process.env.PORT || 4000

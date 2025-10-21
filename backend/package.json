@@ -17,6 +17,8 @@
     "nodemon": "^3.1.10",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "winston": "^3.18.3"
   }
 }

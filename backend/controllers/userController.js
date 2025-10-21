@@ -235,6 +235,9 @@ const getCountryvisited = async (req, res) => {
     const visited = await userModel
       .findById(userId)
       .select("visitedDestinations name");
+     if (!visited.visitedDestinations || visited.visitedDestinations.length === 0) {
+  return res.status(200).send({ visited, status: "Success", message: "No countries visited" });
+}
     res
       .status(200)
       .send({
@@ -253,6 +256,9 @@ const getCountryDesired = async (req, res) => {
     const desired = await userModel
       .findById(userId)
       .select("desiredDestinations name");
+      if(!desired.desiredDestinations || desired.desiredDestinations.length === 0){
+         return res.status(200).send({ desired, status: "Success", message: "No countries desired" });
+      }
     res
       .status(200)
       .send({

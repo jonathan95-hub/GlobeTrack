@@ -175,18 +175,26 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
       
  }
 
- const refreshToken = (req, res) =>{
+const refreshToken = (req, res) => {
   try {
+    if (!req.payload || !req.payload._id || !req.payload.name) {
+      return res.status(400).send({
+        status: "Failed",
+        message: "Invalid payload, cannot refresh token"
+      });
+    }
+
     const payload = {
       _id: req.payload._id,
       name: req.payload.name,
     }
-    
-    const token = generateToken(payload, false)
-    const token_refresh = generateToken(payload, true)
-    res.status(200).send({token, token_refresh})
+
+    const token = generateToken(payload, false);
+    const token_refresh = generateToken(payload, true);
+
+    res.status(200).send({ token, token_refresh, status: "Success", message: "	Tokens refreshed successfully" });
   } catch (error) {
-      res.status(500).send({ status: "Failed", error: error.message });
+    res.status(500).send({ status: "Failed", error: error.message });
   }
 }
 

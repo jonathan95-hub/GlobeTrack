@@ -9,9 +9,16 @@ const createGroup = async (req, res) => {
     const {ip, userAgent} = getRequestInfo(req)
     const userId = req.payload._id;
     const user = await usersModel.findById(userId)
-    const group = req.body;
-    const newGroup = await groupModel.create(group);
-   
+    const {name, photoGroup, description} = req.body;
+    const newGroup = await groupModel.create({
+      name,
+      photoGroup,
+      description
+    });
+   if(!name || !name.trim() || !description || !description.trim()){
+    logger.warn("An attempt was made to create a group without a name or description.")
+    return res.status(400).send({status: "Failed", message: "The name and description fields must be complete. Name must not contain spaces or characters."})
+   }
 
     if (!newGroup.members.includes(userId)) {
       await groupModel.findByIdAndUpdate(newGroup._id, {
