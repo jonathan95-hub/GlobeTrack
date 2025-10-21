@@ -3,12 +3,13 @@
  const jwt = require(`jsonwebtoken`);
  const logger = require("../config/configWiston")
  const getRequestInfo = require("../utils/requestInfo"); // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
-
+ const sendEmail = require("../services/email")
 
 
  const signup = async (req, res) => { 
+    const{ip, userAgent} = getRequestInfo(req)
     try { // creamos un try catch para manejo de errores
-        const{ip, userAgent} = getRequestInfo(req)
+        
         const {name, lastName, email, password, country, city, birthDate} = req.body; // hacemos un destructuring del body
         if(!password || password.length < 8 ){ // Si los caracteres de password son menor a 8 hara un return lo que cortara el codigo y devolverá el mensaje de que es necesario 8 caracteres
           return res.status(400).send({status: "Failed", message: "Password requires 8 or more characters"}) 
@@ -51,6 +52,7 @@
                 userAgent
             }
         })
+        sendEmail(email)
         res.status(201).send({newUser, status: "Success", message: "The user has registered successfully."}) // Si la respuesta es 200 se enviara un mensaje con el status succes y un mensaje que dice que se a registrado correctamente
     } catch (error) { 
         
@@ -85,11 +87,16 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
 
  const login = async (req, res) => {
     try {
-        
-        const{ip, userAgent} = getRequestInfo(req)
+        // Configuracion 
+        const MAX_FAILED = 5;           // número de intentos fallidos permitidos
+        const LOCK_TIME = 30 * 60 * 1000; // 30 minutos de bloqueo
+
+        const{ip, userAgent} = getRequestInfo(req) // Util que devuelve la ip y el userAgent
         const {email, password} = req.body; // Recojemos el email y el password del body
-        const user = await userModel.findOne({email: email}) // buscamos por finOne para traer un objeto de userModel, buscando el email
+        const user = await userModel.findOne({email: email}) // buscamos por finOne para traer un usuario de userModel, buscando el email
         if(!user){ // si user no existe
+            // creamos un log tipo warn en el que aparacera un mensaje de invalido email o contraseña para no revelar datos
+            // En el log daremos datos como el email, el endpoint, la ip y el userAgent que se usó
              logger.warn("Invalid email or password", {
                 meta:
                  { email, 
@@ -100,9 +107,35 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
             });
             return  res.status(404).send('Invalid email or password') // devolvemos un 404 y un mensaje que el email o la contraseña es invalido, 
         }
-        
-        const validate = await bcrypt.compare(password, user.password) // usamos el compare de bcrypt con la contraseña escrita y la contraseña del usuario
+        // Si el usuario tiene la cuenta bloqueada y el tiempo de bloqueo aún no ha expirado, 
+        // se calcula cuánto falta y se devuelve un mensaje de error 423 (Locked).
+        if(user.lockUntil && user.lockUntil > Date.now()){
+            const wait = Math.ceil((user.lockUntil - Date.now())/ 1000)
+            return res.status(423).send({ status: "Failed", message: `Account locked. Try again in ${wait} seconds.` });
+        }
+        // Usamos el compare de bcrypt con la contraseña escrita y la contraseña del usuario, para ver si coinciden
+        const validate = await bcrypt.compare(password, user.password) 
         if(!validate){
+            //Si no coinciden se incrementa en uno los intentos de sesion fallidos
+            user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1
+            // si los intentos de iniciar sesion fallidos son mayot o igual al maximo de fallos
+            if(user.failedLoginAttempts >= MAX_FAILED){
+                // Se bloquea la cuenta hasta la fecha actual mas el tiempo de bloqueo
+                user.lockUntil = Date.now() + LOCK_TIME
+                // Se crea un log tipo warn con el mensaje de cuenta bloqueada por multiple intentos fallidos
+                logger.warn("Account locked due to multiple failed",{
+                    meta:{
+                        email,
+                        lockUntil: new Date(user.lockUntil).toISOString(), // Creamos uno date con el tiempo de lockUntil del usuario y usamos toISIString para convertir a string el objeto date
+                        endpoint: "/auth/login",
+                        ip,
+                        userAgent
+                    }
+                })
+            }
+            // guardamos el estado del usuario
+            await user.save()
+            // Crearemos un logger por cada intento con el mensaje de la contraseña no coincide
            logger.warn("password does not match", {
                 meta: {
                      email,
@@ -112,14 +145,18 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
             });
             return res.status(404).send("Invalid email or password") // si la validacion falla devolvemos el mensaje de email o contraseña invalidos
         }
-        const payload ={ // creamos un objeto con el _id del user y el name del user
+        // Reiniciamos los intentos de sesion fallidos y ponemos el tiempo de bloqueo en null
+        user.failedLoginAttempts = 0
+        user.lockUntil = null
+        await user.save()
+        const payload ={ // creamos un objeto con el _id del user y el name del user y el campo isAdmin del user
             _id: user._id,
             name: user.name,
             isAdmin: user.isAdmin
         }
-        const token = generateToken(payload, false) 
-        const token_refresh = generateToken(payload, true)
-
+        const token = generateToken(payload, false) // Generamos el token
+        const token_refresh = generateToken(payload, true) // Generamos el token de refresco
+        // Creamos un logger tipo info informando que el login se hizo correctamente
         logger.info("Successful login", {
             meta: {
                  userId: user._id.toString(),
@@ -127,7 +164,7 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
                      ip,
                      userAgent  }
         });
-
+        // Devolvemos en la respuesta el usuario los dos token y un mensjae de que el usuario es validado
         res.status(200).send({user, token, token_refresh, status: "Success", message: "validated user"})
     } catch (error) {
         logger.error("Login error", {

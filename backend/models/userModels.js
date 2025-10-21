@@ -51,7 +51,7 @@ const userSchema = new schema({
   isAdmin:{
     type: String,
     enum:["user", "admin"],
-    default: "User"
+    default: "user"
   },
   followers: {
     type: [mongoose.Schema.Types.ObjectId], // Guardara el ObjectId del usuario que te sigue
@@ -121,6 +121,15 @@ const userSchema = new schema({
       ref: "Comment",
     },
   ],
+  failedLoginAttempts: {
+  type: Number,
+  default: 0
+},
+lockUntil: {
+  type: Date,
+  default: null
+}
+
 },
 {timestamps: true});
 

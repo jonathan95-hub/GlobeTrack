@@ -47,7 +47,7 @@ const createGroup = async (req, res) => {
   }
 };
 
-const getGroup = async (req, res) => { // Para obtener una lista de grupos a los que no pertenece el usuario
+const getGroupNotIncludesUser = async (req, res) => { // Para obtener una lista de grupos a los que no pertenece el usuario
   try {
     const userId = req.payload._id;
     const listGroup = await groupModel.find( {
@@ -354,6 +354,16 @@ const editGroup = async(req, res) =>{
     res.status(500).send({ status: "Failed", error: error.message });
   }
 }
+
+const allGroup = async(req,res) => {
+  try {
+    
+    const allGroup = await groupModel.find({})
+    res.status(200).send({allGroup, status: "Success", message: "All group obtained"})
+  } catch (error) {
+     res.status(500).send({ status: "Failed", error: error.message });
+  }
+}
 module.exports = {
   createGroup,
   deletedGroup,
@@ -361,8 +371,9 @@ module.exports = {
   conecctedUserToGroup,
   disconectedUserToGroup,
   getMembersOfGroup,
-  getGroup,
+  getGroupNotIncludesUser,
   getGroupIncludesUser,
   obtainedUserOnline,
-  editGroup
+  editGroup,
+  allGroup
 };
