@@ -90,19 +90,36 @@
     max-width: 700px;
     padding: 2.5rem 3rem;
   }
-
+  .button-container{
+  
+  }
   .register-card h2 {
     font-size: 3rem;
   }
 }
-
+@media(min-width: 1500px) {
+  .register-card {
+    max-width: 800px;
+    padding: 3rem 4rem;
+  }
+  .button-container{
+  
+    margin-inline-start: 20px;
+  }
+  .register-card h2 {
+    font-size: 3.5rem;
+  }
+}
 /* Pantallas extra grandes (>1600px) */
 @media(min-width: 1600px) {
   .register-card {
     max-width: 800px;
     padding: 3rem 4rem;
   }
-
+  .button-container{
+   
+    margin-inline-start: 70px;
+  }
   .register-card h2 {
     font-size: 3.5rem;
   }
