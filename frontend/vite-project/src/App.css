@@ -1,0 +1,8 @@
+@import url("./css/LandingPage/landingPageHome.css");
+@import url("./css/LandingPage/login.css");
+@import url("./css/LandingPage/Register.css");
+@import url("./css/mainLayaout/footer.css");
+@import url("./css/mainLayaout/header.css");
+ul{
+    list-style: none;
+}

@@ -30,7 +30,10 @@ const notificationRouter = require("./router/notificationRouter")
 const auditRouter = require("./router/logRouter");
 
 
-app.use(cors()) // Permite la conexion entre el back y el front
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+})) // Permite la conexion entre el back y el front
 app.use(express.json()) // convierte automáticamente el JSON que se envía desde req.body.
 
 app.use("/audit", auditRouter)

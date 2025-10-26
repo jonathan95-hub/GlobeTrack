@@ -1,0 +1,98 @@
+
+.login-container {
+  background-color: #1E3A8A; /* azul profundo */
+  color: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  margin: 2rem auto;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.login-title {
+  font-family: 'Kavoon', cursive;
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Inputs */
+.login-container input {
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+/* Botones */
+.login-btn {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-weight: bold;
+  padding: 0.6rem 1.2rem;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background-color: #222;
+  transform: scale(1.05);
+   border: 2px solid #fff;
+}
+
+.login-btn-outline {
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 30px;
+  font-weight: bold;
+  padding: 0.6rem 1.2rem;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.login-btn-outline:hover {
+  background-color: #fff;
+  color: #000;
+  transform: scale(1.05);
+}
+
+/* Responsividad */
+@media (min-width: 768px) {
+  .login-container {
+    max-width: 500px;
+    padding: 2.5rem;
+  }
+
+  .login-title {
+    font-size: 2.2rem;
+  }
+
+  .login-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .login-btn,
+  .login-btn-outline {
+    width: auto;
+  }
+}
+
+@media (min-width: 1200px) {
+  .login-container {
+    min-width: 600px;
+    padding: 3rem;
+  }
+
+  .login-title {
+    font-size: 2.5rem;
+  }
+}

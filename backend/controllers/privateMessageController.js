@@ -1,5 +1,5 @@
-const logger = require("../config/configWiston")
-const notificationsModel = require("../models/norificationModel")
+const logger = require("../config/configWinston")
+const notificationsModel = require("../models/notificationModel")
 const privateMessageModel = require("../models/privateMessage")
 const usersModel = require("../models/userModels")
 const getRequestInfo = require("../utils/requestInfo")

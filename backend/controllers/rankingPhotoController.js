@@ -1,6 +1,6 @@
 
-const logger = require("../config/configWiston")
-const notificationsModel = require("../models/norificationModel")
+const logger = require("../config/configWinston")
+const notificationsModel = require("../models/notificationModel")
 const rankingPhotoModel = require("../models/rankingPhotoModel")
 const ranckingPhotoModel = require("../models/rankingPhotoModel")
 const usersModel = require("../models/userModels")

@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
-const logger = require('../config/configWiston');
+const logger = require('../config/configWinston');
 
 const config = nodemailer.createTransport({
   service: "gmail",

@@ -18,14 +18,14 @@ components: {
     tokenAuth: {
       type: "apiKey",
       in: "header",
-      name: "token", // 👈 El header que usa tu backend
+      name: "token", 
       description: "JWT token para autenticación. Ejemplo: eyJhbGciOiJIUzI1NiIs...",
     },
   },
 },
 security: [
   {
-    tokenAuth: [], // 👈 Debe coincidir con el nombre del esquema
+    tokenAuth: [], // 
   },
 ],
   },

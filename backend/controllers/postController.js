@@ -1,5 +1,5 @@
-const logger = require("../config/configWiston");
-const notificationsModel = require("../models/norificationModel");
+const logger = require("../config/configWinston");
+const notificationsModel = require("../models/notificationModel");
 const postModel = require("../models/postModel"); // Importamos el modelo de las publicaciones
 const usersModel = require("../models/userModels");
 const getRequestInfo = require("../utils/requestInfo");
@@ -8,13 +8,15 @@ const getRequestInfo = require("../utils/requestInfo");
 
 const createPost = async (req, res) => {
   try {
-    const{ip,userAgent} = getRequestInfo(req)
-    const userId = req.payload._id
+    const{ip,userAgent} = getRequestInfo(req) // Destructuring de la funcion getRequestInfo con req como parametro
+    const userId = req.payload._id // Obtenmos el id del usuario por el token
     const post = req.body; // recibimos por el body la publicacion
     const newPost = await postModel.create(post,{user: userId}); // creamos la constante newPost para crear un nuevo post con la informacion del body antes recogida como parametro
     const populatePost = await postModel
       .findById(newPost._id)
       .populate("user", "name photoProfile"); // buscamos el nuevo post por su Id y hacemos populate con referencia a user y sacamos el nombre y la imagen del usuario
+      // Se creará un log tipo info con el mensaje de post creado exitosamente
+      // Se enviará el id, la ip, y el navegador del usuario el id del psot y eñ contenido del post
       logger.info("Post created successfully",{
         meta: {
           userId,
@@ -25,19 +27,21 @@ const createPost = async (req, res) => {
           userAgent
         }
       })
-      .status(201)
-      .send({
+      // Devolvemos un 201 con el mensaje de post creado
+      res.status(201).send({
         newPost: populatePost,
         status: "Success",
         message: "Created post",
       }); // recibimos como respuesta el nuevo post con un mensaje de Creada nueva publicación
   } catch (error) {
+    // Creamos un log tipo error para cualquier error del servidor
     logger.error("Error creating post", {
       meta: {
         error: error.message,
         endpoint: "/post/create",
       },
     });
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -53,6 +57,7 @@ const getPost = async (req, res) => {
         path: "comment",
         populate: { path: "user", select: "name image" },
       });
+      // Devolcemos un 200 con el mensaje de todas las publicaciones obtenidas
     res
       .status(200)
       .send({
@@ -61,6 +66,7 @@ const getPost = async (req, res) => {
         message: "All publications have been obtained",
       });
   } catch (error) {
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -68,9 +74,9 @@ const getPost = async (req, res) => {
 
 const deletePost = async (req, res) => {
   try {
-    const{ip, userAgent} = getRequestInfo(req)
-    const userId = req.payload._id // el id viene del token
-    const user = await usersModel.findById(userId)
+    const{ip, userAgent} = getRequestInfo(req) // Destructuring de la funcion getRequestInfo con req como parametro
+    const userId = req.payload._id // Obtenemos el id del usuario por el token
+    const user = await usersModel.findById(userId) // Bu
     const postId = req.params.postId; // En params esta el id del post
     const post = await postModel.findById(postId); // creamos la funcion post en la que buscamos el post por su Id
     if (!post) {
@@ -80,8 +86,10 @@ const deletePost = async (req, res) => {
         .send({ status: "Failed", message: "Post not found" });
     }
     // si el Id el usuario en el post no es igual al id del payload entonces devolvemos un 401 con un mensaje de que no puede eleminar ese post
-    // esto sirver para que solamente el dueño del post pueda eliminarlo
+    // esto sirve para que solamente el dueño del post pueda eliminarlo
     if (post.user.toString() !== user._id || user.isAdmin !== "admin") {
+      // Creamos un llog tipo warn y tendrá el mensaje de se intentó eliminar un post sin ser el creador o administrador
+      // Se enviará al log el id, nombre completo, email, ip y navegador deñ usuario que intentó realizar la acción
       logger.warn("An attempt was made to delete the post without being the creator or administrator",{
         meta:{
           _id: userId,
@@ -92,11 +100,14 @@ const deletePost = async (req, res) => {
           userAgent
         }
       })
+      // Devolvemos un 401 con el mensaje de que no puedes eliminar esta publicación
       return res
         .status(401)
         .send({ status: "Failed", message: "You cannot delete this post" });
     }
-    const deletePost = await postModel.findByIdAndDelete(postId); // buscamos el post por el id y eliminamos
+    const deletePost = await postModel.findByIdAndDelete(postId); // buscamos el post por el id y lo eliminamos
+    // Se creará un log tipo info con el mensaje el post fue elimando correctamente
+    // Se enviará el id, el nombre completo, el email, la ip, y el navegador del usuario
     logger.info("Post deleted successfully",{
       meta: {
         _id: userId,
@@ -107,16 +118,19 @@ const deletePost = async (req, res) => {
         userAgent
       }
     })
+    // Devolvemos un 200 con el mensaje de post eliminado y el post eliminado
     res
       .status(200)
       .send({ status: "Success", message: "deleted post", deletePost });
   } catch (error) {
+    // Se creará un log tipo error para cualquier error del servidor
      logger.error("Error creating post", {
       meta: {
         error: error.message,
         endpoint: "/post/delete/:postId",
       },
     });
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -139,13 +153,16 @@ const likePost = async (req, res) => {
         { new: true }
       )
       .populate("likes", "name").populate("user", "name lastName")
-
+      // Si el post no existe devolvemos un 404 con el mesaje de post no encontrado
       if(!post){
-        return res.status(404).send({status: "Failed", message: "PosT not found"})
+        return res.status(404).send({status: "Failed", message: "Post not found"})
       }
+      
+      // Si el usuario del post no es igual al id del usuario 
       if(post.user._id.toString() !== userId.toString()){
         const senderUser = await usersModel.findById(userId).select("name lastName")
         const fullName = `${senderUser.name} ${senderUser.lastName}`
+        // Se crea una notificacion que se envia al usuario que creo el post
         const notification = await notificationsModel.create({
           receiver: post.user._id,
           sender: userId,
@@ -155,12 +172,15 @@ const likePost = async (req, res) => {
           
         })
         
+        // La notificacion se ve en tiempo real con socket
         if( req.io){
           req.io.to(post.user._id.toString()).emit("newNotification", notification)
         }
       }
+      // Devolvemos un 200 con el post y un mensaje de me gustó la publicación
     res.status(200).send({ post, status: "Success", message: "Liked post" });
   } catch (error) {
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -187,35 +207,49 @@ const deleteLike = async (req, res) => {
           post,
         });
     }
+    // Devolvemos un 200 con el mensaje de eliminado me gusta
     res.status(200).send({ status: "Success", message: "Deleted Like" });
   } catch (error) {
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 
 const editPost = async (req, res) => {
   try {
-    const{ip, userAgent} = getRequestInfo(req)
-    const userId = req.payload._id
-    const user = await usersModel.findById(userId)
+    const{ip, userAgent} = getRequestInfo(req) // Destructuring de la funcion getRequestInfo con req como parametro
+    const userId = req.payload._id // Obtenemos el id del usuario por el token
+    const user = await usersModel.findById(userId) // Buscamos al usuario por el id
 
-    const postId = req.params.postId;
-    const newPost = req.body;
-    const post = await postModel.findById(postId).populate("user")
+    const postId = req.params.postId; // Buscamos el id del post por params
+    const newPost = req.body; 
+    const post = await postModel.findById(postId).populate("user") // Buscamos el post por su id
+    // Si no hay post
     if(!post){
+      // Devolvemos un 404 con el mensaje de post no encontrado
       return res.status(404).send({ status: "Failed", message: "Post not found" });
     }
+
+    // Si el id no es igual al id del creador del post o el usuario no es administador 
     if(post.user._id.toString() !== userId && user.isAdmin !== "admin" ){
+      // Creamos un log tipo warn y tendrá el mensaje de se intentó editar la publicación sin ser el creador o administrador
+        // Se enviará en el log el id, el nombre completo, email, ip y navegador del usuario
       logger.warn("An attempt was made to edit the post without being the creator or administrator",{
         meta: {
           _id: userId,
           user: `${user.name} ${user.lastName}`,
           email: user.email,
-          endpoint: "/post/edit/:postId"
+          endpoint: "/post/edit/:postId",
+          ip, 
+          userAgent
         }
       })
+      // Devolvemos un 401 con el mensaje de no puedes editar el post por que njo eres eñl autor o el administrador
       return res.status(401).send({status: "Failed", message: "You cannot edit this post because you are not the owner or an administrator"})
     }
+
+    // Creamos un post tipo info y tendrá el mensaje de post editado exitosamente 
+    // Se enviará en el log el id, el nombre completo, email, ip y navegador del usuario
     logger.info("Post edited succesfully",{
       meta:{
         _id: userId,
@@ -226,107 +260,140 @@ const editPost = async (req, res) => {
         userAgent
       }
     })
+    // Se busaca el post por su id y lo actualizamos a con newPost 
     const updatePost = await postModel.findByIdAndUpdate(postId, newPost, {new: true})
+    // Devolvemos un 200 con el nuevo post con el mensaje de post actualizado
     res.status(200).send({ updatePost, status: "Success", message: "Post updated" });
   } catch (error) {
+    // Se creará un log tipo error  para cualquier error del servidor
     logger.error("Error creating post", {
       meta: {
         error: error.message,
         endpoint: "/post/edit/:postId",
       },
     });
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
+
+// Función para obtener el top 10 de posts con más likes y comentarios
 const topPost = async (req, res) => {
   try {
+    // Usamos aggregate para hacer una proyección de los posts
+    // Incluimos título, texto, usuario y contamos la cantidad de likes y comentarios con $size
     const post = await postModel.aggregate([
       {
         $project: {
           title: 1,
           text: 1,
           user: 1,
-          numberLikes: { $size: "$likes" },
-          numberComment: { $size: "$comment" },
+          numberLikes: { $size: "$likes" }, // Cuenta el número de likes
+          numberComment: { $size: "$comment" }, // Cuenta el número de comentarios
         },
       },
+      // Ordenamos los resultados por número de likes y comentarios de forma descendente
       { $sort: { numberLikes: -1, numberComment: -1 } },
+      // Limitamos el resultado a los 10 primeros
       { $limit: 10 },
     ]);
 
+    // Hacemos un populate para obtener el nombre y la foto de perfil del usuario que creó cada post
     const populate = await postModel.populate(post, {
       path: "user",
       select: "name photoProfile",
     });
 
+    // Devolvemos un 200 con los posts más populares
     res.status(200).send({
       status: "Success",
       message: "Top 10 post with most likes",
       post: populate,
     });
   } catch (error) {
-    res.status(500).send({ status: "Failed", error: error.message });
-  }
-};
-const getPostUser = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const postUser = await postModel.find({user: userId}).populate("user", "name photoProfile")
-    const post = postUser.map(p => ({
-        _id: p._id,
-        title: p.title,
-        text: p.text,
-        Image: p.Image,
-        user: {
-            _id: p.user._id,
-            name: p.user.name,
-            photoProfile: p.user.photoProfile
-        },
-        likes: p.likes.length,
-        comments: p.comment.length
-    }))
-    
-    res
-      .status(200)
-      .send({  post, status: "Success", message: "Post obtained" });
-  } catch (error) {
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 
+// Función para obtener todos los posts de un usuario específico
+const getPostUser = async (req, res) => {
+  try {
+    const userId = req.params.userId; // Obtenemos el id del usuario por params
+
+    // Buscamos todos los posts del usuario y hacemos populate para sacar su nombre y foto de perfil
+    const postUser = await postModel
+      .find({ user: userId })
+      .populate("user", "name photoProfile");
+
+    // Creamos un nuevo array con los datos formateados de cada post
+    const post = postUser.map(p => ({
+      _id: p._id,
+      title: p.title,
+      text: p.text,
+      Image: p.Image,
+      user: {
+        _id: p.user._id,
+        name: p.user.name,
+        photoProfile: p.user.photoProfile
+      },
+      likes: p.likes.length, // Número de likes del post
+      comments: p.comment.length // Número de comentarios del post
+    }));
+    
+    // Devolvemos un 200 con los posts del usuario
+    res.status(200).send({ post, status: "Success", message: "Post obtained" });
+  } catch (error) {
+    // Devolvemos un 500 para cualquier error del servidor
+    res.status(500).send({ status: "Failed", error: error.message });
+  }
+};
+
+
+// Función para obtener los usuarios que dieron like a un post
 const getUserLikes = async (req, res) => {
   try {
-    const postId = req.params.postId;
+    const postId = req.params.postId; // Obtenemos el id del post por params
+
+    // Buscamos el post por su id y hacemos populate en el campo "likes"
+    // Para obtener el nombre y la foto de perfil de los usuarios que dieron like
     const post = await postModel
       .findById(postId)
       .populate("likes", "photoProfile name");
 
-      const userLike = post.likes
+    const userLike = post.likes; // Obtenemos la lista de usuarios que dieron like
       
-    res
-      .status(200)
-      .send({ post: userLike, status: "Success", message: "Users Obtained" });
+    // Devolvemos un 200 con la lista de usuarios
+    res.status(200).send({ post: userLike, status: "Success", message: "Users Obtained" });
   } catch (error) {
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 
+
+// Función para obtener los comentarios de un post
 const getCommentPost = async (req, res) => {
   try {
-    const postId = req.params.postId;
+    const postId = req.params.postId; // Obtenemos el id del post por params
+
+    // Buscamos el post por su id y hacemos un populate en el campo "comment"
+    // También hacemos un populate anidado para obtener el usuario que realizó cada comentario
     const getComment = await postModel
       .findById(postId)
       .populate({
         path: "comment",
         populate: { path: "user", select: "photoProfile name" },
       });
-    res
-      .status(200)
-      .send({ getComment, status: "Success", message: "Comment obtained" });
+
+    // Devolvemos un 200 con los comentarios obtenidos
+    res.status(200).send({ getComment, status: "Success", message: "Comment obtained" });
   } catch (error) {
+    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
+
 
 module.exports = {
   createPost,

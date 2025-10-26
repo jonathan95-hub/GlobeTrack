@@ -2,7 +2,7 @@ const countryModel = require("../models/countryModel"); // Importamos el modelo 
 const usersModel = require("../models/userModels"); // Importamos el modelo de usuarios
 
 
-// Este endpoint es solo para poder añadir los datos geoJson par implementar en el frontend, el usuario no podra usarlo
+// Este endpoint es solo para poder añadir los datos geoJson par implementar en el frontend, el usuario no podra usarlo, solo para administradores
 // Podria hacerlo privado pero directamente en el front no se dara la posibilidad de añadir paises
 const addCountry = async (req, res) => {
   try {

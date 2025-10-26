@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken"); // Importamos jsonwebtoken
-const logger = require("../config/configWiston");
+const logger = require("../config/configWinston");
 const usersModel = require("../models/userModels");
+const getRequestInfo = require("../utils/requestInfo") // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
 
 
 // Esta función servira para verificar si el token del usuario es generado en esta web 
@@ -20,8 +21,7 @@ const verification = async (req, res, next) => { // pasamos los parametros req, 
 
 const adminAuth = async(req, res, next) => {
     try {
-        const ip = req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
-        const userAgent = req.headers["user-agent"]
+        const{ip, userAgent} = getRequestInfo(req) // Hacemos un destructuring de nuestra funcion getRequestInfo para sacar ip y userAgent para poder reutilizarlos
         const userId = req.payload
         if(userId.isAdmin === "user"){
             const user = await usersModel.findById(userId)

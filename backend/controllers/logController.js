@@ -1,5 +1,5 @@
 const logModel = require("../models/logModel");
-const logger = require("../config/configWiston");
+const logger = require("../config/configWinston");
 const usersModel = require("../models/userModels");
 const getRequestInfo = require("../utils/requestInfo") // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
 
@@ -29,7 +29,8 @@ const allLog = async (req, res) => {
         .status(404)
         .send({ status: "Failed", message: "There are no logs" });
     }
-    
+    // Se creará un log tipo info y tendra el mensaje registros obtenidos exitosamente 
+    // Se enviara el id, nombre completo, email, ip, y navegador del usuario
     logger.info("Logs obtained successfully",{
         meta: {
             id: user._id,
@@ -45,24 +46,29 @@ const allLog = async (req, res) => {
       .status(200)
       .send({ log, status: "Success", message: "Logs obtained successfully" });
   } catch (error) {
+    // Se creara un log tipo error para cualquier error del servidor
     logger.error("Login error", {
             meta: { error: error.message, endpoint: "/audit/allLog" }
         });
+        // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 
 
- const getLogInfo = async(req, res) => {
+const getLogInfo = async(req, res) => {
     try {
-        const{ip, userAgent} = getRequestInfo(req)
+        const {ip, userAgent} = getRequestInfo(req) // Destructuring de la función getRequestInfo con req como parámetro para obtener ip y navegador
 
-        const userId = req.payload._id
-        const user = await usersModel.findById(userId)
-        const fullname = `${user.name} ${user.lastName}`
+        const userId = req.payload._id // Obtenemos el id del usuario desde el token
+        const user = await usersModel.findById(userId) // Buscamos el usuario por su id
+        const fullname = `${user.name} ${user.lastName}` // Creamos una constante con el nombre completo del usuario
 
-        const logInf = await logModel.find({level: "info"}).sort({createdAt: 1})
+        const logInf = await logModel.find({level: "info"}).sort({createdAt: 1}) // Buscamos en la colección de logs todos los que tengan nivel "info" y los ordenamos por fecha ascendente
+        // Si no existen logs de tipo info
         if(logInf.length === 0){     
+            // Creamos un log tipo info con el mensaje de que no existen logs tipo info
+            // Se enviará al log el id, nombre completo, email, ip y navegador del usuario
             logger.info("There are no logs type Info",{
                 meta:{
                     _id: user._id,
@@ -73,8 +79,11 @@ const allLog = async (req, res) => {
                     userAgent
                 }
             })
+            // Devolvemos un 200 con el mensaje de que no existen logs tipo info
             return res.status(200).send("There are no logs type Info")
         }
+        // Creamos un log tipo info con el mensaje de logs tipo info obtenidos
+        // Se enviará al log el id, nombre completo, email, ip y navegador del usuario
         logger.info("Logs type Info obtained",{
             meta:{
                 _id: user._id,
@@ -85,16 +94,20 @@ const allLog = async (req, res) => {
                 userAgent
             }
         })
+        // Devolvemos un 200 con los logs tipo info obtenidos y un mensaje de éxito
         res.status(200).send({logInf, status: "Success", message: "Logs type Info obtained"})
     } catch (error) {
-          logger.error("Login error", {
+        // Creamos un log tipo error para cualquier error del servidor
+        logger.error("Login error", {
             meta: { error: error.message, endpoint: "/audit/logInfo" }
         });
-    res.status(500).send({ status: "Failed", error: error.message });
+        // Devolvemos un 500 con el mensaje de error del servidor
+        res.status(500).send({ status: "Failed", error: error.message });
     }
- }
+}
 
 
+// Esta función hace lo mismo que la anterior pero con los log de tipo warn
   const getLogWarn = async(req, res) => {
     try {
         const{ip, userAgent} = getRequestInfo(req)
@@ -136,6 +149,7 @@ const allLog = async (req, res) => {
     }
  }
 
+ // Esta funcion hace lo mismo que la anterior pero con los log de tipo error
   const getLogError = async(req, res) => {
     try {
         const{ip, userAgent} = getRequestInfo(req)
@@ -177,37 +191,44 @@ const allLog = async (req, res) => {
     }
  }
 
- const deleteAllLog = async( req, res) => {
+const deleteAllLog = async (req, res) => {
     try {
-        const userId = req.payload._id
-        const user = await usersModel.findById(userId)
+        const userId = req.payload._id // Obtenemos el id del usuario desde el token
+        const user = await usersModel.findById(userId) // Buscamos al usuario por su id
        
-        const deleteLog = await logModel.deleteMany({})
+        const deleteLog = await logModel.deleteMany({}) // Eliminamos todos los registros de logs existentes en la colección
+        // Devolvemos un 200 con el resultado de la eliminación y un mensaje indicando que el usuario eliminó los logs
         res.status(200).send(deleteLog, {status: "Success", message: `${user.name} deleted from logs` })
                
     } catch (error) {
-         logger.error("Delete All Logs error", {
+        // Creamos un log tipo error para cualquier error ocurrido durante la eliminación de los logs
+        logger.error("Delete All Logs error", {
             meta: { error: error.message, endpoint: "/audit/deleteAll" }
         });
+        // Devolvemos un 500 con el mensaje del error
         res.status(500).send({ status: "Failed", error: error.message });
     }
- }
+}
 
- const deleteLogInfo = async(req, res) => {
+const deleteLogInfo = async (req, res) => {
     try {
-        const userId  = req.payload._id
-        const logInfo = await logModel.deleteMany({level: "info"})
-        const user = await usersModel.findById(userId)
+        const userId  = req.payload._id // Obtenemos el id del usuario desde el token
+        const logInfo = await logModel.deleteMany({level: "info"}) // Eliminamos todos los registros de logs que tengan nivel "info"
+        const user = await usersModel.findById(userId) // Buscamos al usuario por su id
+        // Devolvemos un 200 con el resultado de la eliminación y un mensaje indicando que el usuario eliminó los logs tipo info
         res.status(200).send({logInfo, status: "Success", message: `${user.name} ${user.lastName} deleted from logs type Info` })
         
     } catch (error) {
+        // Creamos un log tipo error para cualquier error ocurrido durante la eliminación de logs tipo info
         logger.error("Delete All Logs error", {
             meta: { error: error.message, endpoint: "/audit/logInfo" }
         });
+        // Devolvemos un 500 con el mensaje del error
         res.status(500).send({ status: "Failed", error: error.message });
     }
- }
+}
 
+// Esta función hace lo mismo que la anterior pero con los log tipo warn
 const deleteLogWar = async(req, res) => {
     try {
         const userId  = req.payload._id
@@ -222,7 +243,7 @@ const deleteLogWar = async(req, res) => {
         res.status(500).send({ status: "Failed", error: error.message });
     }
  }
-
+// Esta función hace lo mismo que la anterior pero con los log tipo error
  const deleteLogError = async(req, res) => {
     try {
         const userId  = req.payload._id

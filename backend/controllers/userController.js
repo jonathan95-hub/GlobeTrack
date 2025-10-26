@@ -1,5 +1,5 @@
-const logger = require("../config/configWiston");
-const notificationsModel = require("../models/norificationModel");
+const logger = require("../config/configWinston");
+const notificationsModel = require("../models/notificationModel");
 const userModel = require("../models/userModels");
 const getRequestInfo = require("../utils/requestInfo") // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
 
