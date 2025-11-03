@@ -2,13 +2,16 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import{useDispatch} from 'react-redux'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { loginFetch } from '../../../core/services/loginFecth';
+import { loginFetch } from '../../../core/services/landinPage/loginFecth';
 import { doLoginAction } from './loginAction';
 import { useNavigate } from 'react-router-dom';
 
 
 
-const LoginComponent = () => {
+const LoginComponent = (props) => {
+  const{
+    setMenuOptionsInit
+  } = props
   const dispatch = useDispatch();
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
@@ -34,6 +37,10 @@ const LoginComponent = () => {
   }
 };
 
+const backToLanding = () => {
+ setMenuOptionsInit("INIT")
+}
+
 
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100">
@@ -52,7 +59,7 @@ const LoginComponent = () => {
 
         <div className="login-buttons d-flex flex-column gap-3">
           <button className="login-btn" onClick={login}>Acceder</button>
-          <button className="login-btn-outline">Cancelar</button>
+          <button className="login-btn-outline" onClick={ () => backToLanding()}>Cancelar</button>
         </div>
       </div>
     </div>

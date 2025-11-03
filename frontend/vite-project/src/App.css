@@ -3,6 +3,24 @@
 @import url("./css/LandingPage/Register.css");
 @import url("./css/mainLayaout/footer.css");
 @import url("./css/mainLayaout/header.css");
+@import url("./css/HomePage/MapGlobal/Map.css");
+@import url("./css/HomePage/HomePage.css");
+@import url("./css/HomePage/listBestTop/listBestTop.css");
+@import url("./css/HomePage/MapGlobal/Map.css");
+@import url("./css/HomePage/RadialTopVisited/RadialTopVisited.css");
+@import url("./css/HomePage/TopTravelers/TopTravelers.css");
+@import url("./css/HomePage/topGroup/topGroup.css");
 ul{
     list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block; /* Evita espacios debajo de la imagen */
+  object-fit: cover; /* Asegura que no se deformen dentro del contenedor */
+}
+
+body{
+  background: #f5f5f5;
 }

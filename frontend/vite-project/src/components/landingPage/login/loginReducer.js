@@ -1,9 +1,10 @@
 import { LOGIN, LOG_OUT } from "./loginAction";
 
-const token = localStorage.getItem('token');
+const token = localStorage.getItem('token'); // Obtenemos el token del locarStorage
+const userStorage = localStorage.getItem("user") // Obtenemos el usuario del localStorage
 const initialState = {
     isLogued: !!token, // La doble negación hace que si hay token mantenga la sesion abierta si no lo hay te manda de vuelta al login
-    user: null
+    user: userStorage ? JSON.parse(userStorage) : null //Si hay datos del usuario guardados, los convertimos de texto a objeto con JSON.parse Si no hay nada, el usuario empieza en null
 }
 
 const loginReducer = (state = initialState, action) => {
@@ -13,13 +14,19 @@ switch(type){
         return{
             ...state, 
             isLogued: true,
-            user: payload
+            user: payload.user,
+            token: payload.token,
+            token_refresh: payload.token_refresh
         }
     case LOG_OUT:
+        // Al cerrar sesion borramos el token el token de refresco y el usuario del localStorage
+      localStorage.removeItem("token");
+      localStorage.removeItem("token_refresh");
+      localStorage.removeItem("user");
         return{
             ...state,
-            isLogued: false,
-            user: null
+            isLogued: false, // Ponemos is logued en false
+            user: null // Ponemos user en null
             }
     default:
         return state

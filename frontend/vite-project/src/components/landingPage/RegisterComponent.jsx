@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { register } from '../../core/services/registerFetch'
+import { register } from '../../core/services/landinPage/registerFetch'
 
 const RegisterComponent = (props) => {
 
@@ -26,7 +26,7 @@ const RegisterComponent = (props) => {
     
   }
 
-  const backToLogin = () => {
+  const backToLanding = () => {
     setMenuOptionsInit("INIT")
   }
 
@@ -40,7 +40,7 @@ const RegisterComponent = (props) => {
       }
       console.log("Registro exitoso", registerUser) 
       alert("Registro exitoso")
-      backToLogin()
+      backToLanding()
     } catch (error) {
       console.error("Error de login:", error.message);
     alert(error.message); 
@@ -82,7 +82,7 @@ const RegisterComponent = (props) => {
 
         <div className="button-container">
           <button type="submit" className="btn btn-custom" onClick={(e) =>{e.preventDefault(); signupUser()}}>Registrar</button>
-          <button type="button" className="btn btn-custom-outline">Cancelar</button>
+          <button type="button" className="btn btn-custom-outline" onClick={() => {backToLanding()}}>Cancelar</button>
         </div>
       </form>
     </div>

@@ -13,7 +13,7 @@ const LandingPage = () => {
     <>
     {menuOptiosInit === "INIT" ? (<div className="container-fluid containerLanding d-flex flex-column flex-md-row min-vh-100 p-0">
        
-          <div className="text-section d-flex align-items-center justify-content-center text-center text-md-start p-4 col-12 col-md-6">
+          <div className="text-section d-flex align-items-center justify-content-center text-center text-md-start p-4 col-12 col-md-6 ">
             <p className="paragraph-login">
               🌍 Explora el mundo con GlobeTrack. Descubre lugares increíbles y conecta con viajeros de cualquier parte del planeta. 
               ¿Buscas inspiración para tu próximo destino? En GlobeTrack, nuestra comunidad comparte experiencias, consejos y aventuras reales 
@@ -21,7 +21,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <div className="image-section d-flex flex-column align-items-center justify-content-center col-12 col-md-6 p-4">
+          <div className="image-section d-flex flex-column align-items-center justify-content-center col-12 col-md-6 p-4 imageSection">
             <img
               src="src/assets/imageLandingPage/ImagenLandinPage.png"
               alt="Landing"
@@ -53,7 +53,7 @@ const LandingPage = () => {
             </p>
           </div>
           <div className="d-flex align-items-center justify-content-center col-12 col-md-6 p-4">
-            <LoginComponent />
+            <LoginComponent setMenuOptionsInit={setMenuOptionsInit} />
           </div>
         </div>
         ) : (null)}

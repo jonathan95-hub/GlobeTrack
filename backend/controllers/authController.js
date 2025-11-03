@@ -11,9 +11,7 @@
     try { // creamos un try catch para manejo de errores
         
         const {name, lastName, email, password, country, city, birthDate} = req.body; // hacemos un destructuring del body
-        if(!password || password.length < 8 ){ // Si la contraseña tiene menos de 8 caracteres, se devuelve un 400 con un mensaje de error
-          return res.status(400).send({status: "Failed", message: "Password requires 8 or more characters"}) 
-        }
+       
         // Si name, lastName, email o country son un string vacio o solo espacios
         if(!name.trim() || !lastName.trim() || !email.trim() || !country.trim()  ){
             // Se creará un logger tipo warn indicando que algun o algunos campos estan vacios
@@ -27,6 +25,11 @@
             // Devolvemos un 400 con un mensaje que los campos name, lasName, email y country no pueden estar vacios
             return res.status(400).send({status: "Failed", message: "The fields name, lastName, email and country cannot be empty"})
         }
+
+         if(!password || password.length < 8 ){ // Si la contraseña tiene menos de 8 caracteres, se devuelve un 400 con un mensaje de error
+          return res.status(400).send({status: "Failed", message: "Password requires 8 or more characters"}) 
+        }
+
         // aunque en el modelo de usuario ya esta la validacion de email que necesita un @ y . (está puesto con una expresión regular) añado esta validación
         // Si email no incluye "@"" o "."  se creara un log tipo warn que dice que email necesita esos caracteres 
         if(!email.includes("@") || !email.includes(".")){

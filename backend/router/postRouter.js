@@ -1,7 +1,7 @@
 const express = require('express') // Importamos express
 const router = express.Router() // creamos una constante para manejar mejor router de express
 
-const {createPost, getPost, deletePost, likePost, deleteLike, editPost, topPost, getPostUser, getUserLikes, getCommentPost} = require("../controllers/postController")
+const {createPost, getPost, deletePost, likePost, editPost, topPost, getPostUser, getUserLikes, getCommentPost} = require("../controllers/postController")
 const {verification} = require("../middelwares/middelwareAuthentication")
 
 
@@ -655,70 +655,6 @@ router.patch("/:postId", verification, editPost)
  *                   example: "Error message from server"
  */
 router.post("/like/:postId", verification, likePost)
-/**
- * @swagger
- * /post/like/{postId}:
- *   delete:
- *     summary: Eliminar like de un post
- *     description: Permite a un usuario autenticado eliminar su like de un post específico. Requiere token de autenticación.
- *     tags:
- *       - Post
- *     security:
- *       - tokenAuth: []
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         description: ID del post del cual se desea eliminar el like
- *         schema:
- *           type: string
- *           example: "634f1d8a0e5e4f0012345678"
- *     responses:
- *       200:
- *         description: Like deleted successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Success"
- *                 message:
- *                   type: string
- *                   example: "Deleted Like"
- *                 post:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       example: "634f1d8a0e5e4f0012345678"
- *                     likes:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           _id:
- *                             type: string
- *                             example: "68f744c6ca4052540eda9e2e"
- *                           name:
- *                             type: string
- *                             example: "Juan"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Failed"
- *                 error:
- *                   type: string
- *                   example: "Error message from server"
- */
-router.delete("/like/:postId", verification, deleteLike)
 /**
  * @swagger
  * /post/delete/{postId}:

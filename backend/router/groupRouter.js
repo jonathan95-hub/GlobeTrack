@@ -1,7 +1,7 @@
 const express = require('express') // Importamos express
 const router = express.Router() // creamos una constante para manejar mejor router de express
 
-const {createGroup, deletedGroup, enterAndExitUserToGroup, conecctedUserToGroup, disconectedUserToGroup, getMembersOfGroup, getGroupNotIncludesUser, getGroupIncludesUser, obtainedUserOnline, editGroup, allGroup} = require("../controllers/groupController")
+const {createGroup, deletedGroup, enterAndExitUserToGroup, conecctedUserToGroup, disconectedUserToGroup, getMembersOfGroup, getGroupNotIncludesUser, getGroupIncludesUser, obtainedUserOnline, editGroup, allGroup, getFiveGroupsMoreMembers} = require("../controllers/groupController")
 const { verification, adminAuth } = require('../middelwares/middelwareAuthentication')
 /**
  * @swagger
@@ -77,6 +77,7 @@ const { verification, adminAuth } = require('../middelwares/middelwareAuthentica
  *                   example: "Error message from server"
  */
 router.post("/newgroup", verification, createGroup)
+router.get("/topgroup",verification, getFiveGroupsMoreMembers)
 /**
  * @swagger
  * /group/listgroup:

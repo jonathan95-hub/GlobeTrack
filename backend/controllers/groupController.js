@@ -74,6 +74,30 @@ const createGroup = async (req, res) => {
   }
 };
 
+
+const getFiveGroupsMoreMembers = async(req, res) => {
+  try {
+    const FiveGroup = await groupModel.aggregate([
+      {
+        $project:{
+          name: 1,
+          photoGroup:1,
+          description:1,
+          members:1,
+          membersCount:{$size: "$members"}
+        }
+      },
+      {$sort: {membersCount: -1}},
+      {$limit: 5}
+    ])
+
+    res.status(200).send({status: "Success", message: "Top group obtained", FiveGroup})
+  } catch (error) {
+    res.status(500).send({status:"Failed", error: error.message})
+  }
+}
+
+
 const getGroupNotIncludesUser = async (req, res) => { // Para obtener una lista de grupos a los que no pertenece el usuario
   try {
     const userId = req.payload._id; // Obtenemos el id del usuario desde el token
@@ -474,5 +498,6 @@ module.exports = {
   getGroupIncludesUser,
   obtainedUserOnline,
   editGroup,
-  allGroup
+  allGroup,
+  getFiveGroupsMoreMembers
 };

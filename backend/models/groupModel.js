@@ -9,7 +9,7 @@ const groupSchema = new schema({
     },
     photoGroup :{
         type: String,
-        default: "/public/images/ImgDefaultGroup.png"
+        default: " GlobeTrack/frontend/vite-project/public/images/descarga (1).jpg"
     },
     description: {
         type: String,

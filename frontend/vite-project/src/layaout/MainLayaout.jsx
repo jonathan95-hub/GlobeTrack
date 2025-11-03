@@ -1,5 +1,5 @@
 import React from 'react'
-import HeadersComponent from '../components/MainLayaout/HeadersComponent'
+import HeadersComponent from '../components/MainLayaout/Header/HeadersComponent'
 import FooterComponent from '../components/MainLayaout/FooterComponent'
 
 const MainLayaout = (props) => {

@@ -106,7 +106,8 @@ const getUserWithMoreFollowers = async (req, res) => {
       {
         $project: {
           name: 1,
-          image: 1,
+          lastName: 1,
+          photoProfile: 1,
           followers: { $size: "$followers" },
         },
       },

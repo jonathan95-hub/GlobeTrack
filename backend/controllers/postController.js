@@ -52,10 +52,10 @@ const getPost = async (req, res) => {
     // tambien lo usamos para mostrar los comentarios con el nombre de usuario y la imagen
     const allPost = await postModel
       .find()
-      .populate({ path: "user", select: "name image" })
+      .populate({ path: "user", select: "name photoProfile" })
       .populate({
         path: "comment",
-        populate: { path: "user", select: "name image" },
+        populate: { path: "user", select: "name photoProfile" },
       });
       // Devolcemos un 200 con el mensaje de todas las publicaciones obtenidas
     res
@@ -134,86 +134,76 @@ const deletePost = async (req, res) => {
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
-
+// VOLVER A COMENTAR ESTA FUNCION PUES FUE RETOCADA
 const likePost = async (req, res) => {
   try {
-    const userId = req.payload._id; // traemos el id del usuario atraves del payload que viene de la funcion de verificacion anterior
-    const postId = req.params.postId; // recogemos el id del post atraves del aprams
-    
+    const userId = req.payload._id;
+    const postId = req.params.postId;
 
-    // Buscamos el post por id y lo actualizamos, metemos en los parametros el postId que contiene el id del post
-    // Agregamos el valor de userId que es id del usuario con el operador addToSet para evitar duplicados ya que
-    // lo añade solo si no esta ya en el array, ponemos new en true para que nos devuelva el array actualizado
-    //usamos populate para la coleccion likes y muestre el nombre del usuario
-    
-    const post = await postModel
+    // ✅ Primero buscamos el post original
+    const post = await postModel.findById(postId).populate("likes", "name").populate("user", "name lastName");
+
+    if (!post) {
+      return res.status(404).send({ status: "Failed", message: "Post not found" });
+    }
+
+    // ✅ Comprobamos si ya está en likes (comparando como string por seguridad)
+    const alreadyLiked = post.likes.some(like => like._id.toString() === userId.toString());
+
+    if (alreadyLiked) {
+      // ✅ Si ya dio like, lo quitamos con $pull
+      const updatedPost = await postModel
+        .findByIdAndUpdate(
+          postId,
+          { $pull: { likes: userId } },
+          { new: true }
+        )
+        .populate("likes", "name")
+        .populate("user", "name lastName");
+
+      return res.status(200).send({
+        updatedPost,
+        status: "Success",
+        message: "You removed your like from the post",
+      });
+    }
+
+    // ✅ Si no lo había dado, añadimos el like con $addToSet
+    const updatedPost = await postModel
       .findByIdAndUpdate(
         postId,
         { $addToSet: { likes: userId } },
         { new: true }
       )
-      .populate("likes", "name").populate("user", "name lastName")
-      // Si el post no existe devolvemos un 404 con el mesaje de post no encontrado
-      if(!post){
-        return res.status(404).send({status: "Failed", message: "Post not found"})
-      }
-      
-      // Si el usuario del post no es igual al id del usuario 
-      if(post.user._id.toString() !== userId.toString()){
-        const senderUser = await usersModel.findById(userId).select("name lastName")
-        const fullName = `${senderUser.name} ${senderUser.lastName}`
-        // Se crea una notificacion que se envia al usuario que creo el post
-        const notification = await notificationsModel.create({
-          receiver: post.user._id,
-          sender: userId,
-          type: "like",
-          referenceId: post._id,
-          message: `A ${fullName} le a gustado tu publicación`
-          
-        })
-        
-        // La notificacion se ve en tiempo real con socket
-        if( req.io){
-          req.io.to(post.user._id.toString()).emit("newNotification", notification)
-        }
-      }
-      // Devolvemos un 200 con el post y un mensaje de me gustó la publicación
-    res.status(200).send({ post, status: "Success", message: "Liked post" });
-  } catch (error) {
-    // Devolvemos un 500 para cualquier error del servidor
-    res.status(500).send({ status: "Failed", error: error.message });
-  }
-};
+      .populate("likes", "name")
+      .populate("user", "name lastName");
 
-const deleteLike = async (req, res) => {
-  try {
-    const userId = req.payload._id; // Traemos el id del usuario con el payload
-    const postId = req.params.postId; // obtenemos el id el psot por el params
-    // buscamos por id el post con el id obtenido en postId luego usamos el operador $pull para eliminar  automaticamente el id
-    // del usuario en likes
-    // hacemos new true para mostrar el post actualizado y el populate para mostrar el nombre de los likes que siguen estando
-    const post = await postModel
-      .findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true })
-      .populate("likes", "name");
+    // ✅ Si no es su propio post, se envía notificación
+    if (updatedPost.user._id.toString() !== userId.toString()) {
+      const senderUser = await usersModel.findById(userId).select("name lastName");
+      const fullName = `${senderUser.name} ${senderUser.lastName}`;
 
-    // si en el campo likes de post no está incluido el id del usuario entonces devolvemos
-    // un mensaje que indica que ese id de usuario no a dado like
-    if (!post.likes.includes(userId)) {
-      return res
-        .status(200)
-        .send({
-          status: "Failed",
-          message: "There were no likes from this user",
-          post,
-        });
+      const notification = await notificationsModel.create({
+        receiver: updatedPost.user._id,
+        sender: userId,
+        type: "like",
+        referenceId: updatedPost._id,
+        message: `A ${fullName} le ha gustado tu publicación`,
+      });
+
+      if (req.io) {
+        req.io.to(updatedPost.user._id.toString()).emit("newNotification", notification);
+      }
     }
-    // Devolvemos un 200 con el mensaje de eliminado me gusta
-    res.status(200).send({ status: "Success", message: "Deleted Like" });
+
+    // ✅ Respuesta final cuando se da like
+    res.status(200).send({ post: updatedPost, status: "Success", message: "Liked post" });
+
   } catch (error) {
-    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
+
 
 const editPost = async (req, res) => {
   try {
@@ -278,40 +268,56 @@ const editPost = async (req, res) => {
 };
 
 // Función para obtener el top 10 de posts con más likes y comentarios
+// IMPORTANTE VOLVER A DOCUMENTAR ESTA FUNCION PUES FUE MODIFICADA!!
 const topPost = async (req, res) => {
   try {
-    // Usamos aggregate para hacer una proyección de los posts
-    // Incluimos título, texto, usuario y contamos la cantidad de likes y comentarios con $size
     const post = await postModel.aggregate([
+      // 1️⃣ Calcula los totales antes de hacer lookup
       {
         $project: {
           title: 1,
           text: 1,
           user: 1,
-          numberLikes: { $size: "$likes" }, // Cuenta el número de likes
-          numberComment: { $size: "$comment" }, // Cuenta el número de comentarios
+          numberLikes: { $size: { $ifNull: ["$likes", []] } },
+          numberComment: { $size: { $ifNull: ["$comment", []] } },
         },
       },
-      // Ordenamos los resultados por número de likes y comentarios de forma descendente
+      // 2️⃣ Ordena por los campos recién creados
       { $sort: { numberLikes: -1, numberComment: -1 } },
-      // Limitamos el resultado a los 10 primeros
+      // 3️⃣ Limita a 10
       { $limit: 10 },
+      // 4️⃣ Une con la colección de usuarios
+  {
+  $lookup: {
+    from: "users",
+    let: { userId: { $toObjectId: "$user" } }, // convierte el string a ObjectId
+    pipeline: [
+      { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+      { $project: { name: 1, photoProfile: 1 } }
+    ],
+    as: "user"
+  }
+},
+{ $unwind: "$user" },
+      // 6️⃣ Proyecta solo los campos necesarios
+      {
+        $project: {
+          title: 1,
+          text: 1,
+          numberLikes: 1,
+          numberComment: 1,
+          "user.name": 1,
+          "user.photoProfile": 1,
+        },
+      },
     ]);
 
-    // Hacemos un populate para obtener el nombre y la foto de perfil del usuario que creó cada post
-    const populate = await postModel.populate(post, {
-      path: "user",
-      select: "name photoProfile",
-    });
-
-    // Devolvemos un 200 con los posts más populares
     res.status(200).send({
       status: "Success",
-      message: "Top 10 post with most likes",
-      post: populate,
+      message: "Top 10 posts with most likes",
+      post,
     });
   } catch (error) {
-    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -400,7 +406,6 @@ module.exports = {
   getPost,
   deletePost,
   likePost,
-  deleteLike,
   editPost,
   topPost,
   getPostUser,

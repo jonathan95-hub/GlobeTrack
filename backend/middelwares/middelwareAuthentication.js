@@ -6,6 +6,7 @@ const getRequestInfo = require("../utils/requestInfo") // Importamos la funcion 
 
 // Esta función servira para verificar si el token del usuario es generado en esta web 
 const verification = async (req, res, next) => { // pasamos los parametros req, res y next
+    
     const token = req.header("token"); // creamos la contante token en la que en el header cogera el token del usuario
     if(!token){ // si no hay token entoncer devolvera un mensaje de acceso denegado
         return res.status(401).send({status: "Failed", message: "Access denied"})

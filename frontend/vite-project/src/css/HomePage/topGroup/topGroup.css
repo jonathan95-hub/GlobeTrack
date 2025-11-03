@@ -1,0 +1,41 @@
+.containerGroup{
+    width: 95%;
+    height: 90%;
+    border: 2px solid #474747;
+    border-radius: 12px;
+    background: #0c0c0c;
+    box-shadow: 6px 6px 4px #474747;
+}
+
+
+.containerImgGroupList {
+  width: 40%;
+  height: 100px;
+  
+}
+.imgGroupListTop{
+    border-radius: 20%;
+    margin-inline-start: 150%;
+    z-index: -1;
+}
+
+.titleGroup{
+    color: #d3d0d0;
+    font-family: "poppins";
+    font-style: italic;
+    font-size: 26px;
+    z-index: 999;
+}
+
+.textMembers{
+    color: #fffcfc;
+    font-family: "poppins";
+    font-style: italic;
+    font-size: 18px;
+}
+.textDescription{
+    color: #fffcfc;
+    font-family: "poppins";
+    font-style: italic;
+    font-size: 12px;
+}
