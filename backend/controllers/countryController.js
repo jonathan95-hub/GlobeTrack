@@ -39,6 +39,18 @@ const deleteCountry = async (req, res) => {
   }
 };
 
+const getAllCountries = async(req, res) => {
+  try {
+    const countries = await countryModel.find({})
+    if(!countries){
+      return res.status(200).send({status: "Failed", message: "Countries not found"})
+    }
+    res.status(200).send({status: "Success", message: "Countries Obtained", countries})
+  } catch (error) {
+    res.status(500).send({status: "Failed", error: error.message})
+  }
+}
+
 // Esta funcion es una funcion toggle que marca y desmarca a traves del mismo endpoint el pais visitado
 const markVisited = async (req, res) => {
   try {
@@ -63,7 +75,7 @@ const markVisited = async (req, res) => {
       });
     // Y a su vez sacAmos el id del pais de campo visitedDestinations del usuario tambien con el operado $pull
       await usersModel.findByIdAndUpdate(userId, {
-        $pull: { visitedDestinations: countryId },
+        $pull: { visitedDestinations: {geoId: country._id.toString()} },
       });
       // Devolvemos un 200 y un mensaje que dice que el pais a sido desmarcado como visitado
       return res
@@ -81,7 +93,7 @@ const markVisited = async (req, res) => {
           userId,
           {
             $addToSet: {
-              visitedDestinations: { geoId: country._id, name: country.name },
+              visitedDestinations: { geoId: country._id.toString(), name: country.name },
             },
           },
           { new: true } // Lanzamos un new en true para que nos lo devuelva actualizado
@@ -117,7 +129,7 @@ const markDesired = async (req, res) => {
         $pull: { wishedByUser: userId },
       });
       await usersModel.findByIdAndUpdate(userId, {
-        $pull: { desiredDestinations: countryId },
+        $pull: { desiredDestinations: {geoId: country._id.toString()}},
       });
       return res
         .status(200)
@@ -131,7 +143,7 @@ const markDesired = async (req, res) => {
           userId,
           {
             $addToSet: {
-              desiredDestinations: { geoId: country._id, name: country.name },
+              desiredDestinations: { geoId: country._id.toString(), name: country.name },
             },
           },
           { new: true }
@@ -249,4 +261,5 @@ module.exports = {
   getFiveCountryMoreDesired,
   getOneTopVisited,
   getOneTopDesired,
+  getAllCountries
 };

@@ -324,7 +324,7 @@ router.post("/create", verification, createPost)
  *                   type: string
  *                   example: "Error message from server"
  */
-router.get("/userpost/:postId", verification, getPostUser)
+router.get("/userpost/:userId", verification, getPostUser)
 /**
  * @swagger
  * /post/userpost/likes/{postId}:
@@ -742,7 +742,7 @@ router.post("/like/:postId", verification, likePost)
  *                   type: string
  *                   example: "Error message from server"
  */
-router.delete("delete/:postId",  verification, deletePost)
+router.delete("/delete/:postId",  verification, deletePost)
 
 
 module.exports = router

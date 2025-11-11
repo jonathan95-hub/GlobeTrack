@@ -46,7 +46,6 @@
 // export default HomePage
 
 
-
 import React from 'react';
 import MapGlobal from '../../components/HomePage/Map';
 import ListBestPost from '../../components/HomePage/ListBestPost';
@@ -54,27 +53,64 @@ import RadialTopVisitedDesiredComponent from '../../components/HomePage/RadialTo
 import ToptravelersComponent from '../../components/HomePage/ToptravelersComponent';
 import TopGroups from '../../components/HomePage/TopGroups';
 
-
 const HomePage = () => {
   return (
-    <div className='bgHome grid modeColumn bgHomePage'>
-      <div className='mapGrid'>
-        <MapGlobal/>
-      </div>
-      <div className='listGrid'>
-        <ListBestPost/>
-      </div>
-      <div className='radialGrid'>
-        <RadialTopVisitedDesiredComponent/>
-      </div>
-      <div className='travelersGrid'>
-        <ToptravelersComponent/>
-      </div>
-      <div className='groupGrid'>
-        <TopGroups/>
+    <div className="container-fluid bg-light py-4 min-vh-100">
+      <div className="row g-4">
+
+        {/* Columna izquierda */}
+        <div className="col-12 col-lg-7 d-flex flex-column gap-4">
+          
+          {/* Mapa */}
+          <div className="card shadow-lg border-0">
+            <div className="card-body p-3">
+              <h4 className="text-primary fw-bold mb-3 text-center">Mapa Global</h4>
+              <MapGlobal />
+            </div>
+          </div>
+
+          {/* Radial */}
+          <div className="card shadow border-0">
+            <div className="card-body p-3">
+              <h4 className="text-info fw-bold mb-3 text-center">Top Lugares Visitados</h4>
+              <RadialTopVisitedDesiredComponent />
+            </div>
+          </div>
+
+          
+          <div className="row g-4">
+            <div className="col-12 col-md-6">
+              <div className="card shadow border-0 h-100">
+                <div className="card-body p-3">
+                  <h4 className="text-danger fw-bold mb-3 text-center">Grupos Destacados</h4>
+                  <TopGroups />
+                </div>
+              </div>
+            </div>
+            <div className="col-12 col-md-6">
+              <div className="card shadow border-0 h-100">
+                <div className="card-body p-3">
+                  <h4 className="text-warning fw-bold mb-3 text-center">Top Viajeros</h4>
+                  <ToptravelersComponent />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Columna derecha: ListBestPost */}
+        <div className="col-12 col-lg-5 d-flex flex-column h-100">
+          <div className="card shadow-lg border-0 flex-grow-1">
+            <div className="card-body p-3">
+              <h4 className="text-success fw-bold mb-3 text-center">Mejores Publicaciones</h4>
+              <ListBestPost />
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
-}
+};
 
 export default HomePage;

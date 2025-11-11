@@ -9,6 +9,8 @@ const configSocket = require("./config/configSocket") // Importamos y guardamos 
 const socketMiddelware = require('./middelwares/middelwareSocket');
 const swaggerSpec = require('./config/swaggerConfig');
 
+require("./config/configCloudinary")
+
 const app = express() // Creamos una constante que es igual a express
 
 const server = http.createServer(app) // Guardamos en una constante el metodo createServer de http con parametros app
@@ -34,7 +36,10 @@ app.use(cors({
   origin: "http://localhost:5173",
   credentials: true
 })) // Permite la conexion entre el back y el front
-app.use(express.json()) // convierte automáticamente el JSON que se envía desde req.body.
+// app.use(express.json()) // convierte automáticamente el JSON que se envía desde req.body.
+
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 app.use("/audit", auditRouter)
 app.use("/auth", atRouter) 

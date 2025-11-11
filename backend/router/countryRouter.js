@@ -10,9 +10,11 @@ const {
   getFiveCountryMoreDesired,
   getOneTopVisited,
   getOneTopDesired,
+  getAllCountries,
 } = require("../controllers/countryController");
 const { verification, adminAuth } = require("../middelwares/middelwareAuthentication");
 
+router.get("/allCountries", verification, getAllCountries)
 /**
  * @swagger
  * /country/topdesired:

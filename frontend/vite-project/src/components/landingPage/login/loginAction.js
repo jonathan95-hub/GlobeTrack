@@ -1,5 +1,6 @@
 export const LOGIN = "LOGIN"
 export const LOG_OUT = "LOG_OUT"
+export const UPDATE_USER = "UPDATE_USER"
 
 export const doLoginAction = (payload) => {
      localStorage.setItem('token', payload.token);
@@ -16,4 +17,12 @@ export const doLoginOutAction = (payload) =>{
         type: LOG_OUT,
         payload
     }
+}
+
+export const updateUser = (payload) => {
+    return{
+        type: UPDATE_USER,
+        payload
+    }
+    
 }

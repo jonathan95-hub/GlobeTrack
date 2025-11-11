@@ -23,7 +23,7 @@ const userSchema = new schema({
   // Foto de perfil con una imagen por defecto por si el usuario no pusiera ninguna
   photoProfile: {
     type: String,
-    default: "/public/images/ImgDefaultProfile.png", // Por defecto pondra esta imagen
+    default: "https://res.cloudinary.com/ddsaghqay/image/upload/v1762366132/ImgDefaultProfile_qr5cpw.png"
   },
   email: {
     type: String,

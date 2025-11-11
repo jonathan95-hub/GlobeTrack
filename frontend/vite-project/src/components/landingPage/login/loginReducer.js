@@ -1,4 +1,5 @@
-import { LOGIN, LOG_OUT } from "./loginAction";
+import { useSelector } from "react-redux";
+import { LOGIN, LOG_OUT, UPDATE_USER } from "./loginAction";
 
 const token = localStorage.getItem('token'); // Obtenemos el token del locarStorage
 const userStorage = localStorage.getItem("user") // Obtenemos el usuario del localStorage
@@ -16,7 +17,8 @@ switch(type){
             isLogued: true,
             user: payload.user,
             token: payload.token,
-            token_refresh: payload.token_refresh
+            token_refresh: payload.token_refresh,
+            
         }
     case LOG_OUT:
         // Al cerrar sesion borramos el token el token de refresco y el usuario del localStorage
@@ -28,6 +30,12 @@ switch(type){
             isLogued: false, // Ponemos is logued en false
             user: null // Ponemos user en null
             }
+    case UPDATE_USER:
+        localStorage.setItem("user", JSON.stringify(payload))
+        return{
+            ...state,
+            user: payload
+        }
     default:
         return state
 }

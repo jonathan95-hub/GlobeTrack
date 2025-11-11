@@ -3,15 +3,27 @@ const notificationsModel = require("../models/notificationModel");
 const postModel = require("../models/postModel"); // Importamos el modelo de las publicaciones
 const usersModel = require("../models/userModels");
 const getRequestInfo = require("../utils/requestInfo");
+const cloudinary = require("../config/configCloudinary")
 
 
-
+// VOLVER A COMENTAR SE MODIFICO LA FUNCIÓN 
 const createPost = async (req, res) => {
   try {
     const{ip,userAgent} = getRequestInfo(req) // Destructuring de la funcion getRequestInfo con req como parametro
     const userId = req.payload._id // Obtenmos el id del usuario por el token
     const post = req.body; // recibimos por el body la publicacion
-    const newPost = await postModel.create(post,{user: userId}); // creamos la constante newPost para crear un nuevo post con la informacion del body antes recogida como parametro
+    if(post.image){
+      try {
+        const upload = await cloudinary.uploader.upload(post.image,{
+          folder: "Post_GlobeTracked"
+        })
+        post.image = upload.secure_url
+      } catch (error) {
+        res.status(500).send({status: "Failed", error: error.message})
+      }
+    }
+    
+    const newPost = await postModel.create({...post,user: userId}); // creamos la constante newPost para crear un nuevo post con la informacion del body antes recogida como parametro
     const populatePost = await postModel
       .findById(newPost._id)
       .populate("user", "name photoProfile"); // buscamos el nuevo post por su Id y hacemos populate con referencia a user y sacamos el nombre y la imagen del usuario
@@ -56,7 +68,7 @@ const getPost = async (req, res) => {
       .populate({
         path: "comment",
         populate: { path: "user", select: "name photoProfile" },
-      });
+      }).sort({createdAt: -1});
       // Devolcemos un 200 con el mensaje de todas las publicaciones obtenidas
     res
       .status(200)
@@ -87,7 +99,7 @@ const deletePost = async (req, res) => {
     }
     // si el Id el usuario en el post no es igual al id del payload entonces devolvemos un 401 con un mensaje de que no puede eleminar ese post
     // esto sirve para que solamente el dueño del post pueda eliminarlo
-    if (post.user.toString() !== user._id || user.isAdmin !== "admin") {
+    if (post.user.toString() !== user._id.toString() && user.isAdmin !== "admin") {
       // Creamos un llog tipo warn y tendrá el mensaje de se intentó eliminar un post sin ser el creador o administrador
       // Se enviará al log el id, nombre completo, email, ip y navegador deñ usuario que intentó realizar la acción
       logger.warn("An attempt was made to delete the post without being the creator or administrator",{
@@ -330,14 +342,15 @@ const getPostUser = async (req, res) => {
     // Buscamos todos los posts del usuario y hacemos populate para sacar su nombre y foto de perfil
     const postUser = await postModel
       .find({ user: userId })
-      .populate("user", "name photoProfile");
+      .populate("user", "name photoProfile").sort({createdAt: -1});
 
     // Creamos un nuevo array con los datos formateados de cada post
     const post = postUser.map(p => ({
       _id: p._id,
       title: p.title,
       text: p.text,
-      Image: p.Image,
+      image: p.image,
+      location: p.location,
       user: {
         _id: p.user._id,
         name: p.user.name,

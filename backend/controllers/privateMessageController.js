@@ -161,7 +161,7 @@ const getPrivateMessageForUser = async(req, res) => {
                 {sender: userId},
                 {receiver: userId}
             ]
-        }).populate("sender", "name lastName").populate("receiver", "name lastName") // Entonces hacemos un populate en el que saca de sender el name y el lastName del usuario y Luego otro populate que ahce lo mismo para el campo receiver
+        }).populate("sender", "name lastName photoProfile").populate("receiver", "name lastName photoProfile") // Entonces hacemos un populate en el que saca de sender el name y el lastName del usuario y Luego otro populate que ahce lo mismo para el campo receiver
         // Creamos conversations que es un objeto
         const conversations = {}
         // Hacemos un forEach con el parametro message 

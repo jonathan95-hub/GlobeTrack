@@ -30,7 +30,7 @@ const postSchema = new schema({
             ref: "User"
         }
     ],
-    // Arrat de objetos que es el id de la colección comentarios
+    // Array de objetos que es el id de la colección comentarios
     comment: [
         {
             type: mongoose.Schema.Types.ObjectId,

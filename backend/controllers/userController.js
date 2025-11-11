@@ -1,4 +1,5 @@
 const logger = require("../config/configWinston");
+const cloudinary = require("..//config/configCloudinary")
 const notificationsModel = require("../models/notificationModel");
 const userModel = require("../models/userModels");
 const getRequestInfo = require("../utils/requestInfo") // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
@@ -6,69 +7,103 @@ const getRequestInfo = require("../utils/requestInfo") // Importamos la funcion 
 
 const editUser = async (req, res) => {
   try {
-    const{ip, userAgent} = getRequestInfo(req)
+    const { ip, userAgent } = getRequestInfo(req);
     const userId = req.params.userId;
     const updateUser = req.body;
-     if(!updateUser.name.trim() || !updateUser.lastName.trim() || !updateUser.email.trim() || !updateUser.country.trim() || !updateUser.city.trim()){
-      logger.info("All fields must be filled in to be able to edit",{
+
+    // 🧩 Validación de campos requeridos
+    if (
+      !updateUser.name?.trim() ||
+      !updateUser.lastName?.trim() ||
+      !updateUser.email?.trim() ||
+      !updateUser.country?.trim() ||
+      !updateUser.city?.trim()
+    ) {
+      logger.info("All fields must be filled in to be able to edit", {
         meta: {
           _id: userId,
           endpoint: "user/edit/:userId",
           ip,
           userAgent,
-          body: updateUser
-        }
-      })
-      return res.status(400).send({status: "Failed", message: "All fields must be filled in to be able to edit"})
+          body: updateUser,
+        },
+      });
+      return res.status(400).send({
+        status: "Failed",
+        message: "All fields must be filled in to be able to edit",
+      });
     }
-    const user = await userModel.findByIdAndUpdate(userId, updateUser, {
-      new: true,
+
+    // 📸 Si llega imagen nueva en base64 → subir a Cloudinary
+   if (updateUser.photoProfile && updateUser.photoProfile.startsWith("data:image")) {
+  try {
+    const upload = await cloudinary.uploader.upload(updateUser.photoProfile, {
+      folder: "userPhoto",
+      public_id: `user_${userId}`,
+      overwrite: true
     });
-    const fullname = `${user.name} ${user.lastName}` // Creamos la funcion fullName para concatenar el name y el lastName del usuario
-    if(!user){
-      logger.warn("User not found during edit attempt",{
-        meta:{
-          _id: userId,
-          endpoint: "user/edit/:userId",
-          ip,
-          userAgent
-        }
-      })
-       return res.status(404).send({ status: "Failed", message: "User not found"
-      })
+    updateUser.photoProfile = upload.secure_url; // reemplaza base64 por URL
+  } catch (err) {
+    logger.error("Cloudinary upload error", {
+      meta: { error: err.message, endpoint: "user/edit/:userId" },
+    });
+    return res.status(500).send({
+      status: "Failed",
+      message: "Error uploading image to Cloudinary",
+      error: err.message,
+    });
+  }
+}
+
+// 🧠 Actualizar usuario con los nuevos datos (incluyendo URL Cloudinary si aplica)
+const user = await userModel.findByIdAndUpdate(userId, updateUser, { new: true });
+
+    if (!user) {
+      logger.warn("User not found during edit attempt", {
+        meta: { _id: userId, endpoint: "user/edit/:userId", ip, userAgent },
+      });
+      return res.status(404).send({ status: "Failed", message: "User not found" });
     }
-    if(user._id.toString() !== userId && user.isAdmin !== "admin"){
-      logger.warn("An attempt was made to modify a user without being the owner or administrator",{
+
+    // 🛡️ Comprobación de permisos
+    if (user._id.toString() !== userId && user.isAdmin !== "admin") {
+      logger.warn("An attempt was made to modify a user without being the owner or administrator", {
         meta: {
           _id: userId,
-          user: fullname,
+          user: `${user.name} ${user.lastName}`,
           email: user.email,
           endpoint: "/user/edit/:userId",
-          ip, 
-          userAgent
-        }
-      })
-      return res.status(401).send({status:"Failed", message: "You cannot edit this user because you are not an administrator or the owner user."})
-      
+          ip,
+          userAgent,
+        },
+      });
+      return res.status(401).send({
+        status: "Failed",
+        message: "You cannot edit this user because you are not an administrator or the owner user.",
+      });
     }
-     
-    logger.info("Edit user",{
-      meta:{
+
+    logger.info("Edit user", {
+      meta: {
         _id: user._id,
-        user: fullname,
+        user: `${user.name} ${user.lastName}`,
         endpoint: "user/edit/:userId",
         ip,
         userAgent,
-        body: updateUser
+        body: updateUser,
+      },
+    });
 
-      }
-    })
-    res.status(200).send({ user, status: "Success", message: "Edited User" });
+    return res.status(200).send({
+      user,
+      status: "Success",
+      message: "Edited User",
+    });
   } catch (error) {
     logger.error("Edit user error", {
-            meta: { error: error.message, endpoint: "user/edit/:userId" }
-        });
-    res.status(500).send({ status: "Failed", error: error.message });
+      meta: { error: error.message, endpoint: "user/edit/:userId" },
+    });
+    return res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 

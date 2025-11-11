@@ -1,15 +1,4 @@
-@import url("./css/LandingPage/landingPageHome.css");
-@import url("./css/LandingPage/login.css");
-@import url("./css/LandingPage/Register.css");
-@import url("./css/mainLayaout/footer.css");
-@import url("./css/mainLayaout/header.css");
-@import url("./css/HomePage/MapGlobal/Map.css");
-@import url("./css/HomePage/HomePage.css");
-@import url("./css/HomePage/listBestTop/listBestTop.css");
-@import url("./css/HomePage/MapGlobal/Map.css");
-@import url("./css/HomePage/RadialTopVisited/RadialTopVisited.css");
-@import url("./css/HomePage/TopTravelers/TopTravelers.css");
-@import url("./css/HomePage/topGroup/topGroup.css");
+
 ul{
     list-style: none;
 }
