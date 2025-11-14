@@ -12,7 +12,7 @@ import {
 } from "../../../core/services/ProfilePage/tickAndUncheckCountry";
 import { deletePostUser } from "../../../core/services/ProfilePage/deletePost";
 import { UPDATE_USER } from "../../landingPage/login/loginAction";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { changeMenuOption } from "../../MainLayaout/Header/headerAction";
 
 const MyProfileComponent = (props) => {

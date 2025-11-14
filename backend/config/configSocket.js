@@ -1,3 +1,4 @@
+// configSocket.js
 const {Server} = require("socket.io")
 
 
@@ -26,6 +27,7 @@ const configSocket = (server) => {
             console.log("message recibed", message);
             io.to(message.groupId).emit("receiveMessage", message)
         });
+    
 
         socket.on("deleteMessage", (message) => {
             console.log("message deleted", message);

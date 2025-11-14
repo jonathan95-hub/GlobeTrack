@@ -19,14 +19,16 @@ const ListBestPost = () => {
     }
   };
 
+  
+
   useEffect(() => {
     TopBestPost();
   }, []);
 
   return (
-    <div className="container my-5">
-      <h2 className="text-center mb-4 fw-bold text-primary text-uppercase">
-        🌟 Top Publicaciones
+    <div className="container ">
+      <h2 className="text-center mb-4 fw-bold text-primary ">
+        Top Publicaciones
       </h2>
 
       {topPost.length === 0 ? (
@@ -36,7 +38,7 @@ const ListBestPost = () => {
       ) : (
         <div className="d-flex flex-column gap-4">
           {topPost.map((p, idx) => (
-            <div key={idx} className="card h-auto bg-dark shadow-sm border-0">
+            <div key={idx} className="card h-auto bg-dark shadow-sm border-0 d-flex justify-conten">
               <div className="d-flex align-items-center p-3">
                 <img
                   src={p.user?.photoProfile}

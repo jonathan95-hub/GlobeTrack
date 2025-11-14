@@ -44,8 +44,6 @@
 // }
 
 // export default HomePage
-
-
 import React from 'react';
 import MapGlobal from '../../components/HomePage/Map';
 import ListBestPost from '../../components/HomePage/ListBestPost';
@@ -56,16 +54,18 @@ import TopGroups from '../../components/HomePage/TopGroups';
 const HomePage = () => {
   return (
     <div className="container-fluid bg-light py-4 min-vh-100">
-      <div className="row g-4">
+      <div className="row g-4 h-100">
 
         {/* Columna izquierda */}
-        <div className="col-12 col-lg-7 d-flex flex-column gap-4">
+        <div className="col-12 col-lg-7 d-flex flex-column gap-4 h-100">
           
-          {/* Mapa */}
-          <div className="card shadow-lg border-0">
-            <div className="card-body p-3">
+          {/* Mapa: ocupa más espacio con flex-grow */}
+          <div className="card shadow-lg border-0 flex-grow-1">
+            <div className="card-body p-3 d-flex flex-column">
               <h4 className="text-primary fw-bold mb-3 text-center">Mapa Global</h4>
-              <MapGlobal />
+              <div className="flex-grow-1">
+                <MapGlobal />
+              </div>
             </div>
           </div>
 
@@ -77,7 +77,6 @@ const HomePage = () => {
             </div>
           </div>
 
-          
           <div className="row g-4">
             <div className="col-12 col-md-6">
               <div className="card shadow border-0 h-100">
@@ -101,9 +100,11 @@ const HomePage = () => {
         {/* Columna derecha: ListBestPost */}
         <div className="col-12 col-lg-5 d-flex flex-column h-100">
           <div className="card shadow-lg border-0 flex-grow-1">
-            <div className="card-body p-3">
-              <h4 className="text-success fw-bold mb-3 text-center">Mejores Publicaciones</h4>
-              <ListBestPost />
+            <div className="card-body p-3 d-flex flex-column">
+             
+              <div className="flex-grow-1">
+                <ListBestPost />
+              </div>
             </div>
           </div>
         </div>

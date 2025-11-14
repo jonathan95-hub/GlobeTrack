@@ -4,6 +4,7 @@ const postModel = require("../models/postModel"); // Importamos el modelo de las
 const usersModel = require("../models/userModels");
 const getRequestInfo = require("../utils/requestInfo");
 const cloudinary = require("../config/configCloudinary")
+const commentModel = require("../models/commentModel")
 
 
 // VOLVER A COMENTAR SE MODIFICO LA FUNCIÓN 
@@ -60,20 +61,26 @@ const createPost = async (req, res) => {
 
 const getPost = async (req, res) => {
   try {
+     // Obtenemos el número de página desde query params, por defecto 1
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10; // Número de posts por página
+    const skip = (page - 1) * limit;
     // Buscamos todas las publicaciones con find y usamos populate para mostrar el usuario con su imagen y nombre
     // tambien lo usamos para mostrar los comentarios con el nombre de usuario y la imagen
+    const totalPosts = await postModel.countDocuments();
     const allPost = await postModel
       .find()
       .populate({ path: "user", select: "name photoProfile" })
       .populate({
         path: "comment",
         populate: { path: "user", select: "name photoProfile" },
-      }).sort({createdAt: -1});
+      }).sort({createdAt: -1}).skip(skip).limit(limit); ;
       // Devolcemos un 200 con el mensaje de todas las publicaciones obtenidas
     res
       .status(200)
       .send({
         allPost,
+        totalPages: Math.ceil(totalPosts / limit),
         status: "Success",
         message: "All publications have been obtained",
       });
@@ -152,45 +159,48 @@ const likePost = async (req, res) => {
     const userId = req.payload._id;
     const postId = req.params.postId;
 
-    // ✅ Primero buscamos el post original
-    const post = await postModel.findById(postId).populate("likes", "name").populate("user", "name lastName");
+    // Buscamos el post original con usuario y likes completos
+    const post = await postModel
+      .findById(postId)
+      .populate("likes", "_id name") // 🔹 Incluimos _id
+      .populate("user", "name lastName photoProfile country")
+      .populate({
+        path: "comment",
+        populate: { path: "user", select: "name lastName photoProfile" },
+      });
 
     if (!post) {
       return res.status(404).send({ status: "Failed", message: "Post not found" });
     }
 
-    // ✅ Comprobamos si ya está en likes (comparando como string por seguridad)
     const alreadyLiked = post.likes.some(like => like._id.toString() === userId.toString());
 
-    if (alreadyLiked) {
-      // ✅ Si ya dio like, lo quitamos con $pull
-      const updatedPost = await postModel
-        .findByIdAndUpdate(
-          postId,
-          { $pull: { likes: userId } },
-          { new: true }
-        )
-        .populate("likes", "name")
-        .populate("user", "name lastName");
+    let updatedPost;
 
-      return res.status(200).send({
-        updatedPost,
-        status: "Success",
-        message: "You removed your like from the post",
-      });
+    if (alreadyLiked) {
+      // Quitar like
+      updatedPost = await postModel
+        .findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true })
+        .populate("likes", "_id name") // 🔹 Incluimos _id
+        .populate("user", "name lastName photoProfile country")
+        .populate({
+          path: "comment",
+          populate: { path: "user", select: "name lastName photoProfile" },
+        });
+
+      return res.status(200).send({ updatedPost, status: "Success", message: "You removed your like" });
     }
 
-    // ✅ Si no lo había dado, añadimos el like con $addToSet
-    const updatedPost = await postModel
-      .findByIdAndUpdate(
-        postId,
-        { $addToSet: { likes: userId } },
-        { new: true }
-      )
-      .populate("likes", "name")
-      .populate("user", "name lastName");
+    // Añadir like
+    updatedPost = await postModel
+      .findByIdAndUpdate(postId, { $addToSet: { likes: userId } }, { new: true })
+      .populate("likes", "_id name") // 🔹 Incluimos _id
+      .populate("user", "name lastName photoProfile country")
+      .populate({
+        path: "comment",
+        populate: { path: "user", select: "name lastName photoProfile" },
+      });
 
-    // ✅ Si no es su propio post, se envía notificación
     if (updatedPost.user._id.toString() !== userId.toString()) {
       const senderUser = await usersModel.findById(userId).select("name lastName");
       const fullName = `${senderUser.name} ${senderUser.lastName}`;
@@ -208,13 +218,12 @@ const likePost = async (req, res) => {
       }
     }
 
-    // ✅ Respuesta final cuando se da like
     res.status(200).send({ post: updatedPost, status: "Success", message: "Liked post" });
-
   } catch (error) {
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
+
 
 
 const editPost = async (req, res) => {
@@ -390,28 +399,33 @@ const getUserLikes = async (req, res) => {
   }
 };
 
-
-// Función para obtener los comentarios de un post
 const getCommentPost = async (req, res) => {
   try {
-    const postId = req.params.postId; // Obtenemos el id del post por params
+    const postId = req.params.postId;
 
-    // Buscamos el post por su id y hacemos un populate en el campo "comment"
-    // También hacemos un populate anidado para obtener el usuario que realizó cada comentario
-    const getComment = await postModel
-      .findById(postId)
+    // Busca el post y popula los comentarios y los usuarios de esos comentarios
+    const postWithComments = await postModel.findById(postId)
       .populate({
         path: "comment",
-        populate: { path: "user", select: "photoProfile name" },
+        populate: { path: "user", select: "photoProfile name" }
       });
 
-    // Devolvemos un 200 con los comentarios obtenidos
-    res.status(200).send({ getComment, status: "Success", message: "Comment obtained" });
+    if (!postWithComments) {
+      return res.status(404).send({ status: "Failed", message: "Post no encontrado" });
+    }
+
+    // postWithComments.comment ahora es un array de comentarios completos
+    res.status(200).send({
+      getComment: postWithComments.comment,
+      status: "Success",
+      message: "Comment obtained",
+    });
+
   } catch (error) {
-    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
+
 
 
 module.exports = {

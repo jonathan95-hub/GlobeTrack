@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getMessagePrivate, sendMessagesPrivates } from '../../../core/services/ProfilePage/PrivateMessage';
 import { useSelector } from 'react-redux';
+import { io } from "socket.io-client";
+
+// Socket global
+const socket = io("http://localhost:3000");
 
 const MessagePrivate = () => {
   const [conversations, setConversations] = useState([]);
@@ -9,6 +13,7 @@ const MessagePrivate = () => {
   const user = useSelector(state => state.loginReducer);
   const messagesEndRef = useRef(null);
 
+  // Obtener conversaciones del backend
   const getMessages = async () => {
     const info = await getMessagePrivate();
     if (!info) return;
@@ -16,50 +21,103 @@ const MessagePrivate = () => {
     setConversations(conversationsArray);
   };
 
-  const selectConversation = (conversation) => {
-    setSelectedConversation(conversation);
-  };
+  const selectConversation = (conversation) => setSelectedConversation(conversation);
+  const goBack = () => setSelectedConversation(null);
 
-  const goBack = () => {
-    setSelectedConversation(null);
-  };
+  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 
-const sendMessage = async () => {
-  if (!messageText.trim() || !selectedConversation) return;
+  // Enviar mensaje
+  const sendMessage = async () => {
+    if (!messageText.trim() || !selectedConversation) return;
 
-  const receptorId = selectedConversation.user._id;
+    const receptor = selectedConversation.user;
 
-  try {
-    const message = await sendMessagesPrivates(receptorId, messageText);
+    try {
+      const response = await sendMessagesPrivates(receptor._id, messageText);
+      if (!response || !response.send) return;
 
-    if (message) {
-      const updatedMessages = [
-        ...selectedConversation.messages,
-        {
-          content: messageText,
-          sender: { _id: user.user._id, photoProfile: user.user.photoProfile },
-          receiver: { _id: receptorId }
-        }
-      ];
-      setSelectedConversation({ ...selectedConversation, messages: updatedMessages });
+      // Formatear mensaje para UI
+      const messageToEmit = {
+        ...response.send,
+        sender: { _id: user.user._id, photoProfile: user.user.photoProfile },
+        receiver: { _id: receptor._id, photoProfile: receptor.photoProfile }
+      };
+
+      // Emitir por socket
+      socket.emit("sendPrivateMessage", messageToEmit);
+
+      // Actualizar conversación localmente
+      setSelectedConversation(prev => ({
+        ...prev,
+        messages: [...prev.messages, messageToEmit]
+      }));
+
       setMessageText('');
       scrollToBottom();
+    } catch (error) {
+      console.error("Error sending message:", error.message);
+      alert(error.message);
     }
-  } catch (error) {
-    console.error("Error sending message:", error.message);
-    alert(error.message);
-  }
-};
-
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Inicialización: obtener mensajes y unirse a sala personal
   useEffect(() => {
     getMessages();
-  }, []);
+    if (user?.user?._id) {
+      socket.emit("joinUser", user.user._id);
+    }
+  }, [user?.user?._id]);
 
+  // Escuchar mensajes entrantes
+  useEffect(() => {
+    if (!user?.user?._id) return;
+
+    const handlePrivateMessage = (msg) => {
+      const formattedMessage = {
+        ...msg,
+        sender: typeof msg.sender === "object" ? msg.sender : { _id: msg.sender, photoProfile: "" },
+        receiver: typeof msg.receiver === "object" ? msg.receiver : { _id: msg.receiver, photoProfile: "" }
+      };
+
+      const otherUserId = formattedMessage.sender._id === user.user._id
+        ? formattedMessage.receiver._id
+        : formattedMessage.sender._id;
+
+      // Actualizar conversaciones
+      setConversations(prev => {
+        const convExists = prev.some(c => c.user._id === otherUserId);
+        if (convExists) {
+          return prev.map(c =>
+            c.user._id === otherUserId
+              ? { ...c, messages: [...c.messages, formattedMessage] }
+              : c
+          );
+        } else {
+          const newConvUser = formattedMessage.sender._id === user.user._id
+            ? formattedMessage.receiver
+            : formattedMessage.sender;
+          return [...prev, { user: newConvUser, messages: [formattedMessage] }];
+        }
+      });
+
+      // Actualizar conversación seleccionada si corresponde
+      setSelectedConversation(prev =>
+        prev?.user._id === otherUserId
+          ? { ...prev, messages: [...prev.messages, formattedMessage] }
+          : prev
+      );
+
+      scrollToBottom();
+    };
+
+    socket.on("newPrivateMessage", handlePrivateMessage);
+
+    return () => {
+      socket.off("newPrivateMessage", handlePrivateMessage);
+    };
+  }, [user?.user?._id]);
+
+  // Scroll cuando cambian los mensajes
   useEffect(() => {
     scrollToBottom();
   }, [selectedConversation]);

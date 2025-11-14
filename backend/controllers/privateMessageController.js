@@ -4,90 +4,70 @@ const privateMessageModel = require("../models/privateMessage")
 const usersModel = require("../models/userModels")
 const getRequestInfo = require("../utils/requestInfo")
 
-
 const sendMessagePrivate = async (req, res) => {
     try {
-        const{ip, userAgent} = getRequestInfo(req)
-        const userId = req.payload._id
-        const receptorUserId = req.params.receptorUserId
-        const {content} = req.body
-        const userReceiver = await usersModel.findById(receptorUserId)
-        const senderUser = await usersModel.findById(userId).select("name lastName email")
-        const fullName = `${senderUser.name} ${senderUser.lastName}`
-        const receiverFullName = `${userReceiver.name} ${userReceiver.lastName}`
+        const { ip, userAgent } = getRequestInfo(req);
+        const userId = req.payload._id;
+        const receptorUserId = req.params.receptorUserId;
+        const { content } = req.body;
 
-        if(!userReceiver){
-            logger.warn("An attempt was made to send a private message to a user who does not exist",{
-                meta:{
-                    _id: userId,
-                    user: fullName,
-                    email: senderUser.email,
-                    endpoint : "/privatemessage/sendprivate/:receptorUserId",
-                    ip,
-                    userAgent
-                }
-            })
-            return res.status(404).send({status: "Failed", message: "Receiver user not found"})
+        const userReceiver = await usersModel.findById(receptorUserId);
+        const senderUser = await usersModel.findById(userId).select("name lastName email photoProfile");
+
+        if (!userReceiver) {
+            return res.status(404).send({ status: "Failed", message: "Receiver user not found" });
         }
 
-        if(!content || content.trim() === ""){
-            logger.warn("An attempt was made to send an empty message",{
-                meta: {
-                    _id: userId,
-                    user: fullName,
-                    email: senderUser.email,
-                    endpoint: "/privatemessage/sendprivate/:receptorUserId",
-                    ip,
-                    userAgent
-                }
-            })
-            return res.status(400).send({status:"Failed", message: "Message content cannot empty"})
+        if (!content || content.trim() === "") {
+            return res.status(400).send({ status: "Failed", message: "Message content cannot be empty" });
         }
+
+        // Crear el mensaje en la base de datos
         const send = await privateMessageModel.create({
             sender: userId,
             receiver: receptorUserId,
             content: content.trim()
-        })
-        req.io.to(userId.toString()).emit("newPrivateMessage", send);
-        req.io.to(receptorUserId.toString()).emit("newPrivateMessage", send);
+        });
 
+        // Emitir solo al receptor
+        if (req.io) {
+            req.io.to(receptorUserId.toString()).emit("newPrivateMessage", {
+                ...send._doc, // Incluye los campos del mensaje
+                sender: {
+                    _id: senderUser._id,
+                    name: senderUser.name,
+                    lastName: senderUser.lastName,
+                    photoProfile: senderUser.photoProfile || ""
+                },
+                receiver: {
+                    _id: userReceiver._id,
+                    name: userReceiver.name,
+                    lastName: userReceiver.lastName,
+                    photoProfile: userReceiver.photoProfile || ""
+                }
+            });
+        }
 
-       
-        if(userId.toString() !== receptorUserId.toString()){
-           
+        // Crear notificación si el receptor no es el remitente
+        if (userId.toString() !== receptorUserId.toString()) {
             const notification = await notificationsModel.create({
                 receiver: receptorUserId,
                 sender: userId,
                 type: "privateMessage",
                 referenceId: send._id,
-                message: `${fullName} te envió un mensaje privado`
-            })
-            if(req.io){
-                req.io.to(receptorUserId.toString()).emit("newNotification", notification)
+                message: `${senderUser.name} ${senderUser.lastName} te envió un mensaje privado`
+            });
+
+            if (req.io) {
+                req.io.to(receptorUserId.toString()).emit("newNotification", notification);
             }
         }
-        logger.info(`${fullName} sent a message to ${receiverFullName} `,{
-            meta:{
-                _id: userId,
-                user: fullName,
-                email: senderUser.email,
-                endpoint: "/privatemessage/sendprivate/:receptorUserId",
-                ip,
-                userAgent
-            }
-        })
 
-        res.status(201).send({send, status: "Success", message: "Message sent"})
+        res.status(201).send({ send, status: "Success", message: "Message sent" });
     } catch (error) {
-          logger.error("Error send private message", {
-      meta: {
-        error: error.message,
-        endpoint: "/privatemessage/sendprivate/:receptorUserId",
-      },
-    });
-    res.status(500).send({ status: "Failed", error: error.message }); 
+        res.status(500).send({ status: "Failed", error: error.message });
     }
-}
+};
 
 const deletedMessagePrivate = async(req, res) => {
 try {

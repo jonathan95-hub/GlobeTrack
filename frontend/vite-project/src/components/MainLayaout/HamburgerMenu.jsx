@@ -7,6 +7,7 @@ const HamburgerMenu = (props) => {
     goToHome,
     goToPost,
     goToProfile,
+    goToGroupPage
     
   } = props
   const dispatch = useDispatch()
@@ -31,6 +32,12 @@ const HamburgerMenu = (props) => {
   const handleGoToProfile = () => {
     goToProfile()
     dispatch(changeMenuOption(2))
+    setIsOpen(false)
+  }
+
+  const handleGoToGroupPage = () => {
+    goToGroupPage()
+    dispatch(changeMenuOption(4))
     setIsOpen(false)
   }
   return (
@@ -61,7 +68,7 @@ const HamburgerMenu = (props) => {
             <nav>
               <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Grupos</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Mi perfil</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
@@ -71,7 +78,7 @@ const HamburgerMenu = (props) => {
             <nav>
               <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Grupos</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Mi perfil</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
@@ -82,7 +89,7 @@ const HamburgerMenu = (props) => {
               <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Grupos</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
               </ul>
@@ -91,12 +98,20 @@ const HamburgerMenu = (props) => {
               <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Grupos</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
               </ul>
-            </nav>) : (null)}
+            </nav>) : menuOptionsHeader === 4 ? (
+               <ul className="d-flex flex-column gap-2 m-0 p-0">
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
+              </ul>
+            ) : (null)}
         </div>
       )}
     </div>

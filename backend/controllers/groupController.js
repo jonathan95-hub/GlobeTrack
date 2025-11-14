@@ -3,6 +3,7 @@ const groupModel = require("../models/groupModel"); // Importamos groupModel
 const usersModel = require("../models/userModels"); // Importamos userModel
 const getRequestInfo = require("../utils/requestInfo"); // Importamos la funcion getRequestInfo (ver en la carpeta utils)
 const logger = require("../config/configWinston")  //Importamos logger de winston
+const cloudinary = require("../config/configCloudinary")
 
 const createGroup = async (req, res) => {
   try {
@@ -28,11 +29,35 @@ const createGroup = async (req, res) => {
     // Devolvemos un 400 con el mensaje de Los campos de nombre y descripción deben estar completos, no se aceptan espacios como caracteres.
     return res.status(400).send({status: "Failed", message: "The name and description fields must be complete, spaces are not accepted as characters"})
    }
+   let photoGroupUrl = photoGroup; // por defecto la que envía el front
+
+if (photoGroup && photoGroup.startsWith("data:image")) {
+  try {
+    const upload = await cloudinary.uploader.upload(photoGroup, {
+      folder: "groupPhoto",
+      public_id: `group_${userId}_${Date.now()}`,
+      overwrite: true
+    });
+    photoGroupUrl = upload.secure_url; // reemplazamos con URL real
+  } catch (err) {
+    logger.error("Cloudinary upload error", {
+      meta: { error: err.message, endpoint: "/group/create" },
+    });
+    return res.status(500).send({
+      status: "Failed",
+      message: "Error uploading image to Cloudinary",
+      error: err.message,
+    });
+  }
+}
+
 
   const newGroup = await groupModel.create({ // Creamos un objeto con name, photoGroup y description
       name,
-      photoGroup,
-      description
+      photoGroup: photoGroup,
+      description,
+      creatorGroup: userId,
+      members: [userId]
     });
   
     if (!newGroup.members.includes(userId)) { // Si el nuevo grupo no incluye el id del usuario en el campo members entonces 
@@ -103,7 +128,7 @@ const getGroupNotIncludesUser = async (req, res) => { // Para obtener una lista 
     const userId = req.payload._id; // Obtenemos el id del usuario desde el token
     const listGroup = await groupModel.find( { // Buscamos en los grupos los que en el campo membres no tenga el id de userId con el operador $nin 
       members: { $nin: [userId] },
-    });
+    }).populate("creatorGroup", "name");
     // Si en la lista de grupos en los que el usuario no esta incluido es 0 se devuelve un 404 con el mensaje de que no hay grupos en la lista
     if(!listGroup || listGroup.length === 0){
       return res.status(404).send({listGroup, status: "Failed", message: "There are no groups listed"})
@@ -122,21 +147,29 @@ const getGroupNotIncludesUser = async (req, res) => { // Para obtener una lista 
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
-
-const getGroupIncludesUser = async(req, res) => { // Para obtener una lista de grupos a los que  pertenece el usuario
+const getGroupIncludesUser = async (req, res) => {
   try {
-      const userId = req.payload._id // Obtenemos el id del usuario desde el token
-      const groups = await groupModel.find({ members: userId}) // Buscamos todos los grupos donde en members este el id del usuario
-      // Si no ha grupos en los que el usuario este incluido devolvemos un 404 con el mensaje de grupos no encontrado
-      if(!groups || groups.length === 0){
-        return res.status(404).send({status: "Failed", message: "Groups not found"})
-      }
-      // Devolvemos un 200  con los grupos y un  mensaje de grupos a los que el usuario esta incluido obtenido
-      res.status(200).send({groups, status: "Success", message: "groups to which the user belongs obtained"})
+    const userId = req.payload._id;
+
+    const listGroup = await groupModel
+      .find({ members: userId })
+      .populate("creatorGroup", "name"); // Muestra el nombre del creador
+
+    if (!listGroup || listGroup.length === 0) {
+      return res
+        .status(404)
+        .send({ status: "Failed", message: "Groups not found" });
+    }
+
+    res.status(200).send({
+      listGroup,
+      status: "Success",
+      message: "Groups to which the user belongs obtained",
+    });
   } catch (error) {
-        res.status(500).send({ status: "Failed", error: error.message });
+    res.status(500).send({ status: "Failed", error: error.message });
   }
-}
+};
 
 const deletedGroup = async (req, res) => {
   try {

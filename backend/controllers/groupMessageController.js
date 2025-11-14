@@ -60,7 +60,23 @@ const sendMessageGroup = async(req, res) => {
 
 
     // Usamos socket para emitir el mensjae en tiempo real
-    req.io.to(newMessage.group.toString()).emit("messageSend", { newMessage });
+    // Antes de enviar por socket
+const populatedMessage = {
+  _id: newMessage._id,
+  content: newMessage.content,
+  group: newMessage.group,
+  sender: {
+    _id: user._id,
+    name: user.name,
+    lastName: user.lastName,
+    photoProfile: user.photoProfile
+  },
+  createdAt: newMessage.createdAt
+};
+
+// Emitir a todos los miembros del grupo (incluido el remitente)
+req.io.to(groupId.toString()).emit("receiveMessage", populatedMessage);
+
 
     // Hacemos un fIlter en members
     const isDisconneted = group.members.filter(
@@ -137,7 +153,7 @@ const sendMessageGroup = async(req, res) => {
             return res.status(403).send({status: "Failed", message: "user is not member of this group"})
         }
         // Obtenemos todos los mensajes del grupo y sacamos el nombre de quien lo envió y los ordenamos en orden ascendente
-        const messages = await groupMessageModel.find({group: groupId}).populate("sender", "name").sort({createdAt: 1})
+        const messages = await groupMessageModel.find({group: groupId}).populate("sender", "name lastName photoProfile").sort({createdAt: 1})
         // Devolvemos un 200 y un mensaje de mensajes obtenidos
         res.status(200).send({messages, status: "Success", message: "Messages obtained"})       
     } catch (error) {
