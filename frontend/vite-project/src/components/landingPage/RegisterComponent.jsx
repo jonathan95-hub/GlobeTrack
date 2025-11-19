@@ -150,11 +150,7 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
             </button>
           </div>
 
-          <div className="text-center mt-4">
-            <p className="text-muted small mb-0">
-              ¿Ya tienes cuenta? <a href="#" className="text-primary text-decoration-none">Inicia sesión aquí</a>
-            </p>
-          </div>
+          
         </form>
       </div>
     </div>

@@ -1,17 +1,16 @@
+import { apiFetch } from "../apiFetch/apiFetch";
+
+
 export const enterGroupAndExitGroup = async (groupId) => {
-    const token = localStorage.getItem("token")
-    const res = await fetch(`http://localhost:3000/group/addandexit/${groupId}`,{
+
+    const data = await apiFetch(`http://localhost:3000/group/addandexit/${groupId}`,{
         method: 'POST',
         headers:{
-            "Content-Type": "application/json",
-            "token": token
+            "Content-Type": "application/json"
+           
         },
         
     })
-    if(!res.ok){
-        const text = await res.text()
-        throw new Error(text)
-    }
-    const result = await res.json()
-    return result
+   
+    return data
 }

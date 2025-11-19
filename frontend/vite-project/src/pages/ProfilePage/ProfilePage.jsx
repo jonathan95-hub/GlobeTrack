@@ -5,12 +5,16 @@ import CreatePost from "../../components/Profile/CreatePost/CreatePost";
 import MyProfileComponent from "../../components/Profile/MyProfile/MyProfileComponet.jsx";
 import EditUserComponent from "../../components/Profile/EditUser/EditUserComponent.jsx";
 import ProfileUserComponent from "../../components/Profile/ProfileUser/ProfileUserComponent.jsx";
+import { use } from "react";
 
 const ProfilePage = () => {
   const location = useLocation();
   const [isMyProfile, setIsMyProfile] = useState(true);
   const [isCreatePost, setIsCreatePost] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [isEditPost, setIsEditPost]  = useState(false)
+  const [postToEdit, setPostToEdit] = useState(null);
+  
 
   // 🔹 Cargar estado inicial según desde dónde viene la navegación
   useEffect(() => {
@@ -39,13 +43,23 @@ const ProfilePage = () => {
     <div className="container my-4">
       {isMyProfile ? (
         isCreatePost ? (
-          <CreatePost setIsCreatePost={setIsCreatePost} />
+         <CreatePost
+   setIsCreatePost={setIsCreatePost}
+    isEditPost={isEditPost}
+    setIsEditPost={setIsEditPost}
+    postToEdit={postToEdit}
+      setPostToEdit={setPostToEdit}
+/>
+
         ) : isEdit ? (
           <EditUserComponent setIsEdit={setIsEdit} />
         ) : (
           <MyProfileComponent
             setIsCreatePost={setIsCreatePost}
             setIsEdit={setIsEdit}
+            isEditPost={isEditPost}
+            setIsEditPost={setIsEditPost}
+              setPostToEdit={setPostToEdit}
           />
         )
       ) : (

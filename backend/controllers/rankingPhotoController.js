@@ -4,6 +4,7 @@ const notificationsModel = require("../models/notificationModel")
 const rankingPhotoModel = require("../models/rankingPhotoModel")
 const ranckingPhotoModel = require("../models/rankingPhotoModel")
 const usersModel = require("../models/userModels")
+const cloudinary = require("../config/configCloudinary")
 const getRequestInfo = require("../utils/requestInfo")
 
 const createPhoto = async(req, res) => {
@@ -26,33 +27,47 @@ const createPhoto = async(req, res) => {
             })
             return res.status(400).send({status: "Failed", message: "Image and country are required"})
         }
-        const newPhoto = await rankingPhotoModel.create({
-            user: userId,
-            image,
-            country
-        })
-        logger.info(`${user.name} ${user.lastName} successfully published a photo in the ranking`,{
-            meta:{
-                 _id: userId,
-                    user: `${user.name} ${user.lastName}`,
-                    email: user.email,
-                    endpoint: "/ranking/create",
-                    ip,
-                    userAgent
-            }
-        })
-        res.status(201).send({newPhoto, status: "Success", message: "Photo created"})
+        const uploadResult = await cloudinary.uploader.upload(image, {
+      folder: "ranking_photos",
+      resource_type: "image",
+    });
 
-    } catch (error) {
-        logger.error("Error create photo", {
+    // Crear foto en BD con Cloudinary URL
+    const newPhoto = await rankingPhotoModel.create({
+      user: userId,
+      image: uploadResult.secure_url, // URL final de Cloudinary
+      image_public_id: uploadResult.public_id, // Para borrar más tarde si quieres
+      country,
+    });
+
+    logger.info(
+      `${user.name} ${user.lastName} successfully published a photo in the ranking`,
+      {
+        meta: {
+          _id: userId,
+          user: `${user.name} ${user.lastName}`,
+          email: user.email,
+          endpoint: "/ranking/create",
+          ip,
+          userAgent,
+        },
+      }
+    );
+
+    res
+      .status(201)
+      .send({ newPhoto, status: "Success", message: "Photo created" });
+  } catch (error) {
+    logger.error("Error create photo", {
       meta: {
         error: error.message,
         endpoint: "/ranking/create",
       },
     });
-         res.status(500).send({ status: "Failed", error: error.message });
-    }
-}
+
+    res.status(500).send({ status: "Failed", error: error.message });
+  }
+};
 
 const addVoteAndDeleteVote = async (req, res) => {
     try {
@@ -88,25 +103,54 @@ const addVoteAndDeleteVote = async (req, res) => {
          res.status(500).send({ status: "Failed", error: error.message });
     }
 }
-
 const obtainedAllPhoto = async (req, res) => {
-    try {
-         const allPhoto = await ranckingPhotoModel.aggregate([
-        {
-            $project: {
-                user: 1,
-                image: 1,
-                votes: {$size: "$votes" }
-            }
+  try {
+    const allPhoto = await ranckingPhotoModel.aggregate([
+      // Traer info del usuario
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "userInfo",
         },
-        {$sort: {votes: -1}}
-    ])
-    res.status(200).send({allPhoto, status: "Success", message: "Photos obtained"})
-    } catch (error) {
-         res.status(500).send({ status: "Failed", error: error.message });
-    }
-   
-}
+      },
+      { $unwind: "$userInfo" },
+
+      // Traer info del país
+      {
+        $lookup: {
+          from: "countrys",
+          localField: "country", // ObjectId apuntando a countries
+          foreignField: "_id",
+          as: "countryInfo",
+        },
+      },
+      { $unwind: "$countryInfo" },
+
+      // Seleccionar solo los campos que queremos
+      {
+        $project: {
+          user: "$userInfo.name",
+          userId: "$userInfo._id",
+          image: 1,
+          votes: 1,
+          country: "$countryInfo.name",
+        },
+      },
+
+      { $sort: { votes: -1 } }, // ordenar por votos descendente
+    ]);
+
+    res
+      .status(200)
+      .send({ allPhoto, status: "Success", message: "Photos obtained" });
+  } catch (error) {
+    res.status(500).send({ status: "Failed", error: error.message });
+  }
+};
+
+
 
 const deletePhoto = async(req, res) => {
     try {

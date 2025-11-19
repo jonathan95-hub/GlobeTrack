@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { allPostFecth } from "../../core/services/homepage/allPostFetch";
+import { allPostFetch } from "../../core/services/homepage/allPostFetch";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { changeMenuOption } from "../../components/MainLayaout/Header/headerAction";
@@ -11,7 +11,7 @@ const PostPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [openModal, setOpenModal] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
-
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.loginReducer);
@@ -29,24 +29,44 @@ const PostPage = () => {
   };
 
   const toggleLike = async (postId) => {
-    const post = dataAllPost.find((p) => p._id === postId);
-    if (!post) return;
+  const userId = user?.user?._id;
+  if (!userId) return;
 
-    const userId = user?.user?._id;
-    if (!userId) return;
+  // Optimistic update: cambiar estado local antes de llamar al backend
+  setDataAllPost((prev) =>
+    prev.map((p) => {
+      if (p._id !== postId) return p;
 
-    try {
-      const res = await likeAndUnlikePost(postId);
-      const updatedPost = res.post || res.updatedPost;
-      if (!updatedPost) return;
+      const userLiked = p.likes.some(like => like._id === userId);
+      const updatedLikes = userLiked
+        ? p.likes.filter(like => like._id !== userId) // quitar like
+        : [...p.likes, { _id: userId }]; // añadir like
 
-      setDataAllPost((prev) =>
-        prev.map((p) => (p._id === postId ? updatedPost : p))
-      );
-    } catch (error) {
-      console.error("Error al dar o quitar like:", error);
-    }
-  };
+      return { ...p, likes: updatedLikes };
+    })
+  );
+
+  // Llamada al backend
+  try {
+    await likeAndUnlikePost(postId);
+  } catch (error) {
+    console.error("Error al dar o quitar like:", error);
+    // Opcional: revertir cambio local si falla
+    setDataAllPost((prev) =>
+      prev.map((p) => {
+        if (p._id !== postId) return p;
+
+        const userLiked = p.likes.some(like => like._id === userId);
+        const revertedLikes = userLiked
+          ? p.likes.filter(like => like._id !== userId)
+          : [...p.likes, { _id: userId }];
+
+        return { ...p, likes: revertedLikes };
+      })
+    );
+  }
+};
+
 
   const openCommentModal = (postId) => {
     setSelectedPostId(postId);
@@ -56,15 +76,15 @@ const PostPage = () => {
   const handleCommentOption = (option) => {
     setOpenModal(false);
     if (option === "create") {
-      navigate("/post/comment/create", { state: { postId: selectedPostId } });
+      navigate("/post/comment/create", { state: { postId: selectedPostId, from: "postPage" } });
     } else if (option === "view") {
-      navigate("/post/comment", { state: { postId: selectedPostId } });
+      navigate("/post/comment", { state: { postId: selectedPostId, from: "postPage" } });
     }
   };
 
   const getAllPost = async (token, pageToLoad = 1) => {
     try {
-      const data = await allPostFecth(token, pageToLoad);
+      const data = await allPostFetch(token, pageToLoad);
 
       if (data.allPost && Array.isArray(data.allPost)) {
         if (pageToLoad === 1) {

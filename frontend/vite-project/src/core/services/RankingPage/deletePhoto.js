@@ -1,15 +1,15 @@
 import { apiFetch } from "../apiFetch/apiFetch";
 
 
-export const deletePostUser = async (postId) => {
-
-    const data = await apiFetch(`http://localhost:3000/post/delete/${postId}`,{
+export const deletePhotRanking = async(photoId) => {
+  
+    const data = await apiFetch(`http://localhost:3000/ranking/delete/${photoId}`,{
         method: 'DELETE',
         headers:{
             "Content-Type": "application/json"
-        },
-        
+        }
     })
+
     
     return data
 }

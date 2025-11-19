@@ -7,7 +7,8 @@ const HamburgerMenu = (props) => {
     goToHome,
     goToPost,
     goToProfile,
-    goToGroupPage
+    goToGroupPage,
+    goToRancking
     
   } = props
   const dispatch = useDispatch()
@@ -40,6 +41,12 @@ const HamburgerMenu = (props) => {
     dispatch(changeMenuOption(4))
     setIsOpen(false)
   }
+
+  const handleGoToRancking = () => {
+    goToRancking()
+    dispatch(changeMenuOption(5))
+    setIsOpen(false)
+  }
   return (
     <div className='position-relative text-center me-4'>
       <button
@@ -69,9 +76,28 @@ const HamburgerMenu = (props) => {
               <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Mi perfil</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
+                <li style={{ position: "relative" }}>
+  <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
+    Notificaciones
+  </button>
+  {props.unreadNotifications > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: "8px",
+        right: "10px",
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        backgroundColor: "red",
+        display: "inline-block",
+      }}
+    ></span>
+  )}
+</li>
+
               </ul>
             </nav>
           ) : menuOptionsHeader === 1 ? (
@@ -79,9 +105,28 @@ const HamburgerMenu = (props) => {
               <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Mi perfil</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
+                <li style={{ position: "relative" }}>
+  <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
+    Notificaciones
+  </button>
+  {props.unreadNotifications > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: "8px",
+        right: "10px",
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        backgroundColor: "red",
+        display: "inline-block",
+      }}
+    ></span>
+  )}
+</li>
+
               </ul>
             </nav>
           ) : menuOptionsHeader === 2 ? (
@@ -90,8 +135,27 @@ const HamburgerMenu = (props) => {
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
+                <li style={{ position: "relative" }}>
+  <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
+    Notificaciones
+  </button>
+  {props.unreadNotifications > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: "8px",
+        right: "10px",
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        backgroundColor: "red",
+        display: "inline-block",
+      }}
+    ></span>
+  )}
+</li>
+
               </ul>
             </nav>
           ) : menuOptionsHeader === 3 ? (<nav>
@@ -100,17 +164,86 @@ const HamburgerMenu = (props) => {
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
+                <li style={{ position: "relative" }}>
+  <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
+    Notificaciones
+  </button>
+  {props.unreadNotifications > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: "8px",
+        right: "10px",
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        backgroundColor: "red",
+        display: "inline-block",
+      }}
+    ></span>
+  )}
+</li>
+
               </ul>
             </nav>) : menuOptionsHeader === 4 ? (
+              <nav>
                <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Ranking</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold">Notificaciones</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
+                <li style={{ position: "relative" }}>
+  <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
+    Notificaciones
+  </button>
+  {props.unreadNotifications > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: "8px",
+        right: "10px",
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        backgroundColor: "red",
+        display: "inline-block",
+      }}
+    ></span>
+  )}
+</li>
+
               </ul>
+              </nav>
+            ) : menuOptionsHeader === 5 ? (
+               <nav>
+               <ul className="d-flex flex-column gap-2 m-0 p-0">
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
+                <li style={{ position: "relative" }}>
+  <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
+    Notificaciones
+  </button>
+  {props.unreadNotifications > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: "8px",
+        right: "10px",
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        backgroundColor: "red",
+        display: "inline-block",
+      }}
+    ></span>
+  )}
+</li>
+
+              </ul>
+              </nav>
             ) : (null)}
         </div>
       )}

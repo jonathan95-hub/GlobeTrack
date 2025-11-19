@@ -31,6 +31,10 @@ const createGroup = async (req, res) => {
    }
    let photoGroupUrl = photoGroup; // por defecto la que envía el front
 
+   if(!photoGroupUrl){
+    photoGroupUrl = "https://res.cloudinary.com/ddsaghqay/image/upload/v1762366140/imgDefaultGroup_nhjafb.png"
+   }
+
 if (photoGroup && photoGroup.startsWith("data:image")) {
   try {
     const upload = await cloudinary.uploader.upload(photoGroup, {
@@ -54,7 +58,7 @@ if (photoGroup && photoGroup.startsWith("data:image")) {
 
   const newGroup = await groupModel.create({ // Creamos un objeto con name, photoGroup y description
       name,
-      photoGroup: photoGroup,
+      photoGroup: photoGroupUrl,
       description,
       creatorGroup: userId,
       members: [userId]
@@ -435,75 +439,66 @@ const obtainedUserOnline = async(req, res) => {
   }
 }
 
-const editGroup = async(req, res) =>{
+const editGroup = async (req, res) => {
   try {
-    const{ip, userAgent} = getRequestInfo(req) // Destructuring de la funcion getRequestInfo con req como parametro
-    const userId = req.payload._id // Obtenemos el id del usuario desde el token
-    const user = await usersModel.findById(userId) // Buscamos el usuario por el id
-    const groupId = req.params.groupId // Obtenemos el id del grupo por params
-    const group = await groupModel.findById(groupId) // Buscamos el grupo por su id
-    const {name,description} = req.body // Destructuring del body
-    // Si el grupo no existe 
-    if(!group){
-      // Se creará un log con el mensaje de que no se puede editar un grupo que no existe 
-      // Se enviará en el log el id, nombre completo,email, ip y navegador del usuario
-      logger.warn("An attempt has been made to edit a group that does not exist",{
-        meta:{
-          _id: userId,
-          user:`${user.name} ${user.lastName}`,
-          email: user.email,
-           endpoint: "/group/edit/:groupId",
-          ip,
-          userAgent
-        }
-      })
-      // Devolvemos un 404 con el mensaje de grupo no encotrado
+    const { ip, userAgent } = getRequestInfo(req);
+    const userId = req.payload._id;
+    const user = await usersModel.findById(userId);
+    const groupId = req.params.groupId;
+    const group = await groupModel.findById(groupId);
+
+    const { name, description, photoGroup } = req.body;
+
+    if (!group) {
+      logger.warn("Attempt to edit non-existent group", {
+        meta: { _id: userId, user: `${user.name} ${user.lastName}`, email: user.email, endpoint: "/group/edit/:groupId", ip, userAgent }
+      });
       return res.status(404).send({ status: "Failed", message: "Group not found" });
     }
-    // Si el creador del grupo no es igual al id del usuario o el usuario no es administrador
-    if(group.creatorGroup.toString() !== userId.toString() && user.isAdmin !== "admin"){
-      // Se creará un log tipo warn con el mensaje de  el usuario [NOMBRE COMPLETO DEL USUARIO] no es creador ni administrador intentó editar el grupo
-      // Se enviará en el log el id, nombre completo,email, ip y navegador del usuario y el nombre del grupo
-      logger.warn(`the user ${user.name} ${user.lastName} is not the creator of the group nor is an administrator and has attempted to edit the group`,{
-        meta:{
-          _id: userId,
-          user: `${user.name} ${user.lastName}`,
-          email: user.email,
-          group: group.name,
-          endpoint: "/group/edit/:groupId",
-          ip,
-          userAgent
-        }
-      })
-      // Devolvemos un 401 con el mensaje de solo el creador del grupo o un usuario administrador puede editar el grupo
-      return res.status(401).send({status: "Failed", message: "Only the group creator or an administrator user can edit the group"})
+
+    if (group.creatorGroup.toString() !== userId.toString() && user.isAdmin !== "admin") {
+      logger.warn(`Unauthorized attempt to edit group`, {
+        meta: { _id: userId, user: `${user.name} ${user.lastName}`, email: user.email, group: group.name, endpoint: "/group/edit/:groupId", ip, userAgent }
+      });
+      return res.status(401).send({ status: "Failed", message: "Only the creator or an admin can edit this group" });
     }
-    // Creamos la constante group edit en la que buscamos al grupo por su id y lo actualizamos con el nombre y la descripcion que no tenga solo espacios y devolvmos el grupo actualizado
-    const groupEdit = await groupModel.findByIdAndUpdate(groupId,{name: name.trim(),description: description.trim()}, {new: true})
-    // Creamos un log tipo info con el mensaje el grupo fue editado exitosamente
-    // Se enviará en el log el id, nombre completo,email, ip y navegador del usuario y el nombre del grupo
-    logger.info("The group was successfully edited",{
-      meta:{
-         _id: userId,
-          user: `${user.name} ${user.lastName}`,
-          email: user.email,
-          group: group.name,
-          endpoint: "/group/edit/:groupId",
-          ip,
-          userAgent
-      }
-    })
-    // Devolvemos un 200 con el grupo editado y un mensaje de grupo editado exitosamente
-    res.status(200).send({groupEdit, status: "Success", message: "Group edited successfully"})
+
+    let imageUrl = group.photoGroup; // mantener la anterior
+
+    // 🔥 Si viene una nueva imagen en Base64, subir a Cloudinary
+    if (photoGroup) {
+      const uploaded = await cloudinary.uploader.upload(photoGroup, {
+        folder: "groupImages"
+      });
+
+      imageUrl = uploaded.secure_url;
+    }
+
+    const groupEdit = await groupModel.findByIdAndUpdate(
+      groupId,
+      {
+        name: name.trim(),
+        description: description.trim(),
+        photoGroup: imageUrl,
+      },
+      { new: true }
+    );
+
+    logger.info("Group edited successfully", {
+      meta: { _id: userId, user: `${user.name} ${user.lastName}`, email: user.email, group: group.name, endpoint: "/group/edit/:groupId", ip, userAgent }
+    });
+
+    res.status(200).send({ groupEdit, status: "Success", message: "Group edited successfully" });
+
   } catch (error) {
-    // Creamos un log tipo error para cualquier error del servidor
-     logger.error("Edit group error", {
-            meta: { error: error.message, endpoint: "/group/edit/:groupId" }
-        });
-        // Devolvemos un 500 para cualquier error del servidor con el mensaje del error
+    logger.error("Edit group error", {
+      meta: { error: error.message, endpoint: "/group/edit/:groupId" }
+    });
+
     res.status(500).send({ status: "Failed", error: error.message });
   }
-}
+};
+
 // Es solo para administradores par apoder obtener una lsita completa de los grupos
 // No se òne la validacion de si el usuario es administrador por que en la ruta ya hay un middelware que se encarga de ello
 const allGroup = async(req,res) => {

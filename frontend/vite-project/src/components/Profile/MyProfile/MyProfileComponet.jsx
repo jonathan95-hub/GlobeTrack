@@ -14,20 +14,67 @@ import { deletePostUser } from "../../../core/services/ProfilePage/deletePost";
 import { UPDATE_USER } from "../../landingPage/login/loginAction";
 import { useNavigate } from "react-router-dom";
 import { changeMenuOption } from "../../MainLayaout/Header/headerAction";
+import { likeAndUnlikePost } from "../../../core/services/post/likePost";
 
 const MyProfileComponent = (props) => {
   const{
      setIsCreatePost,
-     setIsEdit
+     setIsEdit,
+    
+     setIsEditPost,
+     setPostToEdit
   } = props
   const [dataPostUser, setDataPostUser] = useState([]);
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  
   const navigate = useNavigate()
   const user = useSelector(state => state.loginReducer);
   const spainCenter = [40.4, -3.7];
   const dispatch = useDispatch();
+    const [openModal, setOpenModal] = useState(false);
+      const [selectedPostId, setSelectedPostId] = useState(null);
+
+
+// 🔹 Función toggleLike corregida
+const toggleLike = async (postId) => {
+  const userId = user?.user?._id;
+  if (!userId) return;
+
+  // Optimistic update
+  setDataPostUser((prev) =>
+    prev.map((p) => {
+      if (p._id !== postId) return p;
+
+      const userLiked = p.likes.some((like) => like._id === userId);
+      const updatedLikes = userLiked
+        ? p.likes.filter((like) => like._id !== userId)
+        : [...p.likes, { _id: userId }];
+
+      return { ...p, likes: updatedLikes };
+    })
+  );
+
+  try {
+    await likeAndUnlikePost(postId);
+  } catch (error) {
+    console.error("Error al dar o quitar like:", error);
+    // Revertir si falla
+    setDataPostUser((prev) =>
+      prev.map((p) => {
+        if (p._id !== postId) return p;
+
+        const userLiked = p.likes.some((like) => like._id === userId);
+        const revertedLikes = userLiked
+          ? p.likes.filter((like) => like._id !== userId)
+          : [...p.likes, { _id: userId }];
+
+        return { ...p, likes: revertedLikes };
+      })
+    );
+  }
+};
 
 
   const postUser = async (userId) => {
@@ -60,6 +107,8 @@ const MyProfileComponent = (props) => {
   }
 };
 
+
+
   const getCountries = async () => {
     try {
       const data = await getAllCountries();
@@ -70,6 +119,20 @@ const MyProfileComponent = (props) => {
       }
     } catch (error) {
       console.error("Error cargando países:", error);
+    }
+  };
+
+    const openCommentModal = (postId) => {
+    setSelectedPostId(postId);
+    setOpenModal(true);
+  };
+
+  const handleCommentOption = (option) => {
+    setOpenModal(false);
+    if (option === "create") {
+      navigate("/post/comment/create", { state: { postId: selectedPostId, from: "myProfile" } });
+    } else if (option === "view") {
+      navigate("/post/comment", { state: { postId: selectedPostId, from: "myProfile" } });
     }
   };
 
@@ -143,6 +206,8 @@ const goToMessage = () => {
   navigate("/message")
   dispatch(changeMenuOption(3))
 }
+
+
 
   // 📍 Configurar iconos
   const icono = L.icon({
@@ -293,7 +358,70 @@ const goToMessage = () => {
                 );
               })}
             </MapContainer>
+            
           </div>
+ <div className="d-flex flex-wrap gap-3">
+  <div className="d-flex align-items-center gap-2">
+    <div
+      className="flex-shrink-0"
+      style={{
+        width: "1.2rem",
+        height: "1.2rem",
+        backgroundColor: "#90ee9091",
+        border: "1px solid #000",
+      }}
+    ></div>
+    <span className="text-truncate" style={{ maxWidth: "6rem" }}>
+      Visitado
+    </span>
+  </div>
+
+  <div className="d-flex align-items-center gap-2">
+    <div
+      className="flex-shrink-0"
+      style={{
+        width: "1.2rem",
+        height: "1.2rem",
+        backgroundColor: "#ffd97aa2",
+        border: "1px solid #000",
+      }}
+    ></div>
+    <span className="text-truncate" style={{ maxWidth: "6rem" }}>
+      Deseado
+    </span>
+  </div>
+
+  <div className="d-flex align-items-center gap-2">
+    <div
+      className="flex-shrink-0"
+      style={{
+        width: "1.2rem",
+        height: "1.2rem",
+        backgroundColor: "#7ddad198",
+        border: "1px solid #000",
+      }}
+    ></div>
+    <span className="text-truncate" style={{ maxWidth: "8rem" }}>
+      Visitado y Deseado
+    </span>
+  </div>
+
+  <div className="d-flex align-items-center gap-2">
+    <div
+      className="flex-shrink-0"
+      style={{
+        width: "1.2rem",
+        height: "1.2rem",
+        backgroundColor: "#C0C0C0",
+        border: "1px solid #000",
+      }}
+    ></div>
+    <span className="text" style={{ maxWidth: "8rem" }}>
+      No visitado/deseado
+    </span>
+  </div>
+</div>
+
         </div>
         
       </div>
@@ -380,15 +508,24 @@ const goToMessage = () => {
                   </div>
                   <p className="text-center">{p.text}</p>
                   <div className="d-flex justify-content-center gap-3 mt-3">
-                    <button className="btn  d-flex align-items-center gap-2">
-                      <img
-                        src="/src/assets/ListBestPost/IconoLikeInactivoGlobeTrack.png"
-                        alt=""
-                        style={{ width: "20px" }}
-                      />
-                      <span>{p.likes}</span>
-                    </button>
-                    <button className=" btn d-flex align-items-center gap-2">
+                    <button
+  className="btn d-flex align-items-center gap-2"
+  onClick={() => toggleLike(p._id)}
+>
+  <img
+    src={
+      p.likes.some((like) => like._id === user.user._id)
+        ? "/src/assets/ListBestPost/input-likeActive.png"
+        : "/src/assets/ListBestPost/IconoLikeInactivoGlobeTrack.png"
+    }
+    alt=""
+    style={{ width: "20px" }}
+  />
+  <span>{p.likes.length}</span>
+</button>
+
+                    <button className=" btn d-flex align-items-center gap-2"
+                    onClick={() => openCommentModal(p._id)}>
                       <img
                         src="/src/assets/ListBestPost/IconoComentarioGlobeTrack.png"
                         alt=""
@@ -397,9 +534,26 @@ const goToMessage = () => {
                       <span>{p.comments}</span>
                     </button>
                   </div>
+                  <div className="d-flex gap-2">
                   <div>
                     <button className="btn btn-danger" onClick={()=> handleDeletePost(p._id)}>Eliminar</button>
                   </div>
+   <div>
+ <button
+  className="btn btn-warning"
+  onClick={() => {
+  setPostToEdit(p);       // primero asignamos el post
+  setIsEditPost(true);    // luego decimos "modo edición"
+  setIsCreatePost(true); 
+  postUser() // por último mostramos CreatePost
+}}
+>
+  Editar
+</button>
+
+</div>
+                  </div>
+                 
                 </div>
               </div>
             ))
@@ -430,6 +584,42 @@ const goToMessage = () => {
     </div>
   </Modal.Body>
 </Modal>
+ 
+       {openModal && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content p-4">
+              <h5 className="text-center">Comentarios</h5>
+              <div className="d-flex justify-content-around mt-4">
+                <button
+                  className="btn btn-success"
+                  onClick={() => handleCommentOption("create")}
+                >
+                  Crear comentario
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => handleCommentOption("view")}
+                >
+                  Ver comentarios
+                </button>
+              </div>
+              <div className="text-center mt-3">
+                <button
+                  className="btn btn-link text-danger"
+                  onClick={() => setOpenModal(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
     </div>
   );

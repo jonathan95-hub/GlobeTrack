@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import "leaflet/dist/leaflet.css";
-import { allPostFecth } from "../../core/services/homepage/allPostFetch";
+import { allPostFetch } from "../../core/services/homepage/allPostFetch";
 
 const MapGlobal = () => {
   const spainCenter = [40.4, -3.7];
@@ -11,7 +11,7 @@ const MapGlobal = () => {
 
   const fetchPosts = async (token) => {
     try {
-      const data = await allPostFecth(token);
+      const data = await allPostFetch(token);
       setPost(data.allPost);
     } catch (error) {
       console.error("Error cargando publicaciones", error);

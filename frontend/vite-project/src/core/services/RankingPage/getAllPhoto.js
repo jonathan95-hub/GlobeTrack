@@ -1,9 +1,9 @@
 import { apiFetch } from "../apiFetch/apiFetch";
 
 
-export const getComment = async(postId) => {
+export const getPhotos = async() => {
 
-    const data = await apiFetch(`http://localhost:3000/post/userpost/comment/${postId}`,{
+    const data = await apiFetch("http://localhost:3000/ranking/allphotos",{
         method: 'GET',
         headers:{
             "Content-Type": "application/json"

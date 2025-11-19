@@ -7,6 +7,22 @@ const CreateCommentComponent = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useSelector(state => state.loginReducer);
+  const from = location.state?.from; // <
+      const otherUserId = location.state?.otherUserId;
+  
+  const goToPostPage = () => {
+  if(from === "myProfile"){
+    navigate("/profile")
+  }
+  else if(from === "postPage"){
+    navigate("/post")
+  }
+  else if(otherUserId) {
+    navigate("/profile", { state: { userId: otherUserId, isMyProfile: false } });
+  } else {
+    navigate("/profile"); // fallback seguro
+  }
+}
 
   // Obtenemos postId desde location.state
   const postId = location.state?.postId;
@@ -33,9 +49,7 @@ const CreateCommentComponent = () => {
     }
   };
 
-  const goToPostPage = () => {
-    navigate("/post")
-  }
+  
 
   return (
     <div className="container my-5">

@@ -5,11 +5,14 @@ import { useSelector } from "react-redux";
 import { getPostUserFetch } from "../../../core/services/ProfilePage/postUser";
 import { followAndUnfollow } from "../../../core/services/ProfilePage/FollowAndUnfollowUser";
 import { getAllCountries } from "../../../core/services/ProfilePage/getCountries";
+import { likeAndUnlikePost } from "../../../core/services/post/likePost"; // IMPORTAR TU FUNCIÓN DE LIKE
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import L from "leaflet";
-import { getMessagePrivate } from "../../../core/services/ProfilePage/PrivateMessage";
-import { sendMessagesPrivates } from "../../../core/services/ProfilePage/PrivateMessage";
+import {
+  getMessagePrivate,
+  sendMessagesPrivates,
+} from "../../../core/services/ProfilePage/PrivateMessage";
 
 const ProfileUserComponent = () => {
   const user = useSelector((state) => state.loginReducer);
@@ -17,11 +20,16 @@ const ProfileUserComponent = () => {
   const [follower, setFollower] = useState(false);
   const [dataPostUser, setDataPostUser] = useState([]);
   const [showMessageModal, setShowMessageModal] = useState(false);
-const [messageText, setMessageText] = useState("");
+  const [messageText, setMessageText] = useState("");
   const [countries, setCountries] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState(null);
+
   const location = useLocation();
   const userId = location.state?.userId;
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  // 🔹 FUNCIONES
 
   const getUser = async () => {
     const token = localStorage.getItem("token");
@@ -30,24 +38,6 @@ const [messageText, setMessageText] = useState("");
     const dataUser = await getInfoUser(userId);
     if (!dataUser) return alert("Information of the user not found");
     setViewUser(dataUser.getUser);
-  };
-
-  const follow = async (userId) => {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Token invalid");
-
-    try {
-      await followAndUnfollow(userId);
-      const dataUser = await getInfoUser(userId);
-      setViewUser(dataUser.getUser);
-      setFollower(dataUser.getUser.followers.includes(user.user._id));
-    } catch (err) {
-      console.error("Error al seguir/dejar de seguir:", err);
-    }
-  };
-
-  const AmIYouFollower = () => {
-    if (user.user.following.includes(userId)) setFollower(true);
   };
 
   const postUser = async (userId) => {
@@ -70,7 +60,92 @@ const [messageText, setMessageText] = useState("");
     }
   };
 
-    const openMessage = async () => {
+  const AmIYouFollower = () => {
+    if (user.user.following.includes(userId)) setFollower(true);
+  };
+
+  const follow = async (userId) => {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Token invalid");
+
+    try {
+      await followAndUnfollow(userId);
+      const dataUser = await getInfoUser(userId);
+      setViewUser(dataUser.getUser);
+      setFollower(dataUser.getUser.followers.includes(user.user._id));
+    } catch (err) {
+      console.error("Error al seguir/dejar de seguir:", err);
+    }
+  };
+
+  const toggleLike = async (postId) => {
+    if (!user?.user?._id) return;
+    const userId = user.user._id;
+
+    setDataPostUser((prev) =>
+      prev.map((p) => {
+        if (p._id !== postId) return p;
+
+        const userLiked = Array.isArray(p.likes)
+          ? p.likes.some((like) => like._id === userId)
+          : false;
+        const updatedLikes = userLiked
+          ? p.likes.filter((like) => like._id !== userId)
+          : [...(p.likes || []), { _id: userId }];
+
+        return { ...p, likes: updatedLikes };
+      })
+    );
+
+    try {
+      await likeAndUnlikePost(postId);
+    } catch (err) {
+      console.error(err);
+      // Revertir si falla
+      setDataPostUser((prev) =>
+        prev.map((p) => {
+          if (p._id !== postId) return p;
+
+          const userLiked = Array.isArray(p.likes)
+            ? p.likes.some((like) => like._id === userId)
+            : false;
+          const revertedLikes = userLiked
+            ? p.likes.filter((like) => like._id !== userId)
+            : [...(p.likes || []), { _id: userId }];
+
+          return { ...p, likes: revertedLikes };
+        })
+      );
+    }
+  };
+
+  const openCommentModal = (postId) => {
+    setSelectedPostId(postId);
+    setOpenModal(true);
+  };
+
+  const handleCommentOption = (option) => {
+    setOpenModal(false);
+    if (option === "create") {
+      navigate("/post/comment/create", {
+        state: {
+          postId: selectedPostId,
+          from: "profileUser",
+          otherUserId: userId,
+        },
+      });
+    } else if (option === "view") {
+      navigate("/post/comment", {
+        state: {
+          postId: selectedPostId,
+          from: "profileUser",
+          otherUserId: userId,
+        },
+      });
+    }
+  };
+
+  const openMessage = async () => {
     const info = await getMessagePrivate();
     if (!info) return alert("Error al obtener conversaciones");
 
@@ -82,7 +157,7 @@ const [messageText, setMessageText] = useState("");
     if (existingConversation) {
       navigate("/message", { state: { conversation: existingConversation } });
     } else {
-      setShowMessageModal(true); // mostrar modal para crear mensaje
+      setShowMessageModal(true);
     }
   };
 
@@ -93,15 +168,12 @@ const [messageText, setMessageText] = useState("");
       await sendMessagesPrivates(userId, messageText);
       setShowMessageModal(false);
       setMessageText("");
-      // después de enviar, navegar a la conversación ya creada
       const info = await getMessagePrivate();
       const conversationsArray = Object.values(info.conversations);
       const conversation = conversationsArray.find(
         (conv) => conv.user._id === userId
       );
-      if (conversation) {
-        navigate("/message", { state: { conversation } });
-      }
+      if (conversation) navigate("/message", { state: { conversation } });
     } catch (error) {
       console.error("Error al enviar mensaje:", error);
       alert(error.message);
@@ -118,7 +190,7 @@ const [messageText, setMessageText] = useState("");
     AmIYouFollower();
   }, [viewUser, user]);
 
-  // 🔹 ICONOS DEL MAPA
+  // 🔹 ICONOS MAPA
   const icono = L.icon({
     iconUrl: "/src/assets/Map/PinGlobeTrack.png",
     iconSize: [55, 90],
@@ -144,9 +216,10 @@ const [messageText, setMessageText] = useState("");
 
   const spainCenter = [40.4, -3.7];
 
+  // 🔹 RENDER
   return (
     <div>
-      {/* MAPA ARRIBA */}
+      {/* MAPA */}
       <div className="card shadow-lg border-0 rounded-4 mb-5">
         <div className="card-body p-3">
           <h4 className="text-center mb-3 fw-bold text-primary">
@@ -164,9 +237,6 @@ const [messageText, setMessageText] = useState("");
                 [-90, 180],
               ]}
               maxBoundsViscosity={1.0}
-              scrollWheelZoom={true}  // permite zoom
-              doubleClickZoom={true}  // permite zoom
-              dragging={true}          // permite mover mapa
             >
               <TileLayer
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
@@ -179,7 +249,7 @@ const [messageText, setMessageText] = useState("");
                 noWrap
               />
 
-              {/* PUBLICACIONES COMO PIN */}
+              {/* POSTS */}
               <MarkerClusterGroup
                 chunkedLoading
                 iconCreateFunction={iconCluster}
@@ -191,7 +261,7 @@ const [messageText, setMessageText] = useState("");
                     <Marker key={p._id} position={[lat, lng]} icon={icono}>
                       <Popup>
                         <strong>{p.title}</strong>
-                        <br />
+                        <img src={p.image} alt="" />
                         {p.text}
                       </Popup>
                     </Marker>
@@ -199,7 +269,7 @@ const [messageText, setMessageText] = useState("");
                 })}
               </MarkerClusterGroup>
 
-              {/* PAÍSES VISITADOS Y DESEADOS */}
+              {/* COUNTRIES */}
               {countries.map((country) => {
                 if (!country.geoJson?.coordinates) return null;
 
@@ -242,7 +312,57 @@ const [messageText, setMessageText] = useState("");
                 );
               })}
             </MapContainer>
+            
           </div>
+          <div className="d-flex justify-content-center gap-4 mt-3">
+  <div className="d-flex align-items-center gap-2">
+    <div
+      style={{
+        width: "20px",
+        height: "20px",
+        backgroundColor: "#90ee9091",
+        border: "1px solid #000",
+      }}
+    ></div>
+    <span>Visitado</span>
+  </div>
+
+  <div className="d-flex align-items-center gap-2">
+    <div
+      style={{
+        width: "20px",
+        height: "20px",
+        backgroundColor: "#ffd97aa2",
+        border: "1px solid #000",
+      }}
+    ></div>
+    <span>Deseado</span>
+  </div>
+
+  <div className="d-flex align-items-center gap-2">
+    <div
+      style={{
+        width: "20px",
+        height: "20px",
+        backgroundColor: "#7ddad198",
+        border: "1px solid #000",
+      }}
+    ></div>
+    <span>Visitado y Deseado</span>
+  </div>
+
+  <div className="d-flex align-items-center gap-2">
+    <div
+      style={{
+        width: "20px",
+        height: "20px",
+        backgroundColor: "#C0C0C0",
+        border: "1px solid #000",
+      }}
+    ></div>
+    <span>No visitado/deseado</span>
+  </div>
+</div>
         </div>
       </div>
 
@@ -259,7 +379,9 @@ const [messageText, setMessageText] = useState("");
                   ? "Dejar de Seguir"
                   : "Seguir"}
               </button>
-              <button className="btn btn-outline-primary" onClick={openMessage}>Enviar Mensaje</button>
+              <button className="btn btn-outline-primary" onClick={openMessage}>
+                Enviar Mensaje
+              </button>
             </div>
 
             <div className="d-flex flex-column align-items-center gap-3">
@@ -296,24 +418,29 @@ const [messageText, setMessageText] = useState("");
                 <p>
                   <strong>Biografía:</strong>
                 </p>
-                <p className="fst-italic text-secondary">{viewUser.biography}</p>
+                <p className="fst-italic text-secondary">
+                  {viewUser.biography}
+                </p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      
-
       {/* PUBLICACIONES */}
       <div className="card shadow-lg border-0 rounded-4 mb-5">
         <div className="card-body">
           <h4 className="fw-bold text-primary mb-4">Publicaciones</h4>
           {dataPostUser.length === 0 ? (
-            <p className="text-center text-muted">Aún no tiene publicaciones.</p>
+            <p className="text-center text-muted">
+              Aún no tiene publicaciones.
+            </p>
           ) : (
-            dataPostUser.map((p, idx) => (
-              <div key={idx} className="card mb-4 shadow-sm border-0 rounded-3">
+            dataPostUser.map((p) => (
+              <div
+                key={p._id}
+                className="card mb-4 shadow-sm border-0 rounded-3"
+              >
                 <div className="card-body">
                   <h5 className="text-center fw-bold">{p.title}</h5>
                   <div className="d-flex justify-content-center my-3">
@@ -326,15 +453,42 @@ const [messageText, setMessageText] = useState("");
                   </div>
                   <p className="text-center">{p.text}</p>
                   <div className="d-flex justify-content-center gap-3 mt-3">
-                    <button className="btn btn-outline-danger d-flex align-items-center gap-2">
+                    <button
+                      className="btn d-flex align-items-center justify-content-center p-0 border-0 bg-transparent"
+                      onClick={() => toggleLike(p._id)}
+                    >
                       <img
-                        src="/src/assets/ListBestPost/IconoLikeInactivoGlobeTrack.png"
-                        alt=""
-                        style={{ width: "20px" }}
+                        src={
+                          Array.isArray(p.likes) &&
+                          p.likes.some(
+                            (like) =>
+                              String(like?._id) === String(user.user?._id)
+                          )
+                            ? "/src/assets/ListBestPost/input-likeActive.png"
+                            : "/src/assets/ListBestPost/IconoLikeInactivoGlobeTrack.png"
+                        }
+                        alt="Like"
+                        style={{
+                          width:
+                            Array.isArray(p.likes) &&
+                            p.likes.some(
+                              (like) =>
+                                String(like?._id) === String(user.user?._id)
+                            )
+                              ? "26px"
+                              : "22px",
+                          transition: "all 0.2s ease",
+                        }}
                       />
-                      <span>{p.likes}</span>
+                      <span className="fw-bold text-dark">
+                        {p.likes.length}
+                      </span>
                     </button>
-                    <button className="btn btn-outline-secondary d-flex align-items-center gap-2">
+
+                    <button
+                      className="btn  d-flex align-items-center gap-2"
+                      onClick={() => openCommentModal(p._id)}
+                    >
                       <img
                         src="/src/assets/ListBestPost/IconoComentarioGlobeTrack.png"
                         alt=""
@@ -349,52 +503,92 @@ const [messageText, setMessageText] = useState("");
           )}
         </div>
       </div>
+
+      {/* MODAL MENSAJE */}
       {showMessageModal && (
-  <div
-    className="modal d-block"
-    tabIndex="-1"
-    role="dialog"
-    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-  >
-    <div className="modal-dialog" role="document">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h5 className="modal-title">Enviar mensaje a {viewUser?.name}</h5>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={() => setShowMessageModal(false)}
-          ></button>
+        <div
+          className="modal d-block"
+          tabIndex="-1"
+          role="dialog"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  Enviar mensaje a {viewUser?.name}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowMessageModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <textarea
+                  className="form-control"
+                  rows="3"
+                  placeholder="Escribe tu mensaje..."
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                ></textarea>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowMessageModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={sendInitialMessage}
+                >
+                  Enviar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="modal-body">
-          <textarea
-            className="form-control"
-            rows="3"
-            placeholder="Escribe tu mensaje..."
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-          ></textarea>
+      )}
+
+      {/* MODAL COMENTARIOS */}
+      {openModal && (
+        <div
+          className="modal fade show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content p-4">
+              <h5 className="text-center">Comentarios</h5>
+              <div className="d-flex justify-content-around mt-4">
+                <button
+                  className="btn btn-success"
+                  onClick={() => handleCommentOption("create")}
+                >
+                  Crear comentario
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => handleCommentOption("view")}
+                >
+                  Ver comentarios
+                </button>
+              </div>
+              <div className="text-center mt-3">
+                <button
+                  className="btn btn-link text-danger"
+                  onClick={() => setOpenModal(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="modal-footer">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setShowMessageModal(false)}
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={sendInitialMessage}
-          >
-            Enviar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };

@@ -4,7 +4,7 @@ const postModel = require("../models/postModel"); // Importamos el modelo de las
 const usersModel = require("../models/userModels");
 const getRequestInfo = require("../utils/requestInfo");
 const cloudinary = require("../config/configCloudinary")
-const commentModel = require("../models/commentModel")
+
 
 
 // VOLVER A COMENTAR SE MODIFICO LA FUNCIÓN 
@@ -59,6 +59,8 @@ const createPost = async (req, res) => {
   }
 };
 
+
+// volver a documentar
 const getPost = async (req, res) => {
   try {
      // Obtenemos el número de página desde query params, por defecto 1
@@ -68,13 +70,17 @@ const getPost = async (req, res) => {
     // Buscamos todas las publicaciones con find y usamos populate para mostrar el usuario con su imagen y nombre
     // tambien lo usamos para mostrar los comentarios con el nombre de usuario y la imagen
     const totalPosts = await postModel.countDocuments();
-    const allPost = await postModel
-      .find()
-      .populate({ path: "user", select: "name photoProfile" })
-      .populate({
-        path: "comment",
-        populate: { path: "user", select: "name photoProfile" },
-      }).sort({createdAt: -1}).skip(skip).limit(limit); ;
+   const allPost = await postModel
+  .find()
+  .populate({ path: "user", select: "name photoProfile" })
+  .populate({
+    path: "comment",
+    populate: { path: "user", select: "name photoProfile" },
+  })
+  .populate({ path: "likes", select: "_id" }) // <--- esto es clave
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(limit);
       // Devolcemos un 200 con el mensaje de todas las publicaciones obtenidas
     res
       .status(200)
@@ -224,7 +230,7 @@ const likePost = async (req, res) => {
   }
 };
 
-
+// Volver a documentar!
 
 const editPost = async (req, res) => {
   try {
@@ -271,6 +277,12 @@ const editPost = async (req, res) => {
         userAgent
       }
     })
+      if (newPost.image) {
+      const uploadedImage = await cloudinary.uploader.upload(newPost.image, {
+        folder: "Post_GlobeTracked",
+      });
+      newPost.image = uploadedImage.secure_url; // reemplazamos Base64 por URL
+    }
     // Se busaca el post por su id y lo actualizamos a con newPost 
     const updatePost = await postModel.findByIdAndUpdate(postId, newPost, {new: true})
     // Devolvemos un 200 con el nuevo post con el mensaje de post actualizado
@@ -350,8 +362,14 @@ const getPostUser = async (req, res) => {
 
     // Buscamos todos los posts del usuario y hacemos populate para sacar su nombre y foto de perfil
     const postUser = await postModel
-      .find({ user: userId })
-      .populate("user", "name photoProfile").sort({createdAt: -1});
+  .find({ user: userId })
+  .populate("user", "name photoProfile")
+  .populate("likes", "_id") // <--- esto es clave
+  .populate({
+    path: "comment",
+    populate: { path: "user", select: "name photoProfile" },
+  })
+  .sort({ createdAt: -1 });
 
     // Creamos un nuevo array con los datos formateados de cada post
     const post = postUser.map(p => ({
@@ -365,7 +383,7 @@ const getPostUser = async (req, res) => {
         name: p.user.name,
         photoProfile: p.user.photoProfile
       },
-      likes: p.likes.length, // Número de likes del post
+      likes: p.likes, // Número de likes del post
       comments: p.comment.length // Número de comentarios del post
     }));
     

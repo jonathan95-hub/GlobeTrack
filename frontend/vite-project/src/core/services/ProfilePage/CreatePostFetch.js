@@ -1,28 +1,25 @@
+import { apiFetch } from "../apiFetch/apiFetch";
+
+
 export const createNewPost = async (title,text, imageBase64, location) => {
     try {
-        const token = localStorage.getItem("token")
+       
         const body = {
                title,
                 text,
                 location,
                 image: imageBase64
         }
-        const res = await fetch("http://localhost:3000/post/create",{
+        const data = await apiFetch("http://localhost:3000/post/create",{
             method: 'POST',
             headers: {
-                "Content-Type": "application/json",
-                "token": token 
+                "Content-Type": "application/json"
             },
             body: JSON.stringify(body)
 
         })
-        if(!res.ok){
-            const text = await res.text()
-            throw new Error(text)
-        }
-
-        const result = await res.json()
-        return result
+        
+        return data
     } catch (error) {
          console.error("Error creando el post:", error);
     throw error;

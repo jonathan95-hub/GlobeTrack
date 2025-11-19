@@ -9,9 +9,9 @@ const ListGroupUserComponent = () => {
   const [myGroups, setMyGroups] = useState([]);
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
-  const [showLeaveModal, setShowLeaveModal] = useState(false); // 🔵 nuevo modal
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState(null);
-  const [groupToLeave, setGroupToLeave] = useState(null); // 🔵 grupo a dejar
+  const [groupToLeave, setGroupToLeave] = useState(null);
 
   const user = useSelector(state => state.loginReducer);
 
@@ -25,12 +25,6 @@ const ListGroupUserComponent = () => {
       }
 
       const myGroup = await listGroupIncludesUser();
-
-      if (myGroup.status === "Failed" && myGroup.message === "Groups not found") {
-        setMyGroups([]);
-        return;
-      }
-
       const groupsData = myGroup.listGroup || myGroup.groups || [];
       setMyGroups(groupsData);
 
@@ -43,12 +37,7 @@ const ListGroupUserComponent = () => {
   const enterAndExitGroupFn = async (groupId) => {
     try {
       const res = await enterGroupAndExitGroup(groupId);
-
-      if (res.left) {
-        alert("Has salido del grupo");
-        setMyGroups(prev => prev.filter(g => g._id !== groupId));
-      }
-
+      if (res.left) setMyGroups(prev => prev.filter(g => g._id !== groupId));
       myList();
     } catch (err) {
       console.error(err);
@@ -69,11 +58,8 @@ const ListGroupUserComponent = () => {
 
   const deleteGroup = async () => {
     try {
-      const data = await deleteMygroup(groupToDelete);
-      alert(data.message || "Grupo eliminado correctamente");
-
+      await deleteMygroup(groupToDelete);
       setMyGroups(prev => prev.filter(g => g._id !== groupToDelete));
-
       setShowModal(false);
       setGroupToDelete(null);
     } catch (err) {
@@ -87,13 +73,9 @@ const ListGroupUserComponent = () => {
     setShowModal(true);
   };
 
-  const goToCreate = () => {
-    navigate("/group/create");
-  };
+  const goToCreate = () => navigate("/group/create");
 
-  useEffect(() => {
-    myList();
-  }, []);
+  useEffect(() => { myList(); }, []);
 
   return (
     <div className="container-fluid my-4 px-3">
@@ -110,9 +92,9 @@ const ListGroupUserComponent = () => {
           myGroups.map((g, idx) => (
             <div 
               key={idx} 
-              className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex justify-content-center"
+              className="col-12 col-sm-6 col-md-4 col-lg-3 d-flex"
             >
-              <div className="card h-100 shadow-sm" style={{ minWidth: "250px", maxWidth: "100%" }}>
+              <div className="card shadow-sm d-flex flex-column w-100" style={{ minWidth: "250px" }}>
                 {g.photoGroup && (
                   <img
                     src={g.photoGroup}
@@ -122,9 +104,9 @@ const ListGroupUserComponent = () => {
                   />
                 )}
 
-                <div className="card-body d-flex flex-column">
+                <div className="card-body d-flex flex-column flex-grow-1">
                   <h5 className="card-title">{g.name}</h5>
-                  <p className="card-text text-muted mb-2">{g.description}</p>
+                  <p className="card-text text-muted mb-2 flex-grow-1">{g.description}</p>
 
                   <div className="mb-2 d-flex justify-content-between">
                     <small className="text-secondary">
@@ -143,29 +125,29 @@ const ListGroupUserComponent = () => {
                       Entrar al chat
                     </button>
 
-             {g.creatorGroup?._id === user?.user?._id ? (
-  <div className="d-flex gap-2 flex-column">
-    <button 
-      className="btn btn-warning w-100"
-      onClick={() => navigate("/group/create", { state: { group: g } })}
-    >
-      Editar grupo
-    </button>
-    <button 
-      className="btn btn-danger w-100" 
-      onClick={() => openDeleteModal(g._id)}
-    >
-      Eliminar grupo
-    </button>
-  </div>
-) : (
-  <button 
-    className="btn btn-danger w-100" 
-    onClick={() => openLeaveModal(g._id)}  
-  >
-    Dejar grupo
-  </button>
-)}
+                    {g.creatorGroup?._id === user?.user?._id ? (
+                      <div className="d-flex gap-2 flex-column">
+                        <button 
+                          className="btn btn-warning w-100"
+                          onClick={() => navigate("/group/create", { state: { group: g } })}
+                        >
+                          Editar grupo
+                        </button>
+                        <button 
+                          className="btn btn-danger w-100" 
+                          onClick={() => openDeleteModal(g._id)}
+                        >
+                          Eliminar grupo
+                        </button>
+                      </div>
+                    ) : (
+                      <button 
+                        className="btn btn-danger w-100" 
+                        onClick={() => openLeaveModal(g._id)}  
+                      >
+                        Dejar grupo
+                      </button>
+                    )}
                   </div>
 
                 </div>
@@ -175,77 +157,43 @@ const ListGroupUserComponent = () => {
         )}
       </div>
 
-      {/* 🔴 MODAL ELIMINAR GRUPO */}
+      {/* MODAL ELIMINAR GRUPO */}
       {showModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
-
               <div className="modal-header">
                 <h5 className="modal-title text-danger fw-bold">Eliminar Grupo</h5>
                 <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
               </div>
-
               <div className="modal-body">
                 <p>¿Estás seguro de que quieres eliminar este grupo? Esta acción no se puede deshacer.</p>
               </div>
-
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancelar
-                </button>
-
-                <button 
-                  type="button" 
-                  className="btn btn-danger"
-                  onClick={deleteGroup}
-                >
-                  Sí, eliminar
-                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
+                <button type="button" className="btn btn-danger" onClick={deleteGroup}>Sí, eliminar</button>
               </div>
-
             </div>
           </div>
         </div>
       )}
 
-      {/* 🔵 MODAL DEJAR GRUPO (NUEVO) */}
+      {/* MODAL DEJAR GRUPO */}
       {showLeaveModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
-
               <div className="modal-header">
                 <h5 className="modal-title text-warning fw-bold">Salir del grupo</h5>
                 <button type="button" className="btn-close" onClick={() => setShowLeaveModal(false)}></button>
               </div>
-
               <div className="modal-body">
                 <p>¿Estás seguro de que quieres dejar este grupo?</p>
               </div>
-
               <div className="modal-footer">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
-                  onClick={() => setShowLeaveModal(false)}
-                >
-                  No
-                </button>
-
-                <button 
-                  type="button" 
-                  className="btn btn-danger"
-                  onClick={confirmLeaveGroup}
-                >
-                  Sí, salir
-                </button>
+                <button type="button" className="btn btn-secondary" onClick={() => setShowLeaveModal(false)}>No</button>
+                <button type="button" className="btn btn-danger" onClick={confirmLeaveGroup}>Sí, salir</button>
               </div>
-
             </div>
           </div>
         </div>

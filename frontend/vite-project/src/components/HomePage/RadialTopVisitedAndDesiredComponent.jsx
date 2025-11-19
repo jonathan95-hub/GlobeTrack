@@ -126,15 +126,18 @@ const RadialTopVisitedComponent = () => {
                   <Cell key={entry.name} fill={ColorsVisited[idx % ColorsVisited.length]} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#aaa9a9ff',
-                  border: '1px solid #00ffff',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-                formatter={(value) => [`${value} visitas`, 'Usuarios']}
-              />
+         <Tooltip
+  contentStyle={{
+    backgroundColor: '#aaa9a9ff',
+    border: '1px solid #00ffff',
+    borderRadius: '8px',
+    color: '#fff',
+  }}
+  formatter={(value, name, props) => [
+    `${value} visitas`,      // texto principal
+    props.payload.name       // nombre del país
+  ]}
+/>
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -181,15 +184,19 @@ const RadialTopVisitedComponent = () => {
                   <Cell key={entry.name} fill={ColorsDesired[idx % ColorsDesired.length]} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#aaa9a9ff',
-                  border: '1px solid #ff6ec7',
-                  borderRadius: '8px',
-                  color: '#fff',
-                }}
-                formatter={(value) => [`${value} deseado(s)`, 'Usuarios']}
-              />
+             <Tooltip
+  contentStyle={{
+    backgroundColor: '#aaa9a9ff',
+    border: '1px solid #ff6ec7',
+    borderRadius: '8px',
+    color: '#fff',
+  }}
+  formatter={(value, name, props) => [
+    `${value} deseado(s)`,
+    props.payload.name
+  ]}
+/>
+
             </PieChart>
           </ResponsiveContainer>
         </div>

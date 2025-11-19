@@ -7,9 +7,25 @@ const CommentComponent = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const postId = location.state?.postId;
+    const from = location.state?.from; // <
+    const otherUserId = location.state?.otherUserId;
+  
   const goToPostPage = () => {
+  if(from === "myProfile"){
+    navigate("/profile")
+  }
+  else if(from === "postPage"){
     navigate("/post")
   }
+  else if(otherUserId) {
+    navigate("/profile", { state: { userId: otherUserId, isMyProfile: false } });
+  } else {
+    navigate("/profile"); // fallback seguro
+  }
+}
+
+   
+  
   const allComment = async (postId) => {
     const token = localStorage.getItem("token");
     if (!token) {

@@ -1,34 +1,26 @@
+import { apiFetch } from "../apiFetch/apiFetch";
+
 
 export const  tickUncheckCountryVisited = async (countryId) => {
-    const token = localStorage.getItem("token")
-    const res = await fetch(`http://localhost:3000/country/visited/${countryId}`,{
+   
+    const data = await apiFetch(`http://localhost:3000/country/visited/${countryId}`,{
         method: 'POST',
         headers:{
-            "Content-Type": "application/json",
-            "token": token
+            "Content-Type": "application/json"
         }
     })
-    if(!res.ok){
-        const text = await res.text()
-        throw new Error(text)
-    }
-    const result = await res.json()
-    return result
+    
+    return data
 }
 
 export const  tickUncheckCountryDesired = async (countryId) => {
-    const token = localStorage.getItem("token")
-    const res = await fetch(`http://localhost:3000/country/desired/${countryId}`,{
+   
+    const data = await apiFetch(`http://localhost:3000/country/desired/${countryId}`,{
         method: 'POST',
         headers:{
-            "Content-Type": "application/json",
-            "token": token
+            "Content-Type": "application/json"
         }
     })
-    if(!res.ok){
-        const text = await res.text()
-        throw new Error(text)
-    }
-    const result = await res.json()
-    return result
+     
+    return data
 }

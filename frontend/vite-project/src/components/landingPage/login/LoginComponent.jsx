@@ -80,11 +80,6 @@ const LoginComponent = ({ setMenuOptionsInit }) => {
           </button>
         </div>
 
-        <div className="text-center mt-4">
-          <p className="text-muted small mb-0">
-            ¿Olvidaste tu contraseña? <a href="#" className="text-primary text-decoration-none">Recupérala aquí</a>
-          </p>
-        </div>
       </div>
     </div>
   );

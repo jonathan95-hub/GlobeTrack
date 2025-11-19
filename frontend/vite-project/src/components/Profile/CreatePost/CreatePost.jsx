@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -7,13 +7,21 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { createNewPost } from "../../../core/services/ProfilePage/CreatePostFetch";
+import { useNavigate } from "react-router";
+import { editPost } from "../../../core/services/ProfilePage/editPost";
+import { useSelector } from "react-redux";
 
 
 
 
 const CreatePost = (props) => {
     const{
-        setIsCreatePost
+        isEditPost,
+        setIsEditPost,
+        setIsCreatePost,
+        postToEdit,
+        setPostToEdit,
+       
     } = props
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -22,6 +30,9 @@ const CreatePost = (props) => {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const[ imageBase64,setImageBase64] = useState(null)
+  const navigate = useNavigate()
+  const user = useSelector(state => state.loginReducer)
+ 
 
 
   const markerIcon = L.icon({
@@ -72,6 +83,36 @@ const handleFileChange = (e) => {
   };
 
 
+const edit = async () => {
+  if (!postToEdit?._id) return alert("No hay post seleccionado");
+
+  try {
+    const payload = {
+      title,
+      text,
+    };
+
+    if (imageBase64) payload.image = imageBase64;
+
+    const data = await editPost(postToEdit._id, payload);
+
+    if (data.status === "Success") {
+      alert("✅ Publicación editada con éxito!");
+      setIsEditPost(false);
+      setIsCreatePost(false);
+      setPostToEdit(null);
+    } else {
+      alert("❌ Error al editar la publicación");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("⚠️ Error al editar la publicación");
+  }
+};
+
+
+
+
     const newPost = async () => {
     try {
         console.log({
@@ -94,8 +135,8 @@ const handleFileChange = (e) => {
 
       if (data.status === "Success") {
         alert("✅ Publicación creada con éxito!");
-        // Aquí puedes redirigir o limpiar el formulario:
-        // navigate("/profile") o resetear los estados
+       setIsCreatePost(false) 
+
       } else {
         alert("❌ Error al crear la publicación");
       }
@@ -106,11 +147,160 @@ const handleFileChange = (e) => {
   };
 
   const backProfile = () => {
-    setIsCreatePost(false)
+  setIsEditPost(false);
+  setIsCreatePost(false);
+  setPostToEdit(null);
+};
+
+  
+useEffect(() => {
+  if (postToEdit) {
+    setTitle(postToEdit.title || "");
+    setText(postToEdit.text || "");
+    setPreview(postToEdit.image || null);
+
+    if (postToEdit.location?.coordinates) {
+      const [lng, lat] = postToEdit.location.coordinates;
+      setLocation({ lat, lng });
+      setLocationText(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+    }
   }
+}, [postToEdit]);
+
+
+
+ 
 
   return (
-    <div className="container my-5">
+    <>
+    {isEditPost ? (
+            
+<div className="container my-5">
+        
+      <div className="card shadow-lg border-0 rounded-4">
+        
+        <div className="card-body p-4">
+            <button className="btn btn-success px-4 py-2 fw-semibold" onClick={backProfile}>Volver</button>
+          <h3 className="text-center mb-4 fw-bold text-primary">
+            Editar publicación
+          </h3>
+    
+         
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Título</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Escribe el título de tu publicación"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+
+          
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Imagen</label>
+            <div className="d-flex flex-column align-items-start">
+              <button
+                type="button"
+                className="btn btn-primary mb-2"
+                onClick={() => document.getElementById("fileInput").click()}
+              >
+                Seleccionar imagen
+              </button>
+              <input
+                id="fileInput"
+                type="file"
+                accept="image/*"
+                className="d-none"
+                onChange={handleFileChange}
+              />
+              {preview && (
+                <img
+                  src={preview}
+                  alt="Previsualización"
+                  className="img-fluid rounded-3 shadow-sm mt-2"
+                  style={{ maxHeight: "300px", objectFit: "cover" }}
+                />
+              )}
+            </div>
+          </div>
+
+          
+          <div className="mb-3">
+            <label className="form-label fw-semibold">Texto</label>
+            <textarea
+              className="form-control"
+              rows="3"
+              placeholder="Escribe algo sobre tu viaje..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            ></textarea>
+          </div>
+
+        
+          <div className="mb-3">
+            <label className="form-label fw-semibold">
+              Ubicación (haz clic en el mapa)
+            </label>
+            <input
+              type="text"
+              className="form-control mb-2"
+              value={locationText}
+              readOnly
+              placeholder="Haz clic en el mapa para seleccionar una ubicación"
+            />
+
+            <div className="rounded-3 overflow-hidden border">
+              <MapContainer
+                center={[40.4, -3.7]} 
+                zoom={5}
+                minZoom={3} // 
+                maxZoom={18}
+                maxBounds={[
+                  [-85, -180],
+                  [85, 180],
+                ]} //
+                style={{ height: "300px", width: "100%" }}
+              >
+                
+                <TileLayer
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                  attribution='Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, 
+                  Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                />
+
+               
+                <TileLayer
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                  attribution="Labels © Esri"
+                />
+
+                <LocationPicker onLocationSelect={handleMapClick} />
+                {location && (
+                  <Marker
+                    position={[location.lat, location.lng]}
+                    icon={markerIcon}
+                  />
+                )}
+              </MapContainer>
+            </div>
+          </div>
+
+          
+          <div className="text-center mt-4">
+            <button className="btn btn-success px-4 py-2 fw-semibold" onClick={() => edit(postToEdit?._id)}>
+             Editar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+       
+    ) : (
+
+
+ <div className="container my-5">
         
       <div className="card shadow-lg border-0 rounded-4">
         
@@ -231,7 +421,13 @@ const handleFileChange = (e) => {
         </div>
       </div>
     </div>
+
+    )}</>
+   
   );
 };
 
 export default CreatePost;
+
+
+ 

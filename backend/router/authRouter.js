@@ -2,7 +2,7 @@ const express = require('express') // Importamos express
 const router = express.Router() // creamos una constante para manejar mejor router de express
 const loginLimiter = require("../middelwares/middelwarerateLimit")
 
-const { signup, login, refreshToken} = require("../controllers/authController") // creamos una constatente desetructuring para traer las funciones de authController
+const { signup, login, refreshToken, } = require("../controllers/authController") // creamos una constatente desetructuring para traer las funciones de authController
 const { verificationRefresh } = require('../middelwares/middelwareRefreshToken')
 
 /**

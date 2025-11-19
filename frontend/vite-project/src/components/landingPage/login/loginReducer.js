@@ -18,6 +18,7 @@ switch(type){
             user: payload.user,
             token: payload.token,
             token_refresh: payload.token_refresh,
+            isAdmin: payload.isAdmin
             
         }
     case LOG_OUT:

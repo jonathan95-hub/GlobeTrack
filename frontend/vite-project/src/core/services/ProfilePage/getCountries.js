@@ -1,16 +1,14 @@
+import { apiFetch } from "../apiFetch/apiFetch";
+
+
 export const getAllCountries = async () => {
-    const token = localStorage.getItem("token")
-    const res = await fetch("http://localhost:3000/country/allcountries",{
+
+    const data = await apiFetch("http://localhost:3000/country/allcountries",{
         method: 'GET',
         headers:{
-            "Content-Type": "application/json",
-            "token": token
+            "Content-Type": "application/json"
         }
     })
-    if(!res.ok){
-        const text = await res.text()
-        throw new Error(text);
-    }
-    const result = await res.json()
-    return result
+     
+    return data
 }
