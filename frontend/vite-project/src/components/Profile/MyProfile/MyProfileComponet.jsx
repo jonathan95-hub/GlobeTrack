@@ -15,67 +15,105 @@ import { UPDATE_USER } from "../../landingPage/login/loginAction";
 import { useNavigate } from "react-router-dom";
 import { changeMenuOption } from "../../MainLayaout/Header/headerAction";
 import { likeAndUnlikePost } from "../../../core/services/post/likePost";
+import {
+  obtainedFollowers,
+  obtainedFollowing,
+} from "../../../core/services/ProfilePage/getFollowers";
+import { deleteUser } from "../../../core/services/ControlPanel/deleteUser";
 
 const MyProfileComponent = (props) => {
-  const{
-     setIsCreatePost,
-     setIsEdit,
-    
-     setIsEditPost,
-     setPostToEdit
-  } = props
+  const { setIsCreatePost, setIsEdit, setIsEditPost, setPostToEdit } = props;
   const [dataPostUser, setDataPostUser] = useState([]);
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedPostId, setSelectedPostId] = useState(null);
+  const [dataFollowers, setDataFollowers] = useState([]);
+  const [dataFollowing, setDataFollowing] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  
-  const navigate = useNavigate()
-  const user = useSelector(state => state.loginReducer);
-  const spainCenter = [40.4, -3.7];
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [searchFollowers, setSearchFollowers] = useState("");
+  const [searchFollowing, setSearchFollowing] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-    const [openModal, setOpenModal] = useState(false);
-      const [selectedPostId, setSelectedPostId] = useState(null);
 
+  const user = useSelector((state) => state.loginReducer);
+  const spainCenter = [40.4, -3.7];
 
-// 🔹 Función toggleLike corregida
-const toggleLike = async (postId) => {
-  const userId = user?.user?._id;
-  if (!userId) return;
+  // Función para abrir el modal y cargar seguidores
+  const handleShowFollowers = async (userId) => {
+    const res = await obtainedFollowers(userId);
 
-  // Optimistic update
-  setDataPostUser((prev) =>
-    prev.map((p) => {
-      if (p._id !== postId) return p;
+    console.log("📥 respuesta followers:", res);
 
-      const userLiked = p.likes.some((like) => like._id === userId);
-      const updatedLikes = userLiked
-        ? p.likes.filter((like) => like._id !== userId)
-        : [...p.likes, { _id: userId }];
+    if (res && Array.isArray(res.followers)) {
+      setDataFollowers(res.followers);
+    } else {
+      setDataFollowers([]);
+    }
 
-      return { ...p, likes: updatedLikes };
-    })
-  );
+    setShowFollowersModal(true);
+  };
 
-  try {
-    await likeAndUnlikePost(postId);
-  } catch (error) {
-    console.error("Error al dar o quitar like:", error);
-    // Revertir si falla
+  const handleShowFollowing = async (userId) => {
+    const res = await obtainedFollowing(userId);
+    if (res && Array.isArray(res.following)) {
+      setDataFollowing(res.following);
+    } else {
+      setDataFollowing([]);
+    }
+    setShowFollowingModal(true);
+  };
+
+  // Función para cerrar modal
+  const handleCloseFollowersModal = () => {
+    setShowFollowersModal(false);
+  };
+  const handleCloseFollowingModal = () => {
+    setShowFollowingModal(false);
+  };
+
+  // 🔹 Función toggleLike corregida
+  const toggleLike = async (postId) => {
+    const userId = user?.user?._id;
+    if (!userId) return;
+
+    // Optimistic update
     setDataPostUser((prev) =>
       prev.map((p) => {
         if (p._id !== postId) return p;
 
         const userLiked = p.likes.some((like) => like._id === userId);
-        const revertedLikes = userLiked
+        const updatedLikes = userLiked
           ? p.likes.filter((like) => like._id !== userId)
           : [...p.likes, { _id: userId }];
 
-        return { ...p, likes: revertedLikes };
+        return { ...p, likes: updatedLikes };
       })
     );
-  }
-};
 
+    try {
+      await likeAndUnlikePost(postId);
+    } catch (error) {
+      console.error("Error al dar o quitar like:", error);
+      // Revertir si falla
+      setDataPostUser((prev) =>
+        prev.map((p) => {
+          if (p._id !== postId) return p;
+
+          const userLiked = p.likes.some((like) => like._id === userId);
+          const revertedLikes = userLiked
+            ? p.likes.filter((like) => like._id !== userId)
+            : [...p.likes, { _id: userId }];
+
+          return { ...p, likes: revertedLikes };
+        })
+      );
+    }
+  };
 
   const postUser = async (userId) => {
     try {
@@ -90,24 +128,23 @@ const toggleLike = async (postId) => {
     }
   };
 
- const handleDeletePost = async (postId) => {
-  try {
-    if (!window.confirm("¿Seguro que quieres eliminar esta publicación?")) return;
+  const handleDeletePost = async (postId) => {
+    try {
+      if (!window.confirm("¿Seguro que quieres eliminar esta publicación?"))
+        return;
 
-    const result = await deletePostUser(postId); // llamamos a la función de servicio
-    console.log(result);
+      const result = await deletePostUser(postId); // llamamos a la función de servicio
+      console.log(result);
 
-    // Actualizamos el estado local quitando el post eliminado
-    setDataPostUser((prevPosts) => prevPosts.filter((p) => p._id !== postId));
+      // Actualizamos el estado local quitando el post eliminado
+      setDataPostUser((prevPosts) => prevPosts.filter((p) => p._id !== postId));
 
-    alert("Publicación eliminada correctamente");
-  } catch (error) {
-    console.error("Error al eliminar la publicación:", error);
-    alert("No se pudo eliminar la publicación: " + error.message);
-  }
-};
-
-
+      alert("Publicación eliminada correctamente");
+    } catch (error) {
+      console.error("Error al eliminar la publicación:", error);
+      alert("No se pudo eliminar la publicación: " + error.message);
+    }
+  };
 
   const getCountries = async () => {
     try {
@@ -122,7 +159,7 @@ const toggleLike = async (postId) => {
     }
   };
 
-    const openCommentModal = (postId) => {
+  const openCommentModal = (postId) => {
     setSelectedPostId(postId);
     setOpenModal(true);
   };
@@ -130,84 +167,107 @@ const toggleLike = async (postId) => {
   const handleCommentOption = (option) => {
     setOpenModal(false);
     if (option === "create") {
-      navigate("/post/comment/create", { state: { postId: selectedPostId, from: "myProfile" } });
+      navigate("/post/comment/create", {
+        state: { postId: selectedPostId, from: "myProfile" },
+      });
     } else if (option === "view") {
-      navigate("/post/comment", { state: { postId: selectedPostId, from: "myProfile" } });
+      navigate("/post/comment", {
+        state: { postId: selectedPostId, from: "myProfile" },
+      });
     }
   };
 
- 
+  const handleOpenModal = (country) => {
+    setSelectedCountry(country);
+    setShowModal(true);
+  };
 
-const handleOpenModal = (country) => {
-  setSelectedCountry(country);
-  setShowModal(true);
-};
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedCountry(null);
+  };
 
-const handleCloseModal = () => {
-  setShowModal(false);
-  setSelectedCountry(null);
-};
+  const handleMarkCountry = async (type) => {
+    if (!selectedCountry) return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return alert("Token not found");
 
-const handleMarkCountry = async (type) => {
-  if (!selectedCountry) return;
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("Token not found");
+      const updatedUser = { ...user.user };
 
-    const updatedUser = { ...user.user };
+      if (type === "visitado") {
+        await tickUncheckCountryVisited(selectedCountry._id, token);
+        await getCountries();
 
-    if (type === "visitado") {
-      await tickUncheckCountryVisited(selectedCountry._id, token);
-      await getCountries();
+        const alreadyVisited = updatedUser.visitedDestinations.find(
+          (v) => v.geoId === selectedCountry._id
+        );
+        if (alreadyVisited) {
+          updatedUser.visitedDestinations =
+            updatedUser.visitedDestinations.filter(
+              (v) => v.geoId !== selectedCountry._id
+            );
+        } else {
+          updatedUser.visitedDestinations.push({
+            geoId: selectedCountry._id,
+            name: selectedCountry.name,
+          });
+        }
+      } else if (type === "deseado") {
+        await tickUncheckCountryDesired(selectedCountry._id, token);
+        await getCountries();
 
-      const alreadyVisited = updatedUser.visitedDestinations.find(
-        (v) => v.geoId === selectedCountry._id
-      );
-      if (alreadyVisited) {
-        updatedUser.visitedDestinations =
-          updatedUser.visitedDestinations.filter(
-            (v) => v.geoId !== selectedCountry._id
-          );
-      } else {
-        updatedUser.visitedDestinations.push({
-          geoId: selectedCountry._id,
-          name: selectedCountry.name,
-        });
+        const alreadyDesired = updatedUser.desiredDestinations.find(
+          (d) => d.geoId === selectedCountry._id
+        );
+        if (alreadyDesired) {
+          updatedUser.desiredDestinations =
+            updatedUser.desiredDestinations.filter(
+              (d) => d.geoId !== selectedCountry._id
+            );
+        } else {
+          updatedUser.desiredDestinations.push({
+            geoId: selectedCountry._id,
+            name: selectedCountry.name,
+          });
+        }
       }
-    } else if (type === "deseado") {
-      await tickUncheckCountryDesired(selectedCountry._id, token);
-      await getCountries();
 
-      const alreadyDesired = updatedUser.desiredDestinations.find(
-        (d) => d.geoId === selectedCountry._id
-      );
-      if (alreadyDesired) {
-        updatedUser.desiredDestinations =
-          updatedUser.desiredDestinations.filter(
-            (d) => d.geoId !== selectedCountry._id
-          );
-      } else {
-        updatedUser.desiredDestinations.push({
-          geoId: selectedCountry._id,
-          name: selectedCountry.name,
-        });
-      }
+      dispatch({ type: UPDATE_USER, payload: updatedUser });
+    } catch (error) {
+      console.error("Error al marcar país:", error);
+    } finally {
+      handleCloseModal();
     }
+  };
 
-    dispatch({ type: UPDATE_USER, payload: updatedUser });
-  } catch (error) {
-    console.error("Error al marcar país:", error);
-  } finally {
-    handleCloseModal();
-  }
-};
+  const goToMessage = () => {
+    navigate("/message");
+    dispatch(changeMenuOption(3));
+  };
 
-const goToMessage = () => {
-  navigate("/message")
-  dispatch(changeMenuOption(3))
-}
+  const deletedUser = async (userId) => {
+    try {
+      const res = await deleteUser(userId);
+      if (!res.ok) {
+        alert("The user could not be deleted.");
+      }
+      localStorage.removeItem("token");
+      localStorage.removeItem("token_refresh");
+      localStorage.removeItem("user");
+      navigate("/");
+    } catch (error) {
+      console.error("Error al eliminar el usuario:", error);
+    }
+  };
 
+  const handleOpenDeleteModal = () => {
+    setShowDeleteModal(true);
+  };
 
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
 
   // 📍 Configurar iconos
   const icono = L.icon({
@@ -255,9 +315,8 @@ const goToMessage = () => {
       alert("Token is invalid");
     }
   }, []);
-
+  console.log("USER REDUX:", user);
   return (
-    
     <div className="container my-4">
       {/* MAPA */}
       <div className="card shadow-lg border-0 rounded-4 mb-5">
@@ -302,11 +361,10 @@ const goToMessage = () => {
                     <Marker key={p._id} position={[lat, lng]} icon={icono}>
                       <Popup>
                         <div>
-                      <strong>{p.title}</strong>
-                       <img src={p.image} alt="" />
-                        <span>{p.text}</span>
+                          <strong>{p.title}</strong>
+                          <img src={p.image} alt="" />
+                          <span>{p.text}</span>
                         </div>
-                      
                       </Popup>
                     </Marker>
                   );
@@ -351,89 +409,91 @@ const goToMessage = () => {
                       fillColor: color,
                       fillOpacity: visited || desired ? 0.6 : 0.2,
                     }}
-                   eventHandlers={{
-  click: () => handleOpenModal(country),
-}}
+                    eventHandlers={{
+                      click: () => handleOpenModal(country),
+                    }}
                   />
                 );
               })}
             </MapContainer>
-            
           </div>
- <div className="d-flex flex-wrap gap-3">
-  <div className="d-flex align-items-center gap-2">
-    <div
-      className="flex-shrink-0"
-      style={{
-        width: "1.2rem",
-        height: "1.2rem",
-        backgroundColor: "#90ee9091",
-        border: "1px solid #000",
-      }}
-    ></div>
-    <span className="text-truncate" style={{ maxWidth: "6rem" }}>
-      Visitado
-    </span>
-  </div>
+          <div className="d-flex flex-wrap gap-3">
+            <div className="d-flex align-items-center gap-2">
+              <div
+                className="flex-shrink-0"
+                style={{
+                  width: "1.2rem",
+                  height: "1.2rem",
+                  backgroundColor: "#90ee9091",
+                  border: "1px solid #000",
+                }}
+              ></div>
+              <span className="text-truncate" style={{ maxWidth: "6rem" }}>
+                Visitado
+              </span>
+            </div>
 
-  <div className="d-flex align-items-center gap-2">
-    <div
-      className="flex-shrink-0"
-      style={{
-        width: "1.2rem",
-        height: "1.2rem",
-        backgroundColor: "#ffd97aa2",
-        border: "1px solid #000",
-      }}
-    ></div>
-    <span className="text-truncate" style={{ maxWidth: "6rem" }}>
-      Deseado
-    </span>
-  </div>
+            <div className="d-flex align-items-center gap-2">
+              <div
+                className="flex-shrink-0"
+                style={{
+                  width: "1.2rem",
+                  height: "1.2rem",
+                  backgroundColor: "#ffd97aa2",
+                  border: "1px solid #000",
+                }}
+              ></div>
+              <span className="text-truncate" style={{ maxWidth: "6rem" }}>
+                Deseado
+              </span>
+            </div>
 
-  <div className="d-flex align-items-center gap-2">
-    <div
-      className="flex-shrink-0"
-      style={{
-        width: "1.2rem",
-        height: "1.2rem",
-        backgroundColor: "#7ddad198",
-        border: "1px solid #000",
-      }}
-    ></div>
-    <span className="text-truncate" style={{ maxWidth: "8rem" }}>
-      Visitado y Deseado
-    </span>
-  </div>
+            <div className="d-flex align-items-center gap-2">
+              <div
+                className="flex-shrink-0"
+                style={{
+                  width: "1.2rem",
+                  height: "1.2rem",
+                  backgroundColor: "#7ddad198",
+                  border: "1px solid #000",
+                }}
+              ></div>
+              <span className="text-truncate" style={{ maxWidth: "8rem" }}>
+                Visitado y Deseado
+              </span>
+            </div>
 
-  <div className="d-flex align-items-center gap-2">
-    <div
-      className="flex-shrink-0"
-      style={{
-        width: "1.2rem",
-        height: "1.2rem",
-        backgroundColor: "#C0C0C0",
-        border: "1px solid #000",
-      }}
-    ></div>
-    <span className="text" style={{ maxWidth: "8rem" }}>
-      No visitado/deseado
-    </span>
-  </div>
-</div>
-
+            <div className="d-flex align-items-center gap-2">
+              <div
+                className="flex-shrink-0"
+                style={{
+                  width: "1.2rem",
+                  height: "1.2rem",
+                  backgroundColor: "#C0C0C0",
+                  border: "1px solid #000",
+                }}
+              ></div>
+              <span className="text" style={{ maxWidth: "8rem" }}>
+                No visitado/deseado
+              </span>
+            </div>
+          </div>
         </div>
-        
       </div>
-
-      
 
       {/* PERFIL */}
       <div className="card shadow-lg border-0 rounded-4 mb-5">
         <div className="card-body text-center">
           <div className="d-flex justify-content-center mb-4 gap-3">
-            <button className="btn btn-outline-primary" onClick={() => {setIsEdit(true)}} >Editar</button>
-            <button className="btn btn-outline-primary" onClick={goToMessage}>Mensajes</button>
+            <button
+              className="btn btn-outline-primary"
+              onClick={() => setIsEdit(true)}
+            >
+              Editar
+            </button>
+            <button className="btn btn-outline-primary" onClick={goToMessage}>
+              Mensajes
+            </button>
           </div>
 
           <div className="d-flex flex-column align-items-center gap-3">
@@ -443,7 +503,25 @@ const goToMessage = () => {
               className="rounded-circle shadow"
               style={{ width: "150px", height: "150px", objectFit: "cover" }}
             />
-            <div className="text-start w-75">
+
+            {/* BOTONES DE SEGUIDORES Y SEGUIDOS */}
+            <div className="d-flex gap-3">
+              <button
+                className="btn btn-outline-info text-dark fw-bold fst-italic"
+                onClick={() => handleShowFollowers(user.user._id)}
+              >
+                Seguidores
+              </button>
+
+              <button
+                className="btn btn-outline-success"
+                onClick={() => handleShowFollowing(user.user._id)}
+              >
+                Seguidos
+              </button>
+            </div>
+
+            <div className="text-start w-75 mt-3">
               <p>
                 <strong>Nombre:</strong> {user.user.name} {user.user.lastName}
               </p>
@@ -462,18 +540,15 @@ const goToMessage = () => {
                 {user.user.desiredDestinations.length}
               </p>
               <p>
-                <strong>Seguidores:</strong> {user.user.followers.length}
-              </p>
-              <p>
-                <strong>Seguidos:</strong> {user.user.following.length}
-              </p>
-              <p>
                 <strong>Biografía:</strong>
               </p>
-              <p className="fst-italic text-secondary">
-                {user.user.biography}
-              </p>
+              <p className="fst-italic text-secondary">{user.user.biography}</p>
             </div>
+          </div>
+          <div className="d-flex justify-content-end">
+            <button className="btn btn-danger" onClick={handleOpenDeleteModal}>
+              Eliminar Cuenta
+            </button>
           </div>
         </div>
       </div>
@@ -492,7 +567,9 @@ const goToMessage = () => {
           </div>
 
           {dataPostUser.length === 0 ? (
-            <p className="text-center text-muted">Aún no tienes publicaciones.</p>
+            <p className="text-center text-muted">
+              Aún no tienes publicaciones.
+            </p>
           ) : (
             dataPostUser.map((p, idx) => (
               <div key={idx} className="card mb-4 shadow-sm border-0 rounded-3">
@@ -509,23 +586,25 @@ const goToMessage = () => {
                   <p className="text-center">{p.text}</p>
                   <div className="d-flex justify-content-center gap-3 mt-3">
                     <button
-  className="btn d-flex align-items-center gap-2"
-  onClick={() => toggleLike(p._id)}
->
-  <img
-    src={
-      p.likes.some((like) => like._id === user.user._id)
-        ? "/src/assets/ListBestPost/input-likeActive.png"
-        : "/src/assets/ListBestPost/IconoLikeInactivoGlobeTrack.png"
-    }
-    alt=""
-    style={{ width: "20px" }}
-  />
-  <span>{p.likes.length}</span>
-</button>
+                      className="btn d-flex align-items-center gap-2"
+                      onClick={() => toggleLike(p._id)}
+                    >
+                      <img
+                        src={
+                          p.likes.some((like) => like._id === user.user._id)
+                            ? "/src/assets/ListBestPost/input-likeActive.png"
+                            : "/src/assets/ListBestPost/IconoLikeInactivoGlobeTrack.png"
+                        }
+                        alt=""
+                        style={{ width: "20px" }}
+                      />
+                      <span>{p.likes.length}</span>
+                    </button>
 
-                    <button className=" btn d-flex align-items-center gap-2"
-                    onClick={() => openCommentModal(p._id)}>
+                    <button
+                      className=" btn d-flex align-items-center gap-2"
+                      onClick={() => openCommentModal(p._id)}
+                    >
                       <img
                         src="/src/assets/ListBestPost/IconoComentarioGlobeTrack.png"
                         alt=""
@@ -535,57 +614,63 @@ const goToMessage = () => {
                     </button>
                   </div>
                   <div className="d-flex gap-2">
-                  <div>
-                    <button className="btn btn-danger" onClick={()=> handleDeletePost(p._id)}>Eliminar</button>
+                    <div>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDeletePost(p._id)}
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        className="btn btn-warning"
+                        onClick={() => {
+                          setPostToEdit(p); // primero asignamos el post
+                          setIsEditPost(true); // luego decimos "modo edición"
+                          setIsCreatePost(true);
+                          postUser(); // por último mostramos CreatePost
+                        }}
+                      >
+                        Editar
+                      </button>
+                    </div>
                   </div>
-   <div>
- <button
-  className="btn btn-warning"
-  onClick={() => {
-  setPostToEdit(p);       // primero asignamos el post
-  setIsEditPost(true);    // luego decimos "modo edición"
-  setIsCreatePost(true); 
-  postUser() // por último mostramos CreatePost
-}}
->
-  Editar
-</button>
-
-</div>
-                  </div>
-                 
                 </div>
               </div>
             ))
           )}
         </div>
       </div>
+
+      {/*Modal para marcar pais como visitado o deseado */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
-  <Modal.Header closeButton>
-    <Modal.Title>Marcar país</Modal.Title>
-  </Modal.Header>
-  <Modal.Body className="text-center">
-    <p className="fw-semibold">
-      ¿Qué quieres hacer con <span className="text-primary">{selectedCountry?.name}</span>?
-    </p>
-    <div className="d-flex justify-content-center gap-3 mt-3">
-      <Button
-        variant="success"
-        onClick={() => handleMarkCountry("visitado")}
-      >
-        Marcar como visitado
-      </Button>
-      <Button
-        variant="warning"
-        onClick={() => handleMarkCountry("deseado")}
-      >
-        Marcar como deseado
-      </Button>
-    </div>
-  </Modal.Body>
-</Modal>
- 
-       {openModal && (
+        <Modal.Header closeButton>
+          <Modal.Title>Marcar país</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          <p className="fw-semibold">
+            ¿Qué quieres hacer con{" "}
+            <span className="text-primary">{selectedCountry?.name}</span>?
+          </p>
+          <div className="d-flex justify-content-center gap-3 mt-3">
+            <Button
+              variant="success"
+              onClick={() => handleMarkCountry("visitado")}
+            >
+              Marcar como visitado
+            </Button>
+            <Button
+              variant="warning"
+              onClick={() => handleMarkCountry("deseado")}
+            >
+              Marcar como deseado
+            </Button>
+          </div>
+        </Modal.Body>
+      </Modal>
+
+      {openModal && (
         <div
           className="modal fade show d-block"
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
@@ -620,7 +705,164 @@ const goToMessage = () => {
         </div>
       )}
 
+      <Modal
+        show={showFollowersModal}
+        onHide={handleCloseFollowersModal}
+        centered
+      >
+        <Modal.Header>
+          <Modal.Title>Seguidores: {dataFollowers.length}</Modal.Title>
+        </Modal.Header>
 
+        <Modal.Body>
+          {dataFollowers.length === 0 ? (
+            <p className="text-center text-muted">No tienes seguidores aún.</p>
+          ) : (
+            <>
+              <input
+                type="text"
+                placeholder="Buscar seguidores..."
+                className="form-control mb-3"
+                value={searchFollowers}
+                onChange={(e) => setSearchFollowers(e.target.value)}
+              />
+
+              <ul className="list-group">
+                {dataFollowers
+                  .filter((f) =>
+                    `${f.name} ${f.lastName}`
+                      .toLowerCase()
+                      .includes(searchFollowers.toLowerCase())
+                  )
+                  .map((f) => (
+                    <li
+                      key={f._id}
+                      className="list-group-item d-flex align-items-center justify-content-between gap-3"
+                    >
+                      <img
+                        src={f.photoProfile || "/default-avatar.png"}
+                        alt=""
+                        className="rounded-circle ms-5"
+                        style={{ width: 40, height: 40 }}
+                      />
+                      <span>
+                        {f.name} {f.lastName}
+                      </span>
+
+                      <button
+                        className="btn btn-success"
+                        onClick={() => {
+                          navigate("/profile", {
+                            state: { userId: f._id, isMyProfile: false },
+                          });
+                        }}
+                      >
+                        Ver Perfil
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseFollowersModal}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={showFollowingModal}
+        onHide={handleCloseFollowingModal}
+        centered
+      >
+        <Modal.Header>
+          <Modal.Title>Seguidos: {dataFollowing.length}</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {dataFollowing.length === 0 ? (
+            <p className="text-center text-muted">No sigues a nadie aún.</p>
+          ) : (
+            <>
+              <input
+                type="text"
+                placeholder="Buscar seguidos..."
+                className="form-control mb-3"
+                value={searchFollowing}
+                onChange={(e) => setSearchFollowing(e.target.value)}
+              />
+
+              <ul className="list-group">
+                {dataFollowing
+                  .filter((f) =>
+                    `${f.name} ${f.lastName}`
+                      .toLowerCase()
+                      .includes(searchFollowing.toLowerCase())
+                  )
+                  .map((f) => (
+                    <li
+                      key={f._id}
+                      className="list-group-item d-flex align-items-center gap-3 justify-content-between"
+                    >
+                      <img
+                        src={f.photoProfile || "/default-avatar.png"}
+                        alt=""
+                        className="rounded-circle"
+                        style={{ width: 40, height: 40 }}
+                      />
+
+                      <span>
+                        {f.name} {f.lastName}
+                      </span>
+
+                      <button
+                        className="btn btn-success"
+                        onClick={() => {
+                          navigate("/profile", {
+                            state: { userId: f._id, isMyProfile: false },
+                          });
+                        }}
+                      >
+                        Ver Perfil
+                      </button>
+                    </li>
+                  ))}
+              </ul>
+            </>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseFollowingModal}>
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showDeleteModal} onHide={handleCloseDeleteModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Eliminar cuenta</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body className="text-center">
+          <p className="fw-bold">
+            ¿Estás seguro de que quieres eliminar tu cuenta?
+          </p>
+          <p className="text-danger">Esta acción no se puede deshacer.</p>
+        </Modal.Body>
+
+        <Modal.Footer className="d-flex justify-content-between">
+          <Button variant="secondary" onClick={handleCloseDeleteModal}>
+            No
+          </Button>
+          <Button variant="danger" onClick={() => deletedUser(user.user?._id)}>
+            Sí, eliminar mi cuenta
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

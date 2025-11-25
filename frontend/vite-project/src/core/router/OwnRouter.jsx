@@ -15,6 +15,7 @@ import CreateGroupComponent from '../../components/GroupPage/CreateGroupComponen
 import ChatGroup from '../../components/GroupPage/ChatGroup'
 import CreateCommentComponent from '../../components/PostPage/createComment'
 import RanckingPage from '../../pages/RankingPage/RanckingPage'
+import ControlPanel from '../../pages/controlPanel/ControlPanel'
 
 const OwnRouter = () => {
   const{isLogued} = useSelector(state => state.loginReducer)
@@ -33,6 +34,7 @@ const OwnRouter = () => {
     <Route path='/post/comment' element={isLogued ? (<ProtectedRouteComponent><MainLayaout><CommentComponent/></MainLayaout></ProtectedRouteComponent>) : (<Navigate to="" replace/>)} />
     <Route path='/post/comment/create' element={isLogued ? (<ProtectedRouteComponent><MainLayaout><CreateCommentComponent/></MainLayaout></ProtectedRouteComponent>) : (<Navigate to="" replace/>)} />
     <Route path='/ranking' element={isLogued ? (<ProtectedRouteComponent><MainLayaout><RanckingPage/></MainLayaout></ProtectedRouteComponent>) : (<Navigate to="" replace/>)} />
+    <Route path='/control' element={isLogued ? (<ProtectedRouteComponent><MainLayaout><ControlPanel/></MainLayaout></ProtectedRouteComponent>) : (<Navigate to="" replace/>)} />
 
       </Routes>
     </div>

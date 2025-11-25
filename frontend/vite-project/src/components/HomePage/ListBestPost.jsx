@@ -19,47 +19,72 @@ const ListBestPost = () => {
     }
   };
 
-  
-
   useEffect(() => {
     TopBestPost();
   }, []);
 
   return (
-    <div className="container ">
-      <h2 className="text-center mb-4 fw-bold text-primary ">
+    <div className="container">
+      <h2 className="text-center mb-4 fw-bold text-primary">
         Top Publicaciones
       </h2>
 
       {topPost.length === 0 ? (
+        
         <p className="text-center text-muted fw-semibold">
           No hay publicaciones destacadas
         </p>
       ) : (
         <div className="d-flex flex-column gap-4">
           {topPost.map((p, idx) => (
-            <div key={idx} className="card h-auto bg-dark shadow-sm border-0 d-flex justify-conten">
+            
+            <div
+              key={idx}
+              className="card bg-dark shadow-sm border-0"
+              style={{
+                padding: "10px",
+                borderRadius: "14px",
+              }}
+            >
+              {/* Encabezado */}
               <div className="d-flex align-items-center p-3">
                 <img
                   src={p.user?.photoProfile}
                   alt={p.user?.name || "Perfil"}
                   className="rounded-circle border border-2 border-primary me-3"
                   style={{
-                    width: "50px",
-                    height: "50px",
+                    width: "65px",   // <<< más grande
+                    height: "65px",
                     objectFit: "cover",
-                    color: "#fff"
                   }}
                 />
-                <h6 className="mb-0 fw-bold text-light">{p.user?.name}</h6>
+                <h6
+                  className="mb-0 fw-bold text-light"
+                  style={{ fontSize: "1.05rem" }}
+                >
+                  {p.user?.name}
+                </h6>
               </div>
-              <div className="card-body">
-                <h5 className="card-title text-primary fw-bold">{p.title}</h5>
+
+              <div>
+                <img  src={p.image} alt="" />
+              </div>
+
+              {/* Contenido */}
+              <div className="card-body" style={{ paddingTop: "0px" }}>
+                <h5
+                  className="card-title text-primary fw-bold"
+                  style={{ fontSize: "1.15rem" }}
+                >
+                  {p.title}
+                </h5>
+
                 <p
                   className="card-text text-secondary"
                   style={{
+                    fontSize: "0.95rem",
                     display: "-webkit-box",
-                    WebkitLineClamp: 3,
+                    WebkitLineClamp: 4,
                     WebkitBoxOrient: "vertical",
                     overflow: "hidden",
                   }}

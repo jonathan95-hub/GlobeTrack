@@ -5,7 +5,7 @@ import CreatePost from "../../components/Profile/CreatePost/CreatePost";
 import MyProfileComponent from "../../components/Profile/MyProfile/MyProfileComponet.jsx";
 import EditUserComponent from "../../components/Profile/EditUser/EditUserComponent.jsx";
 import ProfileUserComponent from "../../components/Profile/ProfileUser/ProfileUserComponent.jsx";
-import { use } from "react";
+
 
 const ProfilePage = () => {
   const location = useLocation();

@@ -366,66 +366,68 @@ const ProfileUserComponent = () => {
         </div>
       </div>
 
-      {/* PERFIL */}
-      {viewUser && (
-        <div className="card shadow-lg border-0 rounded-4 mb-5">
-          <div className="card-body text-center">
-            <div className="d-flex justify-content-center mb-4 gap-3">
-              <button
-                className="btn btn-outline-primary"
-                onClick={() => follow(viewUser._id)}
-              >
-                {viewUser.followers.includes(user.user._id)
-                  ? "Dejar de Seguir"
-                  : "Seguir"}
-              </button>
-              <button className="btn btn-outline-primary" onClick={openMessage}>
-                Enviar Mensaje
-              </button>
-            </div>
+    {/* PERFIL */}
+{viewUser && (
+  <div className="card shadow-lg border-0 rounded-4 mb-5">
+    <div className="card-body text-center">
+      <div className="d-flex justify-content-center mb-4 gap-3">
+        <button
+          className="btn btn-outline-primary"
+          onClick={() => follow(viewUser._id)}
+        >
+          {viewUser.followers.includes(user.user._id)
+            ? "Dejar de Seguir"
+            : "Seguir"}
+        </button>
+        <button className="btn btn-outline-primary" onClick={openMessage}>
+          Enviar Mensaje
+        </button>
+      </div>
 
-            <div className="d-flex flex-column align-items-center gap-3">
-              <img
-                src={viewUser.photoProfile}
-                alt="Perfil"
-                className="rounded-circle shadow"
-                style={{ width: "150px", height: "150px", objectFit: "cover" }}
-              />
-              <div className="text-start w-75">
-                <p>
-                  <strong>Nombre:</strong> {viewUser.name} {viewUser.lastName}
-                </p>
-                <p>
-                  <strong>País:</strong> {viewUser.country}
-                </p>
-                <p>
-                  <strong>Ciudad:</strong> {viewUser.city}
-                </p>
-                <p>
-                  <strong>Paises visitados:</strong>{" "}
-                  {viewUser.visitedDestinations.length}
-                </p>
-                <p>
-                  <strong>Paises deseados:</strong>{" "}
-                  {viewUser.desiredDestinations.length}
-                </p>
-                <p>
-                  <strong>Seguidores:</strong> {viewUser.followers.length}
-                </p>
-                <p>
-                  <strong>Seguidos:</strong> {viewUser.following.length}
-                </p>
-                <p>
-                  <strong>Biografía:</strong>
-                </p>
-                <p className="fst-italic text-secondary">
-                  {viewUser.biography}
-                </p>
-              </div>
-            </div>
-          </div>
+      <div className="d-flex flex-column align-items-center gap-3">
+        <img
+          src={viewUser.photoProfile}
+          alt="Perfil"
+          className="rounded-circle shadow"
+          style={{ width: "150px", height: "150px", objectFit: "cover" }}
+        />
+
+        {/* BOTONES DE SEGUIDORES Y SEGUIDOS */}
+        <div className="d-flex gap-3">
+          <button className="btn btn-outline-info">
+            Seguidores <span className="badge bg-dark">{viewUser.followers.length}</span>
+          </button>
+          <button className="btn btn-outline-success">
+            Seguidos <span className="badge bg-dark">{viewUser.following.length}</span>
+          </button>
         </div>
-      )}
+
+        <div className="text-start w-75 mt-3">
+          <p>
+            <strong>Nombre:</strong> {viewUser.name} {viewUser.lastName}
+          </p>
+          <p>
+            <strong>País:</strong> {viewUser.country}
+          </p>
+          <p>
+            <strong>Ciudad:</strong> {viewUser.city}
+          </p>
+          <p>
+            <strong>Paises visitados:</strong> {viewUser.visitedDestinations.length}
+          </p>
+          <p>
+            <strong>Paises deseados:</strong> {viewUser.desiredDestinations.length}
+          </p>
+          <p>
+            <strong>Biografía:</strong>
+          </p>
+          <p className="fst-italic text-secondary">{viewUser.biography}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* PUBLICACIONES */}
       <div className="card shadow-lg border-0 rounded-4 mb-5">

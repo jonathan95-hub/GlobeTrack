@@ -80,7 +80,7 @@ const ListGroupComponent = () => {
                       </div>
                       <div className="d-flex flex-column text-end">
                         <small className="text-secondary fw-semibold">Creador</small>
-                        <span className="text-dark fw-medium">{g.creatorGroup.name}</span>
+                        <span className="text-dark fw-medium">{g.creatorGroup?.name}</span>
                       </div>
                     </div>
                   </div>

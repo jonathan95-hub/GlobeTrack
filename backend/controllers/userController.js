@@ -240,12 +240,12 @@ const followAndUnfollow = async (req, res) => {
 const howManyFollowers = async (req, res) => {
   try {
     const userId = req.payload._id;
-    const howMany = await userModel
+    const user = await userModel
       .findById(userId)
-      .populate("followers", "photoProfile name");
+      .populate("followers", "photoProfile name lastName");
     res
       .status(200)
-      .send({ howMany, status: "Success", message: "Followers obtained" });
+      .send({ followers: user.followers, status: "Success", message: "Followers obtained" });
   } catch (error) {
     res.status(500).send({ status: "Failed", error: error.message });
   }
@@ -254,12 +254,12 @@ const howManyFollowers = async (req, res) => {
 const howManyFollowing = async (req, res) => {
   try {
     const userId = req.payload._id;
-    const howMany = await userModel
+    const user = await userModel
       .findById(userId)
-      .populate("following", "photoProfile name");
+      .populate("following", "photoProfile name lastName");
     res
       .status(200)
-      .send({ howMany, status: "Success", message: "Following obtained" });
+      .send({ following: user.following, status: "Success", message: "Following obtained" });
   } catch (error) {
     res.status(500).send({ status: "Failed", error: error.message });
   }

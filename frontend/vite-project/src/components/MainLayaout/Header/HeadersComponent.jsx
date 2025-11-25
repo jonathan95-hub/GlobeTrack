@@ -100,6 +100,11 @@ const handleNotificationClick = async (notificationId) => {
       localStorage.setItem("menuOption", 5)
   }
 
+  const goToControl = () => {
+    navigate("/control")
+    localStorage.getItem("token")
+  }
+
   useEffect(() => {
     const savedOption = localStorage.getItem("menuOption");
     if (savedOption) {
@@ -118,7 +123,7 @@ const handleNotificationClick = async (notificationId) => {
       {menuOptionsHeader === 0 ? (
         <header className="d-flex flex-wrap align-items-center justify-content-between py-2 w-100 bg-primary shadow-sm">
 
-          <div className="d-flex align-items-center ms-3">
+          <div className="d-flex align-items-center ms-2">
             <img
               className="headerLogo img-fluid "
               src="/src/assets/HeaderAndFooter/LogoGlobeTracked.png"
@@ -167,12 +172,7 @@ const handleNotificationClick = async (notificationId) => {
         <div className="d-flex align-items-center gap-3 me-3">
   {/* Botón Panel de Control solo si es admin */}
   {user.user?.isAdmin === "admin" && (
-    <button
-      className="btn btn-warning"
-      onClick={() => navigate("/admin-panel")} // Cambia la ruta si es otra
-    >
-      Panel de Control
-    </button>
+     <img style={{width:'20px', cursor: 'pointer'}} onClick={goToControl}  src="/src/assets/HeaderAndFooter/engranaje.png" alt="" />
   )}
 
   <img
@@ -188,7 +188,7 @@ const handleNotificationClick = async (notificationId) => {
       ) : menuOptionsHeader === 1 ? (
         <header className="d-flex flex-wrap align-items-center justify-content-between py-2 w-100 bg-primary shadow-sm">
 
-          <div className="d-flex align-items-center ms-3">
+          <div className="d-flex align-items-center ms-2">
             <img
               className="headerLogo img-fluid"
               src="/src/assets/HeaderAndFooter/LogoGlobeTracked.png"
@@ -237,12 +237,7 @@ const handleNotificationClick = async (notificationId) => {
          <div className="d-flex align-items-center gap-3 me-3">
   {/* Botón Panel de Control solo si es admin */}
   {user.user?.isAdmin === "admin" && (
-    <button
-      className="btn btn-warning"
-      onClick={() => navigate("/admin-panel")} // Cambia la ruta si es otra
-    >
-      Panel de Control
-    </button>
+     <img style={{width:'20px', cursor: 'pointer'}} onClick={goToControl}  src="/src/assets/HeaderAndFooter/engranaje.png" alt="" />
   )}
 
   <img
@@ -258,7 +253,7 @@ const handleNotificationClick = async (notificationId) => {
       ) : menuOptionsHeader === 2 ? (
         <header className="d-flex flex-wrap align-items-center justify-content-between py-2 w-100 bg-primary shadow-sm">
 
-          <div className="d-flex align-items-center ms-5">
+          <div className="d-flex align-items-center ms-2 ">
             <img
               className="headerLogo img-fluid"
               src="/src/assets/HeaderAndFooter/LogoGlobeTracked.png"
@@ -307,12 +302,7 @@ const handleNotificationClick = async (notificationId) => {
          <div className="d-flex align-items-center gap-3 me-3">
   {/* Botón Panel de Control solo si es admin */}
   {user.user?.isAdmin === "admin" && (
-    <button
-      className="btn btn-warning"
-      onClick={() => navigate("/admin-panel")} // Cambia la ruta si es otra
-    >
-      Panel de Control
-    </button>
+     <img style={{width:'20px', cursor: 'pointer'}} onClick={goToControl}  src="/src/assets/HeaderAndFooter/engranaje.png" alt="" />
   )}
 
   <img
@@ -328,7 +318,7 @@ const handleNotificationClick = async (notificationId) => {
       ) : menuOptionsHeader === 3 ? (
         <header className="d-flex flex-wrap align-items-center justify-content-between py-2 w-100 bg-primary shadow-sm">
 
-          <div className="d-flex align-items-center ms-5">
+          <div className="d-flex align-items-center ms-2">
             <img
               className="headerLogo img-fluid"
               src="/src/assets/HeaderAndFooter/LogoGlobeTracked.png"
@@ -378,12 +368,7 @@ const handleNotificationClick = async (notificationId) => {
         <div className="d-flex align-items-center gap-3 me-3">
   {/* Botón Panel de Control solo si es admin */}
   {user.user?.isAdmin === "admin" && (
-    <button
-      className="btn btn-warning"
-      onClick={() => navigate("/admin-panel")} // Cambia la ruta si es otra
-    >
-      Panel de Control
-    </button>
+     <img style={{width:'20px', cursor: 'pointer'}} onClick={goToControl}  src="/src/assets/HeaderAndFooter/engranaje.png" alt="" />
   )}
 
   <img
@@ -399,7 +384,7 @@ const handleNotificationClick = async (notificationId) => {
       ) : menuOptionsHeader === 4 ? (
          <header className="d-flex flex-wrap align-items-center justify-content-between py-2 w-100 bg-primary shadow-sm">
 
-          <div className="d-flex align-items-center ms-5">
+          <div className="d-flex align-items-center ms-2">
             <img
               className="headerLogo img-fluid"
               src="/src/assets/HeaderAndFooter/LogoGlobeTracked.png"
@@ -428,7 +413,7 @@ const handleNotificationClick = async (notificationId) => {
                 <li><button className="btn btn-outline-light" onClick={goToHome}>Home</button></li>
                 <li><button className="btn btn-outline-light" onClick={goToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-outline-light" onClick={goToProfile}>Perfil</button></li>
-                <li><button className="btn btn-outline-light"  onClick={goToRancking}>Rancking</button></li>
+                <li><button className="btn btn-outline-light"  onClick={goToRancking}>Ranking</button></li>
                              <li style={{ position: "relative" }}>
   <button className="btn btn-outline-light position-relative" onClick={handleToggleNotifications}>
     Notificaciones
@@ -448,12 +433,7 @@ const handleNotificationClick = async (notificationId) => {
         <div className="d-flex align-items-center gap-3 me-3">
   {/* Botón Panel de Control solo si es admin */}
   {user.user?.isAdmin === "admin" && (
-    <button
-      className="btn btn-warning"
-      onClick={() => navigate("/admin-panel")} // Cambia la ruta si es otra
-    >
-      Panel de Control
-    </button>
+     <img style={{width:'20px', cursor: 'pointer'}} onClick={goToControl}  src="/src/assets/HeaderAndFooter/engranaje.png" alt="" />
   )}
 
   <img
@@ -469,7 +449,7 @@ const handleNotificationClick = async (notificationId) => {
       ) : menuOptionsHeader === 5 ? (
          <header className="d-flex flex-wrap align-items-center justify-content-between py-2 w-100 bg-primary shadow-sm">
 
-          <div className="d-flex align-items-center ms-5">
+          <div className="d-flex align-items-center ms-2">
             <img
               className="headerLogo img-fluid"
               src="/src/assets/HeaderAndFooter/LogoGlobeTracked.png"
@@ -518,12 +498,7 @@ const handleNotificationClick = async (notificationId) => {
        <div className="d-flex align-items-center gap-3 me-3">
   {/* Botón Panel de Control solo si es admin */}
   {user.user?.isAdmin === "admin" && (
-    <button
-      className="btn btn-warning"
-      onClick={() => navigate("/admin-panel")} // Cambia la ruta si es otra
-    >
-      Panel de Control
-    </button>
+     <img style={{width:'20px', cursor: 'pointer'}} onClick={goToControl}  src="/src/assets/HeaderAndFooter/engranaje.png" alt="" />
   )}
 
   <img

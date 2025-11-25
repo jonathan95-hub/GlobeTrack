@@ -147,8 +147,8 @@ const PostPage = () => {
                       onClick={() => goToProfileUser(p.user._id)}
                     >
                       <img
-                        src={p.user.photoProfile}
-                        alt={p.user.name}
+                        src={p.user?.photoProfile}
+                        alt={p.user?.name}
                         className="rounded-circle shadow-sm me-3"
                         style={{
                           width: "60px",
@@ -158,9 +158,9 @@ const PostPage = () => {
                       />
                       <div>
                         <h6 className="mb-0 fw-bold text-primary">
-                          {p.user.name} {p.user.lastName}
+                          {p.user?.name} {p.user?.lastName}
                         </h6>
-                        <small className="text-muted">{p.user.country}</small>
+                        <small className="text-muted">{p.user?.country}</small>
                       </div>
                     </div>
 

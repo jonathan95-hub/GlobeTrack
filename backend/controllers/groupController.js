@@ -104,7 +104,7 @@ if (photoGroup && photoGroup.startsWith("data:image")) {
 };
 
 
-const getFiveGroupsMoreMembers = async(req, res) => {
+const getGroupsMoreMembers = async(req, res) => {
   try {
     const FiveGroup = await groupModel.aggregate([
       {
@@ -117,7 +117,7 @@ const getFiveGroupsMoreMembers = async(req, res) => {
         }
       },
       {$sort: {membersCount: -1}},
-      {$limit: 5}
+      {$limit: 10}
     ])
 
     res.status(200).send({status: "Success", message: "Top group obtained", FiveGroup})
@@ -402,7 +402,7 @@ const disconectedUserToGroup = async (req, res) => {
 const getMembersOfGroup = async (req, res) => {
   try {
     const groupId = req.params.groupId; // Obtenemos el id del grupo por params
-    const group = await groupModel.findById(groupId); // Buscamos el grupo por su id
+    const group = await groupModel.findById(groupId).populate("members", "name photoProfile"); // Buscamos el grupo por su id
     // Si no existe eñ grupo
     if (!group) {
       //Devolvemos un 404 con el mensaje de grupo no encontrado
@@ -411,7 +411,7 @@ const getMembersOfGroup = async (req, res) => {
         .send({ status: "Failed", message: "Group not found" });
     }
     
-    const getMembers = group.members.length; // Creamos la constante getMembers que es la longitud del array de miembros del grupo
+    const getMembers = group.members; // Creamos la constante getMembers que es la longitud del array de miembros del grupo
 
     // Devolvemos un 200 con el mensaje de miembros obtenidos
     res
@@ -424,20 +424,58 @@ const getMembersOfGroup = async (req, res) => {
 };
 
 // Esta funcion es igual que la anterior pero cambiando el array de members por el de userConnect
-const obtainedUserOnline = async(req, res) => {
+const removeMemberFromGroup = async (req, res) => {
   try {
-    const groupId = req.params.groupId
-    const group = await groupModel.findById(groupId)
-    if(!group){
-      return res.status(404).send({status: "Failed", message: "Group not found"})
+    const userId = req.payload; // Usuario que hace la petición (del token)
+    const { groupId, userIdToRemove } = req.params; // Usuario a eliminar
+
+    // Buscar el grupo
+    const group = await groupModel.findById(groupId);
+    if (!group) {
+      return res.status(404).send({ status: "Failed", message: "Group not found" });
     }
-    const isConnected = group.userConnect.length
-    res.status(200).send({isConnected, status: "Success", message: "User conected obtained"})
+
+    // Buscar al usuario que hace la petición
+    const requestingUser = await usersModel.findById(userId);
+    if (!requestingUser) {
+      return res.status(404).send({ status: "Failed", message: "Requesting user not found" });
+    }
+
+    // Comprobar permisos: creador o admin
+    const isCreator = group.creatorGroup._id.toString() === userId._id.toString();
+    const isAdmin = requestingUser.isAdmin === "admin"; // ajusta según tu DB
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).send({
+        status: "Failed",
+        message: "You do not have permission to remove members"
+      });
+    }
+
+    // Verificar que el usuario a eliminar sea miembro
+    if (!group.members.map(m => m.toString()).includes(userIdToRemove)) {
+      return res.status(400).send({
+        status: "Failed",
+        message: "User is not a member of this group"
+      });
+    }
+
+    // Eliminar miembro
+    group.members.pull(userIdToRemove);
+    await group.save();
+
+    res.status(200).send({
+      status: "Success",
+      message: "User removed from group",
+      groupId,
+      removedUserId: userIdToRemove
+    });
+
   } catch (error) {
-      // Devolvemos un 500 para cualquier error del servidor y el mensaje del error
     res.status(500).send({ status: "Failed", error: error.message });
   }
-}
+};
+
 
 const editGroup = async (req, res) => {
   try {
@@ -503,7 +541,7 @@ const editGroup = async (req, res) => {
 // No se òne la validacion de si el usuario es administrador por que en la ruta ya hay un middelware que se encarga de ello
 const allGroup = async(req,res) => {
   try {
-    const allGroup = await groupModel.find({}) // Se buscan todos los grupos
+    const allGroup = await groupModel.find({}).populate('creatorGroup', 'name') // Se buscan todos los grupos
     if(allGroup.length === 0 ){ // Si no hay ningun grupo existente
       // Devolvemos un 404 con el mensaje de grupos no encontrados
       return res.status(404).send({status: "Success", message: "Groups not found"})
@@ -524,8 +562,8 @@ module.exports = {
   getMembersOfGroup,
   getGroupNotIncludesUser,
   getGroupIncludesUser,
-  obtainedUserOnline,
+  removeMemberFromGroup,
   editGroup,
   allGroup,
-  getFiveGroupsMoreMembers
+  getGroupsMoreMembers
 };

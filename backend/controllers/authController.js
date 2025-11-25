@@ -3,7 +3,8 @@
  const jwt = require(`jsonwebtoken`); // Importamos jsonwebtoken
  const logger = require("../config/configWinston") // Importamos la configuración del logger Winston
  const getRequestInfo = require("../utils/requestInfo"); // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
- const sendEmail = require("../services/email") // Importamos la funcion sendEmail
+ const sendEmail = require("../services/email"); // Importamos la funcion sendEmail
+const { error } = require("winston");
 
 
  const signup = async (req, res) => { 
@@ -100,6 +101,7 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
 
 
  const login = async (req, res) => {
+    
     try {
         // Configuracion de bloqueo por intento de sesion fallidos
         const MAX_FAILED = 5;           // número de intentos fallidos permitidos
