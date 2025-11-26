@@ -326,78 +326,9 @@ const enterAndExitUserToGroup = async (req, res) => {
   }
 };
 
-const conecctedUserToGroup = async (req, res) => {
-  try {
-    const userId = req.payload._id; // Obtenemos el id del usuario desde el token
-    const groupId = req.params.groupId; // Obtenemos el id del grupo por params
-    const group = await groupModel.findById(groupId); // Buscamo el grupo por su id
-    // si el id del usuario no está incluido en el array de members 
-    if (!group.members.includes(userId)) {
-      // devolvemos un 403 y el mensaje de que el usuario no es miembro del grupo
-      return res
-        .status(403)
-        .send({
-          status: "Failed",
-          message: "User not is member to this group",
-        });
-    }
-    // buscamos el grupo por su id y actualizamos el array de userConnect insetando el id dle usuario con el operador $addToSet
-    await groupModel.findByIdAndUpdate(groupId, {
-      $addToSet: { userConnect: userId },
-    });
 
-    // Actualizamos en tiempo real el numero de usuarios conectados con req.io que viene de la implementacion de socket.io
-    if (req.io) {
-      const updatedGroup = await groupModel.findById(groupId);
-      req.io.to(groupId).emit("updateGroupOnlineUsers", {
-        groupId,
-        connectedUsers: updatedGroup.userConnect.length, 
-      });
-    }
-    // Devolvemos un 200 con un mensaje de usuario conectado
-    res.status(200).send({ status: "Success", message: "User connected" });
-  } catch (error) {
-    // Devolvemos un 500 para cualquier error del servidor y el mensaje del error
-    res.status(500).send({ status: "Failed", error: error.message });
-  }
-};
 
-const disconectedUserToGroup = async (req, res) => {
-  try {
-    const userId = req.payload._id; // Obtenemos el id del usuario desde el token
-    const groupId = req.params.groupId; // Obtenemos el id del grupo por params
-    const group = await groupModel.findById(groupId); // Buscamo el grupo por su id
-    // Si el id del usuario no está incluido en el array de userConnect
-    if (!group.userConnect.includes(userId)) {
-      // Devolvemos un 403 con el mensaje de el usuario nunca se conectó al grupo
-      return res
-        .status(403)
-        .send({
-          status: "Failed",
-          message: "The user never logged into this group",
-        });
-    }
-    // buscamos el grupo por su id y actualizamos el array de userConnect sacando el id dle usuario con el operador $pull
-    await groupModel.findByIdAndUpdate(groupId, {
-      $pull: { userConnect: userId },
-    });
-    // Actualizamos en tiempo real el numero de usuarios conectados con req.io que viene de la implementacion de socket.io
-      if (req.io) {
-      const updatedGroup = await groupModel.findById(groupId);
-      req.io.to(groupId).emit("updateGroupOnlineUsers", {
-        groupId,
-        connectedUsers: updatedGroup.userConnect.length,
-      });
-    }
-    // Devolvemos un 200  con el mensaje de el usuario ha sido desconectado
-    res
-      .status(200)
-      .send({ status: "Success", message: "the user has logged out" });
-  } catch (error) {
-    // Devolvemos un 500 para cualquier error del servidor y el mensaje del error
-    res.status(500).send({ status: "Failed", error: error.message });
-  }
-};
+
 
 const getMembersOfGroup = async (req, res) => {
   try {
@@ -423,7 +354,7 @@ const getMembersOfGroup = async (req, res) => {
   }
 };
 
-// Esta funcion es igual que la anterior pero cambiando el array de members por el de userConnect
+// Volver a comentar
 const removeMemberFromGroup = async (req, res) => {
   try {
     const userId = req.payload; // Usuario que hace la petición (del token)
@@ -537,7 +468,7 @@ const editGroup = async (req, res) => {
   }
 };
 
-// Es solo para administradores par apoder obtener una lsita completa de los grupos
+// Es solo para administradores para poder obtener una lista completa de los grupos
 // No se òne la validacion de si el usuario es administrador por que en la ruta ya hay un middelware que se encarga de ello
 const allGroup = async(req,res) => {
   try {
@@ -557,8 +488,6 @@ module.exports = {
   createGroup,
   deletedGroup,
   enterAndExitUserToGroup,
-  conecctedUserToGroup,
-  disconectedUserToGroup,
   getMembersOfGroup,
   getGroupNotIncludesUser,
   getGroupIncludesUser,

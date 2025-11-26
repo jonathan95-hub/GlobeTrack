@@ -12,11 +12,15 @@ const {
   getCountryDesired,
   allUser,
   deletedUser,
+  getFollowersByUserId,
+  getFollowingByUserId
 } = require("../controllers/userController");
 const {
   verification,
   adminAuth,
 } = require("../middelwares/middelwareAuthentication");
+router.get('/otheruserfollowers/:userId', getFollowersByUserId);
+router.get('/otheruserfollowing/:userId', getFollowingByUserId);
 
 /**
  * @swagger

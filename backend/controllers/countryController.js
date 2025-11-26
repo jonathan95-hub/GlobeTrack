@@ -206,52 +206,7 @@ const getFiveCountryMoreDesired = async (req, res) => {
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
-// Trae el pais mas visitado
-const getOneTopVisited = async (req, res) => {
-  try {
-    const top = await countryModel.aggregate([
-      {
-        $project: {
-          name: 1,
-          userVisited: { $size: "$userVisited" },
-        },
-      },
-      { $sort: { userVisited: -1 } },
-      { $limit: 1 },
-    ]);
-    res
-      .status(200)
-      .send({
-        top,
-        status: "Success",
-        message: "the most visited country obtained",
-      });
-  } catch (error) {
-    res.status(500).send({ status: "Failed", error: error.message });
-  }
-};
-// Trae l pais mas deseado
-const getOneTopDesired = async (req, res) => {
-  try {
-    const top = await countryModel.aggregate([
-      {
-        $project: {
-          name: 1,
-          wishedByUser: { $size: "$wishedByUser" },
-        },
-      },
-      { $sort: { wishedByUser: -1 } },
-      { $limit: 1 },
-    ]);
-    res
-      .status(200)
-      .send({
-        top,
-        status: "Success",
-        message: "the most desired country obtained",
-      });
-  } catch (error) {}
-};
+
 module.exports = {
   addCountry,
   deleteCountry,
@@ -259,7 +214,5 @@ module.exports = {
   markDesired,
   getFiveCountryMoreVisited,
   getFiveCountryMoreDesired,
-  getOneTopVisited,
-  getOneTopDesired,
   getAllCountries
 };

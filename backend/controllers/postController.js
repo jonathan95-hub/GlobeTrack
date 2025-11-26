@@ -396,27 +396,6 @@ const getPostUser = async (req, res) => {
 };
 
 
-// Función para obtener los usuarios que dieron like a un post
-const getUserLikes = async (req, res) => {
-  try {
-    const postId = req.params.postId; // Obtenemos el id del post por params
-
-    // Buscamos el post por su id y hacemos populate en el campo "likes"
-    // Para obtener el nombre y la foto de perfil de los usuarios que dieron like
-    const post = await postModel
-      .findById(postId)
-      .populate("likes", "photoProfile name");
-
-    const userLike = post.likes; // Obtenemos la lista de usuarios que dieron like
-      
-    // Devolvemos un 200 con la lista de usuarios
-    res.status(200).send({ post: userLike, status: "Success", message: "Users Obtained" });
-  } catch (error) {
-    // Devolvemos un 500 para cualquier error del servidor
-    res.status(500).send({ status: "Failed", error: error.message });
-  }
-};
-
 const getCommentPost = async (req, res) => {
   try {
     const postId = req.params.postId;
@@ -454,6 +433,5 @@ module.exports = {
   editPost,
   topPost,
   getPostUser,
-  getUserLikes,
   getCommentPost
 };

@@ -25,56 +25,62 @@ const ListBestPost = () => {
 
   return (
     <div className="container">
-      <h2 className="text-center mb-4 fw-bold text-primary">
-        Top Publicaciones
-      </h2>
-
       {topPost.length === 0 ? (
-        
         <p className="text-center text-muted fw-semibold">
           No hay publicaciones destacadas
         </p>
       ) : (
-        <div className="d-flex flex-column gap-4">
+        <div className="d-flex flex-column gap-3">
           {topPost.map((p, idx) => (
-            
             <div
               key={idx}
               className="card bg-dark shadow-sm border-0"
               style={{
-                padding: "10px",
+                padding: "14px",
                 borderRadius: "14px",
               }}
             >
               {/* Encabezado */}
-              <div className="d-flex align-items-center p-3">
+              <div className="d-flex align-items-center p-2">
                 <img
                   src={p.user?.photoProfile}
                   alt={p.user?.name || "Perfil"}
                   className="rounded-circle border border-2 border-primary me-3"
                   style={{
-                    width: "65px",   // <<< más grande
+                    width: "65px",
                     height: "65px",
                     objectFit: "cover",
                   }}
                 />
                 <h6
                   className="mb-0 fw-bold text-light"
-                  style={{ fontSize: "1.05rem" }}
+                  style={{ fontSize: "1.2rem" }}
                 >
                   {p.user?.name}
                 </h6>
               </div>
 
-              <div>
-                <img  src={p.image} alt="" />
-              </div>
+              {/* Imagen principal */}
+              {p.image && (
+                <div className="overflow-hidden rounded my-2">
+                  <img
+                    src={p.image}
+                    alt={p.title}
+                    style={{
+                      width: "100%",
+                      height: "220px",
+                      objectFit: "cover",
+                      borderRadius: "10px",
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Contenido */}
-              <div className="card-body" style={{ paddingTop: "0px" }}>
+              <div className="card-body p-2" style={{ paddingTop: "6px" }}>
                 <h5
                   className="card-title text-primary fw-bold"
-                  style={{ fontSize: "1.15rem" }}
+                  style={{ fontSize: "1.2rem" }}
                 >
                   {p.title}
                 </h5>
@@ -82,9 +88,9 @@ const ListBestPost = () => {
                 <p
                   className="card-text text-secondary"
                   style={{
-                    fontSize: "0.95rem",
+                    fontSize: "1rem",
                     display: "-webkit-box",
-                    WebkitLineClamp: 4,
+                    WebkitLineClamp: 3,
                     WebkitBoxOrient: "vertical",
                     overflow: "hidden",
                   }}
@@ -101,7 +107,6 @@ const ListBestPost = () => {
 };
 
 export default ListBestPost;
-
 
 
   //  <Carousel

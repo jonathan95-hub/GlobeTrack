@@ -2,7 +2,12 @@ const logger = require("../config/configWinston");
 const cloudinary = require("..//config/configCloudinary")
 const notificationsModel = require("../models/notificationModel");
 const userModel = require("../models/userModels");
-const getRequestInfo = require("../utils/requestInfo") // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
+const getRequestInfo = require("../utils/requestInfo"); // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
+const postModel = require("../models/postModel");
+const commentModel = require("../models/commentModel")
+const groupModel = require("../models/groupModel")
+const privateMessageModel = require("../models/privateMessage")
+
 
 
 const editUser = async (req, res) => {
@@ -147,7 +152,7 @@ const getUserWithMoreFollowers = async (req, res) => {
         },
       },
       { $sort: { followers: -1 } },
-      { $limit: 20 },
+      { $limit: 10 },
     ]);
     res
       .status(200)
@@ -265,6 +270,49 @@ const howManyFollowing = async (req, res) => {
   }
 };
 
+const getFollowersByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params; // tomo el id de la URL
+    const user = await userModel
+      .findById(userId)
+      .populate("followers", "photoProfile name lastName"); // solo campos necesarios
+
+    if (!user) {
+      return res.status(404).send({ status: "Failed", error: "User not found" });
+    }
+
+    res.status(200).send({
+      followers: user.followers,
+      status: "Success",
+      message: "Followers obtained"
+    });
+  } catch (error) {
+    res.status(500).send({ status: "Failed", error: error.message });
+  }
+};
+
+// Obtiene los seguidos de cualquier usuario
+const getFollowingByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params; // tomo el id de la URL
+    const user = await userModel
+      .findById(userId)
+      .populate("following", "photoProfile name lastName"); // solo campos necesarios
+
+    if (!user) {
+      return res.status(404).send({ status: "Failed", error: "User not found" });
+    }
+
+    res.status(200).send({
+      following: user.following,
+      status: "Success",
+      message: "Following obtained"
+    });
+  } catch (error) {
+    res.status(500).send({ status: "Failed", error: error.message });
+  }
+};
+
 const getCountryvisited = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -306,25 +354,57 @@ const getCountryDesired = async (req, res) => {
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
-
-const deletedUser = async(req, res) => {
+const deletedUser = async (req, res) => {
   try {
-    const userId = req.payload._id
-    const id = req.params.id
-    const user = await userModel.findById(userId)
-    if(user._id.toString() === id || user.isAdmin === "admin"){
-      const deleted = await userModel.findByIdAndDelete(id)
-      res.status(200).send({deleted, status: "Success", message: "User deleted successfully"})
-      
+    const userId = req.payload._id;
+    const id = req.params.id;
+
+    const user = await userModel.findById(userId);
+
+    // Verificación de permisos
+    if (user._id.toString() !== id && user.isAdmin !== "admin") {
+      return res.status(403).send({
+        status: "Failed",
+        message: "Not authorized to delete this user"
+      });
     }
-    else{
-       return res.status(403).send({ status: "Failed", message: "Not authorized to delete this user" });
-    }
-    
+
+    // Borrar los posts del usuario
+    await postModel.deleteMany({ user: id });
+
+    // Borrar los comentarios hechos por el usuario
+    await commentModel.deleteMany({ user: id });
+
+    // Quitar likes del usuario en todas las publicaciones
+    await postModel.updateMany(
+      { likes: id },
+      { $pull: { likes: id } }
+    );
+
+    // Quitar comentarios del usuario dentro de arrays comment[]
+    await postModel.updateMany(
+      {},
+      { $pull: { comment: { user: id } } }
+    );
+
+    // Opcional: eliminar grupos si los has creado así
+    await groupModel.deleteMany({ user: id });
+
+    // Eliminar usuario
+    const deleted = await userModel.findByIdAndDelete(id);
+
+    res.status(200).send({
+      deleted,
+      status: "Success",
+      message: "User deleted successfully"
+    });
+
   } catch (error) {
-     res.status(500).send({ status: "Failed", error: error.message });
+    res.status(500).send({ status: "Failed", error: error.message });
   }
-}
+};
+
+
 
 
 module.exports = {
@@ -337,6 +417,8 @@ module.exports = {
   getCountryvisited,
   getCountryDesired,
   allUser,
-  deletedUser
+  deletedUser,
+  getFollowersByUserId,
+  getFollowingByUserId
 
 };

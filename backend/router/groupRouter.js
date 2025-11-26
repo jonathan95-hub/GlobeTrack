@@ -1,7 +1,7 @@
 const express = require('express') // Importamos express
 const router = express.Router() // creamos una constante para manejar mejor router de express
 
-const {createGroup, deletedGroup, enterAndExitUserToGroup, conecctedUserToGroup, disconectedUserToGroup, getMembersOfGroup, getGroupNotIncludesUser, getGroupIncludesUser, removeMemberFromGroup, editGroup, allGroup, getGroupsMoreMembers} = require("../controllers/groupController")
+const {createGroup, deletedGroup, enterAndExitUserToGroup,  getMembersOfGroup, getGroupNotIncludesUser, getGroupIncludesUser, removeMemberFromGroup, editGroup, allGroup, getGroupsMoreMembers} = require("../controllers/groupController")
 const { verification, adminAuth } = require('../middelwares/middelwareAuthentication')
 /**
  * @swagger
@@ -637,125 +637,6 @@ router.delete("/delete/:groupId",verification, deletedGroup )
  *                   example: "Error message from server"
  */
 router.post("/addandexit/:groupId", verification, enterAndExitUserToGroup)
-/**
- * @swagger
- * /group/connect/{groupId}:
- *   post:
- *     summary: Conectar usuario a un grupo
- *     description: Permite marcar a un usuario como conectado en un grupo. Requiere autenticación mediante token.
- *     tags:
- *       - Groups
- *     security:
- *       - tokenAuth: []
- *     parameters:
- *       - name: groupId
- *         in: path
- *         required: true
- *         description: Group ID
- *         schema:
- *           type: string
- *           example: "634f1d8a0e5e4f0012345678"
- *     responses:
- *       200:
- *         description: User connected successfully to the group
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Success"
- *                 message:
- *                   type: string
- *                   example: "User connected"
- *       403:
- *         description: User does not belong to the group
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Failed"
- *                 message:
- *                   type: string
- *                   example: "User is not a member of this group"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Failed"
- *                 error:
- *                   type: string
- *                   example: "Error message from server"
- */
-router.post("/connect/:groupId", verification, conecctedUserToGroup)
-/**
- * @swagger
- * /group/disconnect/{groupId}:
- *   post:
- *     summary: Desconectar usuario de un grupo
- *     description: Permite marcar a un usuario como desconectado de un grupo. Requiere autenticación mediante token.
- *     tags:
- *       - Groups
- *     security:
- *       - tokenAuth: []
- *     parameters:
- *       - name: groupId
- *         in: path
- *         required: true
- *         description: Group ID
- *         schema:
- *           type: string
- *           example: "634f1d8a0e5e4f0012345678"
- *     responses:
- *       200:
- *         description: User disconnected successfully from the group
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Success"
- *                 message:
- *                   type: string
- *                   example: "User disconnected"
- *       403:
- *         description: User never connected to the group
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Failed"
- *                 message:
- *                   type: string
- *                   example: "The user never logged into this group"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Failed"
- *                 error:
- *                   type: string
- *                   example: "Error message from server"
- */
-router.post("/disconnect/:groupId", verification, disconectedUserToGroup)
+
 
 module.exports = router 

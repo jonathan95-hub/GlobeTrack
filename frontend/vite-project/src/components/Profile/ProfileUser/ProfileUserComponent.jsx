@@ -5,14 +5,14 @@ import { useSelector } from "react-redux";
 import { getPostUserFetch } from "../../../core/services/ProfilePage/postUser";
 import { followAndUnfollow } from "../../../core/services/ProfilePage/FollowAndUnfollowUser";
 import { getAllCountries } from "../../../core/services/ProfilePage/getCountries";
-import { likeAndUnlikePost } from "../../../core/services/post/likePost"; // IMPORTAR TU FUNCIÓN DE LIKE
+import { likeAndUnlikePost } from "../../../core/services/post/likePost";
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import L from "leaflet";
-import {
-  getMessagePrivate,
-  sendMessagesPrivates,
-} from "../../../core/services/ProfilePage/PrivateMessage";
+import { getMessagePrivate, sendMessagesPrivates } from "../../../core/services/ProfilePage/PrivateMessage";
+
+// Asumimos que estas funciones existen para obtener los seguidores/seguidos
+import { obtainedFollowersOtherUser, obtainedFollowingOtherUser } from "../../../core/services/ProfilePage/getFollowersAndFollowinOtherUser";
 
 const ProfileUserComponent = () => {
   const user = useSelector((state) => state.loginReducer);
@@ -24,6 +24,11 @@ const ProfileUserComponent = () => {
   const [countries, setCountries] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
+
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [dataFollowers, setDataFollowers] = useState([]);
+  const [dataFollowing, setDataFollowing] = useState([]);
 
   const location = useLocation();
   const userId = location.state?.userId;
@@ -101,7 +106,6 @@ const ProfileUserComponent = () => {
       await likeAndUnlikePost(postId);
     } catch (err) {
       console.error(err);
-      // Revertir si falla
       setDataPostUser((prev) =>
         prev.map((p) => {
           if (p._id !== postId) return p;
@@ -179,6 +183,31 @@ const ProfileUserComponent = () => {
       alert(error.message);
     }
   };
+
+// Manejo de seguidores
+const handleShowFollowers = async () => {
+  if (!viewUser) return;
+
+  try {
+    const res = await obtainedFollowersOtherUser(viewUser._id); // 🔹 cambiamos la función
+    setDataFollowers(res.followers || []); // asumimos que la API devuelve { followers: [...] }
+    setShowFollowersModal(true);
+  } catch (error) {
+    console.error("Error obteniendo seguidores:", error);
+  }
+};
+
+const handleShowFollowing = async () => {
+  if (!viewUser) return;
+
+  try {
+    const res = await obtainedFollowingOtherUser(viewUser._id); // 🔹 cambiamos la función
+    setDataFollowing(res.following || []); // asumimos que la API devuelve { following: [...] }
+    setShowFollowingModal(true);
+  } catch (error) {
+    console.error("Error obteniendo seguidos:", error);
+  }
+};
 
   useEffect(() => {
     getUser();
@@ -368,65 +397,54 @@ const ProfileUserComponent = () => {
 
     {/* PERFIL */}
 {viewUser && (
-  <div className="card shadow-lg border-0 rounded-4 mb-5">
-    <div className="card-body text-center">
-      <div className="d-flex justify-content-center mb-4 gap-3">
-        <button
-          className="btn btn-outline-primary"
-          onClick={() => follow(viewUser._id)}
-        >
-          {viewUser.followers.includes(user.user._id)
-            ? "Dejar de Seguir"
-            : "Seguir"}
-        </button>
-        <button className="btn btn-outline-primary" onClick={openMessage}>
-          Enviar Mensaje
-        </button>
-      </div>
+        <div className="card shadow-lg border-0 rounded-4 mb-5">
+          <div className="card-body text-center">
+            <div className="d-flex justify-content-center mb-4 gap-3">
+              <button
+                className="btn btn-outline-primary"
+                onClick={() => follow(viewUser._id)}
+              >
+                {viewUser.followers.includes(user.user._id)
+                  ? "Dejar de Seguir"
+                  : "Seguir"}
+              </button>
+              <button className="btn btn-outline-primary" onClick={openMessage}>
+                Enviar Mensaje
+              </button>
+            </div>
 
-      <div className="d-flex flex-column align-items-center gap-3">
-        <img
-          src={viewUser.photoProfile}
-          alt="Perfil"
-          className="rounded-circle shadow"
-          style={{ width: "150px", height: "150px", objectFit: "cover" }}
-        />
+            <div className="d-flex flex-column align-items-center gap-3">
+              <img
+                src={viewUser.photoProfile}
+                alt="Perfil"
+                className="rounded-circle shadow"
+                style={{ width: "150px", height: "150px", objectFit: "cover" }}
+              />
 
-        {/* BOTONES DE SEGUIDORES Y SEGUIDOS */}
-        <div className="d-flex gap-3">
-          <button className="btn btn-outline-info">
-            Seguidores <span className="badge bg-dark">{viewUser.followers.length}</span>
-          </button>
-          <button className="btn btn-outline-success">
-            Seguidos <span className="badge bg-dark">{viewUser.following.length}</span>
-          </button>
+              {/* BOTONES DE SEGUIDORES Y SEGUIDOS */}
+              <div className="d-flex gap-3">
+                <button className="btn btn-outline-info" onClick={handleShowFollowers}>
+                  Seguidores <span className="badge bg-dark">{viewUser.followers.length}</span>
+                </button>
+                <button className="btn btn-outline-success" onClick={handleShowFollowing}>
+                  Seguidos <span className="badge bg-dark">{viewUser.following.length}</span>
+                </button>
+              </div>
+
+              {/* Datos del usuario */}
+              <div className="text-start w-75 mt-3">
+                <p><strong>Nombre:</strong> {viewUser.name} {viewUser.lastName}</p>
+                <p><strong>País:</strong> {viewUser.country}</p>
+                <p><strong>Ciudad:</strong> {viewUser.city}</p>
+                <p><strong>Paises visitados:</strong> {viewUser.visitedDestinations.length}</p>
+                <p><strong>Paises deseados:</strong> {viewUser.desiredDestinations.length}</p>
+                <p><strong>Biografía:</strong></p>
+                <p className="fst-italic text-secondary">{viewUser.biography}</p>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div className="text-start w-75 mt-3">
-          <p>
-            <strong>Nombre:</strong> {viewUser.name} {viewUser.lastName}
-          </p>
-          <p>
-            <strong>País:</strong> {viewUser.country}
-          </p>
-          <p>
-            <strong>Ciudad:</strong> {viewUser.city}
-          </p>
-          <p>
-            <strong>Paises visitados:</strong> {viewUser.visitedDestinations.length}
-          </p>
-          <p>
-            <strong>Paises deseados:</strong> {viewUser.desiredDestinations.length}
-          </p>
-          <p>
-            <strong>Biografía:</strong>
-          </p>
-          <p className="fst-italic text-secondary">{viewUser.biography}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
 
       {/* PUBLICACIONES */}
@@ -505,6 +523,87 @@ const ProfileUserComponent = () => {
           )}
         </div>
       </div>
+
+        {/* MODAL SEGUIDORES */}
+    {/* MODAL SEGUIDORES */}
+{showFollowersModal && (
+  <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Seguidores de {viewUser?.name}</h5>
+          <button type="button" className="btn-close" onClick={() => setShowFollowersModal(false)}></button>
+        </div>
+        <div className="modal-body">
+          {dataFollowers.length === 0 ? (
+            <p>No tiene seguidores.</p>
+          ) : (
+            <ul className="list-unstyled p-0">
+              {dataFollowers.map(f => (
+                <li key={f._id} className="d-flex align-items-center justify-content-between mb-2">
+                  <div className="d-flex align-items-center gap-2">
+                    <img 
+                      src={f.photoProfile} 
+                      alt={f.name} 
+                      style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} 
+                    />
+                    <span>{f.name} {f.lastName}</span>
+                  </div>
+                  <button 
+                    className="btn btn-sm btn-success"
+                    onClick={() => navigate("/profile", { state: { userId: f._id } })}
+                  >
+                    Ver perfil
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{/* MODAL SEGUIDOS */}
+{showFollowingModal && (
+  <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Seguidos de {viewUser?.name}</h5>
+          <button type="button" className="btn-close" onClick={() => setShowFollowingModal(false)}></button>
+        </div>
+        <div className="modal-body">
+          {dataFollowing.length === 0 ? (
+            <p>No sigue a nadie.</p>
+          ) : (
+            <ul className="list-unstyled p-0">
+              {dataFollowing.map(f => (
+                <li key={f._id} className="d-flex align-items-center justify-content-between mb-2">
+                  <div className="d-flex align-items-center gap-2">
+                    <img 
+                      src={f.photoProfile} 
+                      alt={f.name} 
+                      style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} 
+                    />
+                    <span>{f.name} {f.lastName}</span>
+                  </div>
+                  <button 
+                    className="btn btn-sm btn-success"
+                    onClick={() => navigate("/profile", { state: { userId: f._id } })}
+                  >
+                    Ver perfil
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* MODAL MENSAJE */}
       {showMessageModal && (

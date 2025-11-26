@@ -8,8 +8,6 @@ const {
   markDesired,
   getFiveCountryMoreVisited,
   getFiveCountryMoreDesired,
-  getOneTopVisited,
-  getOneTopDesired,
   getAllCountries,
 } = require("../controllers/countryController");
 const { verification, adminAuth } = require("../middelwares/middelwareAuthentication");
@@ -81,64 +79,7 @@ router.get("/allCountries", verification, getAllCountries)
  *                   example: "Error message from server"
  */
 router.get("/topdesired", verification, getFiveCountryMoreDesired); // Endpoint para traer los 5 paises mas deseados
-/**
- * @swagger
- * /country/topvisited/topone:
- *   get:
- *     summary: Obtener el país más visitado
- *     description: Devuelve el país con mayor cantidad de usuarios que lo han visitado. Requiere autenticación mediante token (header **token**).
- *     tags:
- *       - Countries
- *     security:
- *       - tokenAuth: []
- *     responses:
- *       200:
- *         description: The most visited country obtained
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 top:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       name:
- *                         type: string
- *                         example: "Spain"
- *                       userVisited:
- *                         type: integer
- *                         example: 15
- *                 status:
- *                   type: string
- *                   example: "Success"
- *                 message:
- *                   type: string
- *                   example: "The most visited country obtained"
- *             examples:
- *               top1:
- *                 value:
- *                   top:
- *                     - name: "Spain"
- *                       userVisited: 15
- *                   status: "Success"
- *                   message: "The most visited country obtained"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Failed"
- *                 error:
- *                   type: string
- *                   example: "Error message from server"
- */
-router.get("/topvisited/topone",verification, getOneTopVisited); // Endpoint para traer el pais mas visitado
+
 /**
  * @swagger
  * /country/topvisited:
@@ -205,64 +146,7 @@ router.get("/topvisited/topone",verification, getOneTopVisited); // Endpoint par
  *                   example: "Error message from server"
  */
 router.get("/topvisited",verification, getFiveCountryMoreVisited); // Endpoint para traer los 5 paises mas visitados
-/**
- * @swagger
- * /country/topdesired/topone:
- *   get:
- *     summary: Obtener el país más deseado
- *     description: Devuelve el país que más usuarios desean visitar. Requiere autenticación mediante token (header **token**).
- *     tags:
- *       - Countries
- *     security:
- *       - tokenAuth: []
- *     responses:
- *       200:
- *         description: The most desired country obtained
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 top:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       name:
- *                         type: string
- *                         example: "Italy"
- *                       wishedByUser:
- *                         type: integer
- *                         example: 20
- *                 status:
- *                   type: string
- *                   example: "Success"
- *                 message:
- *                   type: string
- *                   example: "The most desired country obtained"
- *             examples:
- *               top1:
- *                 value:
- *                   top:
- *                     - name: "Italy"
- *                       wishedByUser: 20
- *                   status: "Success"
- *                   message: "The most desired country obtained"
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "Failed"
- *                 error:
- *                   type: string
- *                   example: "Error message from server"
- */
-router.get("/topdesired/topone",verification, getOneTopDesired) // Endpoint para traer el pais mas deseado
+
 /**
  * @swagger
  * /country/create:

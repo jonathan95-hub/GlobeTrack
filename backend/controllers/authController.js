@@ -4,7 +4,7 @@
  const logger = require("../config/configWinston") // Importamos la configuración del logger Winston
  const getRequestInfo = require("../utils/requestInfo"); // Importamos la funcion de nuestro archivo utils ya que es una funcion reutilizable
  const sendEmail = require("../services/email"); // Importamos la funcion sendEmail
-const { error } = require("winston");
+
 
 
  const signup = async (req, res) => { 

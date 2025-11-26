@@ -140,6 +140,7 @@ req.io.to(groupId.toString()).emit("receiveMessage", populatedMessage);
         const userId = req.payload._id // Obtenemos el id del usuario con el token
         const groupId = req.params.groupId // Obtenemos el id del grupo por params
         const group = await groupModel.findById(groupId) // Buscamos el grupo por su id
+        const user = await usersModel.findById(userId)
         // Si no hay grupo 
         if(!group){
             // Devolvemos un 404 con el mensaje de grupo no encontrado
@@ -147,8 +148,9 @@ req.io.to(groupId.toString()).emit("receiveMessage", populatedMessage);
         }
         // Validamos que en el array de members de grupo esta el id del usuario
         const isMember = group.members.includes(userId)
+        
         // Si no está 
-        if(!isMember){
+        if(!isMember && !user.isAdmin === "admin"){
             // Devolvemos un 403 y un mensaje de el usuario no es miembro de este grupo
             return res.status(403).send({status: "Failed", message: "user is not member of this group"})
         }

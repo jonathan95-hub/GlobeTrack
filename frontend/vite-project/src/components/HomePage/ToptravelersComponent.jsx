@@ -40,7 +40,14 @@ const ToptravelersComponent = () => {
             No hay viajeros destacados
           </p>
         ) : (
-          <div className="d-flex flex-column gap-3 flex-grow-1 overflow-auto">
+          <div
+            className="flex-grow-1 overflow-auto"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "12px",
+            }}
+          >
             {topUser.map((u, idx) => (
               <div
                 key={idx}
@@ -74,13 +81,6 @@ const ToptravelersComponent = () => {
                   >
                     {u.name} {u.lastName}
                   </span>
-
-                  <small
-                    className="text-secondary fst-italic"
-                    style={{ fontSize: "0.8rem" }}
-                  >
-                    🌍 Viajero destacado
-                  </small>
                 </div>
               </div>
             ))}

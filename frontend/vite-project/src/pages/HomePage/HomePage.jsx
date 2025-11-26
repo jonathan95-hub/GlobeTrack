@@ -24,25 +24,23 @@ return ( <div className="container-fluid bg-light py-4 min-vh-100"> <div classNa
       {/* Radial */}
       <div className="card shadow border-0">
         <div className="card-body p-3">
-          <h4 className="text-info fw-bold mb-3 text-center">Top Lugares Visitados</h4>
           <RadialTopVisitedDesiredComponent />
         </div>
       </div>
 
       {/* Top Groups y Top Travelers */}
       <div className="row g-4 flex-grow-1">
+       <div className="col-12 col-md-6 d-flex flex-column">
+  <div className="card shadow border-0 h-100">
+    <div className="card-body p-3 d-flex flex-column">
+      <TopGroups />
+    </div>
+  </div>
+</div>
+
         <div className="col-12 col-md-6 d-flex flex-column">
           <div className="card shadow border-0 flex-grow-1">
             <div className="card-body p-3 d-flex flex-column">
-              <h4 className="text-danger fw-bold mb-3 text-center">Grupos Destacados</h4>
-              <TopGroups />
-            </div>
-          </div>
-        </div>
-        <div className="col-12 col-md-6 d-flex flex-column">
-          <div className="card shadow border-0 flex-grow-1">
-            <div className="card-body p-3 d-flex flex-column">
-              <h4 className="text-warning fw-bold mb-3 text-center">Top Viajeros</h4>
               <ToptravelersComponent />
             </div>
           </div>
@@ -51,7 +49,7 @@ return ( <div className="container-fluid bg-light py-4 min-vh-100"> <div classNa
     </div>
 
     {/* Columna derecha: ListBestPost */}
-    <div className="col-12 col-lg-5 d-flex flex-column h-100">
+    <div className="col-12 col-lg-5 d-flex flex-column h-100 vh-100">
       <div className="card shadow-lg border-0 flex-grow-1">
         <div className="card-body p-3 d-flex flex-column">
           <div className="flex-grow-1">

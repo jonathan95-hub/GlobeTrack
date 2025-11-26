@@ -24,14 +24,14 @@ const TopGroups = () => {
 
   return (
     <div
-      className="bg-dark text-light rounded-4 shadow p-3 w-100"
+      className="bg-dark text-light rounded-4 shadow p-4 w-100"
       style={{
         border: "1px solid rgba(0,255,255,0.2)",
         fontSize: "0.9rem",
       }}
     >
       <h5
-        className="fw-bold text-center mb-3"
+        className="fw-bold text-center mb-4"
         style={{
           color: "#00ffff",
           textShadow: "0 0 5px rgba(0,255,255,0.8)",
@@ -40,70 +40,83 @@ const TopGroups = () => {
         🌐 Top Grupos
       </h5>
 
-      <div className="d-flex flex-column gap-3">
-
+      <div className="row g-3">
         {dataGroups.map((g, idx) => (
-          <div
-            key={idx}
-            className="d-flex align-items-center gap-3 p-3 rounded bg-secondary bg-opacity-10 shadow-sm flex-wrap"
-            style={{
-              minHeight: "90px",
-              border: "1px solid rgba(0,255,255,0.3)",
-            }}
-          >
-            {/* Imagen */}
+          <div key={idx} className="col-12 col-md-6">
             <div
-              className="rounded overflow-hidden border border-info flex-shrink-0"
+              className="d-flex align-items-center gap-2 p-2 rounded bg-secondary bg-opacity-10 shadow-sm h-100"
               style={{
-                width: "75px",
-                height: "75px",
+                border: "1px solid rgba(0,255,255,0.3)",
+                minHeight: "100px",
               }}
             >
-              <img
-                src={g.photoGroup}
-                alt={g.name}
-                className="w-100 h-100"
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-
-            {/* Texto */}
-            <div className="d-flex flex-column justify-content-center flex-grow-1">
-              <span
-                className="fw-bold text-light"
+              {/* Imagen más pequeña */}
+              <div
+                className="rounded overflow-hidden border border-info flex-shrink-0"
                 style={{
-                  fontSize: "1rem",
-                  textShadow: "0 0 4px #00ffff",
-                  wordBreak: "break-word", // <- Permite que las palabras largas se ajusten
+                  width: "55px",
+                  height: "55px",
                 }}
               >
-                {g.name}
-              </span>
+                <img
+                  src={g.photoGroup}
+                  alt={g.name}
+                  className="w-100 h-100"
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
 
-              <span
-                className="text-info"
-                style={{
-                  fontSize: "0.85rem",
-                  wordBreak: "break-word",
-                }}
+              {/* Texto */}
+              <div
+                className="d-flex flex-column justify-content-between flex-grow-1"
+                style={{ height: "100%", overflow: "hidden" }}
               >
-                👥 {g.membersCount} miembros
-              </span>
+                {/* Título */}
+                <span
+                  className="fw-bold text-light"
+                  style={{
+                    fontSize: "0.95rem",
+                    textShadow: "0 0 4px #00ffff",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {g.name}
+                </span>
 
-              <span
-                className="text-secondary"
-                style={{
-                  fontSize: "0.75rem",
-                  maxWidth: "100%", // <- Ajusta al ancho disponible
-                  wordBreak: "break-word",
-                }}
-              >
-                {g.description}
-              </span>
+                {/* Miembros */}
+                <span
+                  className="text-info"
+                  style={{
+                    fontSize: "0.8rem",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 1,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  👥 {g.membersCount} miembros
+                </span>
+
+                {/* Descripción */}
+                <span
+                  className="text-secondary"
+                  style={{
+                    fontSize: "0.7rem",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                >
+                  {g.description}
+                </span>
+              </div>
             </div>
           </div>
         ))}
-
       </div>
     </div>
   );
