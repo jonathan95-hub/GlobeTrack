@@ -74,8 +74,52 @@ const deleteAllLog = async (req, res) => {
         res.status(500).send({ status: "Failed", error: error.message });
     }
 }
+const deleteLogInfo = async(req, res) => {
+    try {
+        const userId  = req.payload._id
+        const logInfo = await logModel.deleteMany({level: "info"})
+        const user = await usersModel.findById(userId)
+        res.status(200).send({logInfo, status: "Success", message: `${user.name} ${user.lastName} deleted from logs type Info` })
+        
+    } catch (error) {
+        logger.error("Delete All Logs error", {
+            meta: { error: error.message, endpoint: "/audit/logInfo" }
+        });
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+ }
+
+const deleteLogWar = async(req, res) => {
+    try {
+        const userId  = req.payload._id
+        const logInfo = await logModel.deleteMany({level: "warn"})
+        const user = await usersModel.findById(userId)
+        res.status(200).send({logInfo, status: "Success", message: `${user.name} ${user.lastName} deleted from logs type warn` })
+        
+    } catch (error) {
+        logger.error("Delete All Logs error", {
+            meta: { error: error.message, endpoint: "/audit/logWarn" }
+        });
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+ }
+
+ const deleteLogError = async(req, res) => {
+    try {
+        const userId  = req.payload._id
+        const logInfo = await logModel.deleteMany({level: "error"})
+        const user = await usersModel.findById(userId)
+        res.status(200).send({logInfo, status: "Success", message: `${user.name} ${user.lastName} deleted from logs type error` })
+        
+    } catch (error) {
+        logger.error("Delete All Logs error", {
+            meta: { error: error.message, endpoint: "/audit/logError" }
+        });
+        res.status(500).send({ status: "Failed", error: error.message });
+    }
+ }
 
 
 
 
-module.exports = { allLog,  deleteAllLog };
+module.exports = { allLog,  deleteAllLog, deleteLogError, deleteLogInfo, deleteLogWar };

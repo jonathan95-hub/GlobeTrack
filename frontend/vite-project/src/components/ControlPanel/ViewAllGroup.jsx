@@ -66,7 +66,7 @@ const ViewAllGroup = () => {
         setDataMembers(res.getMembers)
         // Poner el título del modal usando el nombre del grupo
         setModalTitle(`Miembros de ${groupName}`)
-        // Guardo el ID del grupo que estoy viendo
+        // Guardar el ID del grupo que se ve
         setCurrentGroupId(groupId)
         // Limpiar el buscador de miembros
         setSearchMemberTerm("")
@@ -227,6 +227,7 @@ const ViewAllGroup = () => {
 
           {filteredMembers.length > 0 ? (
             <div className="d-flex flex-wrap gap-3 justify-content-start">
+              {/*Hacemos un mapeo en filteredMembers */}
               {filteredMembers.map(member => (
                 <div 
                   key={member._id} 
@@ -306,12 +307,12 @@ const ViewAllGroup = () => {
                       <span className="fw-bold">{m.sender?.name || "Usuario desconocido"}</span>
                     </div>
 
-                    {/* Contenido del mensaje */}
+                    {/* El mensaje */}
                     <div style={{ marginLeft: 42 }}>
                       {m.content || "Sin contenido"}
                     </div>
 
-                    {/* Fecha y hora */}
+                    {/* Fecha y hora del mensaje */}
                     <div style={{ marginLeft: 42, textAlign: "right", fontSize: "0.8rem", color: "#666" }}>
                       {formattedDate} {formattedTime}
                     </div>

@@ -1,51 +1,63 @@
+// Importamos useEffect y useState de react
 import React, { useEffect, useState } from 'react'
+// Importamos la funcion que hace la llamada al backend para traer todos los usuarios
 import { allUser } from '../../core/services/ControlPanel/AllUser'
+// Importamos la función que hace la llamada al backend para eliminar un usuario
 import { deleteUser } from '../../core/services/ControlPanel/deleteUser'
 
 const ViewAllUser = () => {
+  // Estado donde guardamos los usuarios
 const [dataUser, setDataUser] = useState([])
+// Estado para mostrar un modal
 const [showModal, setShowModal] = useState(false)
+// Estado donde guardamos el usuario seleccionad
 const [selectedUser, setSelectedUser] = useState(null)
+// Estado para buscar a los usuarios
 const [searchTerm, setSearchTerm] = useState("")
 
+// Función para traer todos los usuarios
 const getAllUser = async () => {
 try {
-const res = await allUser()
-if (res && Array.isArray(res.users)) {
-setDataUser(res.users)
+const res = await allUser() // Llamada a la funcion que llama al backend
+if (res && Array.isArray(res.users)) { // si vienen en un array 
+setDataUser(res.users) // seteamos  el  estado dataUser con res.users
 }
 } catch (error) {
 console.error(error.message)
 }
 }
 
+//Funcion para cuando le damos click a banear 
+// Le paasamos por parametro el usuario
 const handleBanClick = (user) => {
-setSelectedUser(user)
-setShowModal(true)
+setSelectedUser(user) // seteamos selectedUser con el usuario
+setShowModal(true) // ponemos el modal en true
 }
-
+ // Función para cuando hacemos click en detalles
+ // Le paasamos por parametro el usuario
 const handleDetailClick = (user) => {
-setSelectedUser(user)
-setShowModal(true)
+setSelectedUser(user) // seteamos selectedUser con el usuario
+setShowModal(true) // ponemos el modal en true
 }
 
+// Función para eliminar el usuario
 const confirmBan = async () => {
-if (selectedUser) {
+if (selectedUser) { // le pasamos el usuario seleccionado
 try {
-await deleteUser(selectedUser._id)
-setShowModal(false)
-setSelectedUser(null)
-getAllUser()
+await deleteUser(selectedUser._id) // llamamos a la función que hace la llamada al backend para eliminar usuario y en el parametro le pasamos el id del usuario seleccionado
+setShowModal(false) // cerramos el modal
+setSelectedUser(null) // ponemos el usuario seleccionado en nulo
+getAllUser() // llamamos a la función que traer todos los usuarios para obtener la lista actualiza 
 } catch (error) {
 console.error(error.message)
 }
 }
 }
-
+ // Usamos useEffect para llamar a getAllUser cada vez que se recarga la página
 useEffect(() => {
 getAllUser()
 }, [])
-
+  // Función para formatear fechas que vienen del backend
 const formatDate = (isoDate) => {
 if (!isoDate) return ''
 const date = new Date(isoDate)
@@ -54,7 +66,7 @@ const month = String(date.getMonth() + 1).padStart(2, '0')
 const year = date.getFullYear()
 return `${day}/${month}/${year}`
 }
-
+ // Filtramos los usuarios según lo que se escribe en el buscador
 const filteredUsers = dataUser.filter(u =>
 (`${u.name} ${u.lastName}`).toLowerCase().includes(searchTerm.toLowerCase())
 )
