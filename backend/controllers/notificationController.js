@@ -25,30 +25,6 @@ const getNotification =  async (req, res) => {
 
 
 
-const readNotification = async (req, res) => {
-    try {
-        const userId = req.payload._id // Obtenemos el id del usuario desde el token
-        const notificationId = req.params.notificationId // Obtenemos el id de la notificación por params
-
-        // Buscamos la notificación por su id y el id del usuario receptor
-        // Actualizamos el campo isRead a true y devolvemos la notificación actualizada
-        const notificationRead = await notificationsModel.findOneAndUpdate({
-            _id: notificationId, 
-            receiver: userId
-        },{
-            isRead: true
-        }, {new: true})
-
-        // Devolvemos un 200 con la notificación marcada como leída
-        res.status(200).send({notificationRead, status:"Success", message: "Readed notification"})
-    } catch (error) {
-        // Devolvemos un 500 para cualquier error del servidor con el mensaje del error
-        res.status(500).send({ status: "Failed", error: error.message });
-    }
-} 
-
-
-
 const deleteNotification = async(req, res) => {
     try {
         const {ip, userAgent} = getRequestInfo(req) // Destructuring de la función getRequestInfo para obtener ip y navegador
@@ -89,4 +65,4 @@ const deleteNotification = async(req, res) => {
     }
 }
 
-module.exports = {getNotification, readNotification, deleteNotification}
+module.exports = {getNotification,  deleteNotification}

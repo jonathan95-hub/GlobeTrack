@@ -6,7 +6,7 @@ import { doLoginOutAction } from "../../landingPage/login/loginAction";
 import { changeMenuOption } from "./headerAction";
 import { useEffect } from "react";
 import { getNotification } from "../../../core/services/notification/getNotification";
-import { markNotificationAsRead } from "../../../core/services/notification/readNotification";
+import { deletedNotification } from "../../../core/services/notification/deleteNotification";
 
 const HeadersComponent = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -40,8 +40,8 @@ const HeadersComponent = () => {
 
   const handleNotificationClick = async (notificationId) => {
     try {
-      // Marcamos como leída en el backend
-      await markNotificationAsRead(notificationId);
+      // Eliminamos en el backend
+      await deletedNotification(notificationId);
 
       // Eliminamos de la lista en tiempo real
       setNotifications((prev) =>

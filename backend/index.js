@@ -2,12 +2,11 @@ const express = require('express'); // Importamos express
 const cors = require(`cors`) // Importamos cors
 const http = require("http") // importamos http
 require('dotenv').config(); // importamos dotenv
-const swaggerUi = require("swagger-ui-express")
+
 
 const connection = require("./connectionDataBase/connection") // Importamos y guardamos en una constante el archivo de conexion a la base de datos
 const configSocket = require("./config/configSocket") // Importamos y guardamos en una constante el archivo de la configuracion de socket
 const socketMiddelware = require('./middelwares/middelwareSocket');
-const swaggerSpec = require('./config/swaggerConfig');
 
 require("./config/configCloudinary")
 
@@ -53,7 +52,7 @@ app.use("/groupmessage", groupMessageRouter)
 app.use("/privatemessage", privateMessageRouter)
 app.use("/notification", notificationRouter)
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+
 
 connection()
 const PORT = process.env.PORT || 4000

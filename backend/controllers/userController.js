@@ -361,7 +361,7 @@ const deletedUser = async (req, res) => {
 
     const user = await userModel.findById(userId);
 
-    // Verificación de permisos
+    // Verificación de permiso,
     if (user._id.toString() !== id && user.isAdmin !== "admin") {
       return res.status(403).send({
         status: "Failed",

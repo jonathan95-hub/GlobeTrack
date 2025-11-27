@@ -164,4 +164,4 @@ const getPrivateMessageForUser = async(req, res) => {
     }
 }
 
-module.exports = {sendMessagePrivate, getPrivateMessageForUser, deletedMessagePrivate}
+module.exports = {sendMessagePrivate, getPrivateMessageForUser}

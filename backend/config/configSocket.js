@@ -1,45 +1,37 @@
 // configSocket.js
-const {Server} = require("socket.io")
+const { Server } = require("socket.io");
 
-
+// Configura el socket
 const configSocket = (server) => {
-    let io = new Server(server, {
+    // Creamos instancia de Socket.IO y permitimos CORS
+    const io = new Server(server, {
         cors: {
-            origin: "*",
-            methods: ["GET", "POST", "DELETE"], 
-        }, 
+            origin: "*", // permitir cualquier origen
+            methods: ["GET", "POST", "DELETE"], // métodos permitidos
+        },
     });
 
+    // Escuchamos cuando un usuario se conecta
     io.on("connection", (socket) => {
-        console.log("User coneccted", socket.id)
 
+        // Usuario se une a su sala personal
         socket.on("joinUser", (userId) => {
-            socket.join(userId)
-            console.log(`user${socket.id} joined personal room ${userId}`)
-        })
+            socket.join(userId);
+        });
 
+        // Usuario se une a un grupo
         socket.on("joinGroup", (groupId) => {
             socket.join(groupId);
-            console.log(`User ${socket.id} joined group ${groupId}`)
-        })
+        });
 
+        // Usuario envía un mensaje a un grupo
         socket.on("sendMessage", (message) => {
-            console.log("message recibed", message);
-            io.to(message.groupId).emit("receiveMessage", message)
-        });
-    
-
-        socket.on("deleteMessage", (message) => {
-            console.log("message deleted", message);
-            io.to(message.groupId).emit("messageDeleted", message)
+            io.to(message.groupId).emit("receiveMessage", message);
         });
 
-        socket.on("disconnect", () => {
-            console.log("User disconnect", socket.id)
-        })
-    })
-    return io
-    
-}
+    });
+
+    return io; // devolvemos la instancia de io
+};
 
 module.exports = configSocket;
