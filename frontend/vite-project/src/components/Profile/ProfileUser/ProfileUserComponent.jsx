@@ -10,41 +10,42 @@ import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-markercluster";
 import L from "leaflet";
 import { getMessagePrivate, sendMessagesPrivates } from "../../../core/services/ProfilePage/PrivateMessage";
-
-// Asumimos que estas funciones existen para obtener los seguidores/seguidos
 import { obtainedFollowersOtherUser, obtainedFollowingOtherUser } from "../../../core/services/ProfilePage/getFollowersAndFollowinOtherUser";
 
 const ProfileUserComponent = () => {
+  // Obtenemos información del usuario logueado desde redux
   const user = useSelector((state) => state.loginReducer);
-  const [viewUser, setViewUser] = useState(null);
-  const [follower, setFollower] = useState(false);
-  const [dataPostUser, setDataPostUser] = useState([]);
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [messageText, setMessageText] = useState("");
-  const [countries, setCountries] = useState([]);
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState(null);
 
-  const [showFollowersModal, setShowFollowersModal] = useState(false);
-  const [showFollowingModal, setShowFollowingModal] = useState(false);
-  const [dataFollowers, setDataFollowers] = useState([]);
-  const [dataFollowing, setDataFollowing] = useState([]);
+  // Estados locales para manejar datos del perfil, publicaciones, modales y mensajes
+  const [viewUser, setViewUser] = useState(null); // Información del usuario que estamos viendo
+  const [follower, setFollower] = useState(false); // Si yo sigo a este usuario
+  const [dataPostUser, setDataPostUser] = useState([]); // Publicaciones del usuario
+  const [showMessageModal, setShowMessageModal] = useState(false); // Mostrar modal de mensaje
+  const [messageText, setMessageText] = useState(""); // Texto del mensaje
+  const [countries, setCountries] = useState([]); // Lista de países
+  const [openModal, setOpenModal] = useState(false); // Modal de comentarios
+  const [selectedPostId, setSelectedPostId] = useState(null); // Post seleccionado para comentarios
+  const [showFollowersModal, setShowFollowersModal] = useState(false); // Modal seguidores
+  const [showFollowingModal, setShowFollowingModal] = useState(false); // Modal seguidos
+  const [dataFollowers, setDataFollowers] = useState([]); // Datos de seguidores
+  const [dataFollowing, setDataFollowing] = useState([]); // Datos de seguidos
 
   const location = useLocation();
-  const userId = location.state?.userId;
+  const userId = location.state?.userId; // ID del usuario cuyo perfil estamos viendo
   const navigate = useNavigate();
 
-  // 🔹 FUNCIONES
-
+  // Función para obtener info del usuario desde backend
   const getUser = async () => {
     const token = localStorage.getItem("token");
     if (!token) return alert("Token invalid");
 
     const dataUser = await getInfoUser(userId);
     if (!dataUser) return alert("Information of the user not found");
+
     setViewUser(dataUser.getUser);
   };
 
+  // Función para traer publicaciones del usuario
   const postUser = async (userId) => {
     try {
       const data = await getPostUserFetch(userId);
@@ -55,6 +56,7 @@ const ProfileUserComponent = () => {
     }
   };
 
+  // Función para traer la lista de países
   const getCountries = async () => {
     try {
       const data = await getAllCountries();
@@ -65,17 +67,19 @@ const ProfileUserComponent = () => {
     }
   };
 
+  // Verificamos si yo sigo a este usuario
   const AmIYouFollower = () => {
     if (user.user.following.includes(userId)) setFollower(true);
   };
 
+  // Función para seguir o dejar de seguir
   const follow = async (userId) => {
     const token = localStorage.getItem("token");
     if (!token) return alert("Token invalid");
 
     try {
-      await followAndUnfollow(userId);
-      const dataUser = await getInfoUser(userId);
+      await followAndUnfollow(userId); // Llamada al backend
+      const dataUser = await getInfoUser(userId); // Obtenemos info actualizada
       setViewUser(dataUser.getUser);
       setFollower(dataUser.getUser.followers.includes(user.user._id));
     } catch (err) {
@@ -83,10 +87,12 @@ const ProfileUserComponent = () => {
     }
   };
 
+  // Función para dar o quitar like a un post
   const toggleLike = async (postId) => {
     if (!user?.user?._id) return;
     const userId = user.user._id;
 
+    // Actualización optimista de la UI
     setDataPostUser((prev) =>
       prev.map((p) => {
         if (p._id !== postId) return p;
@@ -106,6 +112,8 @@ const ProfileUserComponent = () => {
       await likeAndUnlikePost(postId);
     } catch (err) {
       console.error(err);
+
+      // Revertimos cambios si falla la llamada
       setDataPostUser((prev) =>
         prev.map((p) => {
           if (p._id !== postId) return p;
@@ -123,11 +131,13 @@ const ProfileUserComponent = () => {
     }
   };
 
+  // Abrir modal de comentarios
   const openCommentModal = (postId) => {
     setSelectedPostId(postId);
     setOpenModal(true);
   };
 
+  // Manejo de la opción de comentarios
   const handleCommentOption = (option) => {
     setOpenModal(false);
     if (option === "create") {
@@ -149,6 +159,7 @@ const ProfileUserComponent = () => {
     }
   };
 
+  // Abrir modal de mensaje o ir a conversación existente
   const openMessage = async () => {
     const info = await getMessagePrivate();
     if (!info) return alert("Error al obtener conversaciones");
@@ -165,6 +176,7 @@ const ProfileUserComponent = () => {
     }
   };
 
+  // Enviar primer mensaje
   const sendInitialMessage = async () => {
     if (!messageText.trim()) return;
 
@@ -184,31 +196,33 @@ const ProfileUserComponent = () => {
     }
   };
 
-// Manejo de seguidores
-const handleShowFollowers = async () => {
-  if (!viewUser) return;
+  // Traer seguidores del usuario
+  const handleShowFollowers = async () => {
+    if (!viewUser) return;
 
-  try {
-    const res = await obtainedFollowersOtherUser(viewUser._id); // 🔹 cambiamos la función
-    setDataFollowers(res.followers || []); // asumimos que la API devuelve { followers: [...] }
-    setShowFollowersModal(true);
-  } catch (error) {
-    console.error("Error obteniendo seguidores:", error);
-  }
-};
+    try {
+      const res = await obtainedFollowersOtherUser(viewUser._id);
+      setDataFollowers(res.followers || []);
+      setShowFollowersModal(true);
+    } catch (error) {
+      console.error("Error obteniendo seguidores:", error);
+    }
+  };
 
-const handleShowFollowing = async () => {
-  if (!viewUser) return;
+  // Traer seguidos del usuario
+  const handleShowFollowing = async () => {
+    if (!viewUser) return;
 
-  try {
-    const res = await obtainedFollowingOtherUser(viewUser._id); // 🔹 cambiamos la función
-    setDataFollowing(res.following || []); // asumimos que la API devuelve { following: [...] }
-    setShowFollowingModal(true);
-  } catch (error) {
-    console.error("Error obteniendo seguidos:", error);
-  }
-};
+    try {
+      const res = await obtainedFollowingOtherUser(viewUser._id);
+      setDataFollowing(res.following || []);
+      setShowFollowingModal(true);
+    } catch (error) {
+      console.error("Error obteniendo seguidos:", error);
+    }
+  };
 
+  // Ejecutamos funciones al cargar componente
   useEffect(() => {
     getUser();
     postUser(userId);
@@ -219,7 +233,7 @@ const handleShowFollowing = async () => {
     AmIYouFollower();
   }, [viewUser, user]);
 
-  // 🔹 ICONOS MAPA
+  // Configuración de iconos para el mapa
   const icono = L.icon({
     iconUrl: "/src/assets/Map/PinGlobeTrack.png",
     iconSize: [55, 90],
@@ -245,7 +259,8 @@ const handleShowFollowing = async () => {
 
   const spainCenter = [40.4, -3.7];
 
-  // 🔹 RENDER
+
+ 
   return (
     <div>
       {/* MAPA */}

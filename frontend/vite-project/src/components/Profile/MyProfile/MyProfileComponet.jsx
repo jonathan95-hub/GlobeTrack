@@ -1,3 +1,4 @@
+// Importamos hooks, componentes de la librerias leaflet y boostrap, tambien importamos funciones necesarias par ala logica
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from "react-leaflet";
@@ -22,28 +23,29 @@ import {
 import { deleteUser } from "../../../core/services/ControlPanel/deleteUser";
 
 const MyProfileComponent = (props) => {
-  const { setIsCreatePost, setIsEdit, setIsEditPost, setPostToEdit } = props;
-  const [dataPostUser, setDataPostUser] = useState([]);
-  const [countries, setCountries] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [selectedPostId, setSelectedPostId] = useState(null);
-  const [dataFollowers, setDataFollowers] = useState([]);
-  const [dataFollowing, setDataFollowing] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const { setIsCreatePost, setIsEdit, setIsEditPost, setPostToEdit } = props; // Props necesarios 
+
+  const [dataPostUser, setDataPostUser] = useState([]); // Publicaciones del usuario
+  const [countries, setCountries] = useState([]); // Lista de países
+  const [selectedCountry, setSelectedCountry] = useState(null); // País seleccionado en el mapa
+  const [selectedPostId, setSelectedPostId] = useState(null); // Post seleccionado para comentarios
+  const [dataFollowers, setDataFollowers] = useState([]); // Lista de seguidores
+  const [dataFollowing, setDataFollowing] = useState([]); // Lista de seguidos
+  const [showModal, setShowModal] = useState(false); // Modal para marcar país visitado/deseado
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
-  const [searchFollowers, setSearchFollowers] = useState("");
-  const [searchFollowing, setSearchFollowing] = useState("");
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
+  const [searchFollowers, setSearchFollowers] = useState(""); // Filtro seguidores
+  const [searchFollowing, setSearchFollowing] = useState(""); // Filtro seguidos
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // Modal eliminar usuario
+  const [openModal, setOpenModal] = useState(false); // Modal comentarios
 
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const navigate = useNavigate(); // Navegación
+  const dispatch = useDispatch(); // Redux dispatch
 
-  const user = useSelector((state) => state.loginReducer);
-  const spainCenter = [40.4, -3.7];
+  const user = useSelector((state) => state.loginReducer); // Usuario  actual
+  const spainCenter = [40.4, -3.7]; // centro del mapa
 
-  // Función para abrir el modal y cargar seguidores
+  // Funciones para mostrar seguidores y seguidos
   const handleShowFollowers = async (userId) => {
     const res = await obtainedFollowers(userId);
 
@@ -68,53 +70,63 @@ const MyProfileComponent = (props) => {
     setShowFollowingModal(true);
   };
 
-  // Función para cerrar modal
+  // Función para cerrar modal de seguidores
   const handleCloseFollowersModal = () => {
     setShowFollowersModal(false);
   };
+  // Función para cerrar modal de seguidos
   const handleCloseFollowingModal = () => {
     setShowFollowingModal(false);
   };
 
-  // 🔹 Función toggleLike corregida
-  const toggleLike = async (postId) => {
-    const userId = user?.user?._id;
-    if (!userId) return;
+  
+ // Función para dar o quitar like a un post
+const toggleLike = async (postId) => {
+  // Obtenemos el ID del usuario logueado desde Redux
+  const userId = user?.user?._id;
+  if (!userId) return; // Si no hay usuario, salimos
 
-    // Optimistic update
+  //  actualizamos  inmediatamente 
+  setDataPostUser((prev) =>
+    prev.map((p) => {
+      if (p._id !== postId) return p; // Solo modificamos el post seleccionado
+
+      // Verificamos si el usuario ya dio like
+      const userLiked = p.likes.some((like) => like._id === userId);
+
+      // Si ya dio like, lo quitamos; si no, lo añadimos
+      const updatedLikes = userLiked
+        ? p.likes.filter((like) => like._id !== userId)
+        : [...p.likes, { _id: userId }];
+
+      // devolvemos el post actualizado
+      return { ...p, likes: updatedLikes };
+    })
+  );
+
+  try {
+    // Llamada al backend para registrar el like o quitar el lioke
+    await likeAndUnlikePost(postId);
+  } catch (error) {
+    console.error("Error al dar o quitar like:", error);
+
+    // por si falla la llamada al backend
     setDataPostUser((prev) =>
       prev.map((p) => {
         if (p._id !== postId) return p;
 
         const userLiked = p.likes.some((like) => like._id === userId);
-        const updatedLikes = userLiked
+        const revertedLikes = userLiked
           ? p.likes.filter((like) => like._id !== userId)
           : [...p.likes, { _id: userId }];
 
-        return { ...p, likes: updatedLikes };
+        return { ...p, likes: revertedLikes };
       })
     );
+  }
+};
 
-    try {
-      await likeAndUnlikePost(postId);
-    } catch (error) {
-      console.error("Error al dar o quitar like:", error);
-      // Revertir si falla
-      setDataPostUser((prev) =>
-        prev.map((p) => {
-          if (p._id !== postId) return p;
-
-          const userLiked = p.likes.some((like) => like._id === userId);
-          const revertedLikes = userLiked
-            ? p.likes.filter((like) => like._id !== userId)
-            : [...p.likes, { _id: userId }];
-
-          return { ...p, likes: revertedLikes };
-        })
-      );
-    }
-  };
-
+  // Función para traer los post del usuario
   const postUser = async (userId) => {
     try {
       const data = await getPostUserFetch(userId);
@@ -127,7 +139,7 @@ const MyProfileComponent = (props) => {
       console.error("Error al cargar las publicaciones:", error);
     }
   };
-
+  
   const handleDeletePost = async (postId) => {
     try {
       if (!window.confirm("¿Seguro que quieres eliminar esta publicación?"))
@@ -136,7 +148,7 @@ const MyProfileComponent = (props) => {
       const result = await deletePostUser(postId); // llamamos a la función de servicio
       console.log(result);
 
-      // Actualizamos el estado local quitando el post eliminado
+      // Actualizamos el estadoquitando el post eliminado
       setDataPostUser((prevPosts) => prevPosts.filter((p) => p._id !== postId));
 
       alert("Publicación eliminada correctamente");
@@ -146,6 +158,7 @@ const MyProfileComponent = (props) => {
     }
   };
 
+  // obtener todos los paises 
   const getCountries = async () => {
     try {
       const data = await getAllCountries();
@@ -158,12 +171,13 @@ const MyProfileComponent = (props) => {
       console.error("Error cargando países:", error);
     }
   };
-
+  // abrir el modal de comentarios
   const openCommentModal = (postId) => {
     setSelectedPostId(postId);
     setOpenModal(true);
   };
-
+ 
+  // opciones del modal de comentarios
   const handleCommentOption = (option) => {
     setOpenModal(false);
     if (option === "create") {
@@ -177,6 +191,7 @@ const MyProfileComponent = (props) => {
     }
   };
 
+   // Abrir/cerrar modal para marcar país
   const handleOpenModal = (country) => {
     setSelectedCountry(country);
     setShowModal(true);
@@ -187,6 +202,8 @@ const MyProfileComponent = (props) => {
     setSelectedCountry(null);
   };
 
+
+  //  Marcar país como visitado/deseado
   const handleMarkCountry = async (type) => {
     if (!selectedCountry) return;
     try {
@@ -240,7 +257,7 @@ const MyProfileComponent = (props) => {
       handleCloseModal();
     }
   };
-
+  // Navegar a mensajes
   const goToMessage = () => {
     navigate("/message");
     dispatch(changeMenuOption(3));
@@ -269,7 +286,7 @@ const MyProfileComponent = (props) => {
     setShowDeleteModal(false);
   };
 
-  // 📍 Configurar iconos
+  // Configuracion de iconos
   const icono = L.icon({
     iconUrl: "/src/assets/Map/PinGlobeTrack.png",
     iconSize: [55, 90],
@@ -279,7 +296,7 @@ const MyProfileComponent = (props) => {
     shadowSize: [90, 90],
     shadowAnchor: [27, 90],
   });
-
+  // Icono para clusters de marcador
   const iconCluster = (cluster) => {
     const count = cluster.getChildCount();
     return L.divIcon({
@@ -304,7 +321,7 @@ const MyProfileComponent = (props) => {
     });
   };
 
-  // 🔄 Cargar datos al montar
+  //  Cargar los datos al entrar en la pagina
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userId = user?.user?._id;

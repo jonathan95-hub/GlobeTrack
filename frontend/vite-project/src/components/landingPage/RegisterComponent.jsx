@@ -1,8 +1,12 @@
+// Importamos React y useState
 import React, { useState } from 'react'
+// Importamos la función de registro del backend
 import { register } from '../../core/services/landinPage/registerFetch'
 
+// Componente de registro
 const RegisterComponent = ({ setMenuOptionsInit }) => {
 
+  // Estado donde guardamos los datos del formulario
   const [registerData, setRegisterData] = useState({
     name: "",
     lastName: "",
@@ -13,6 +17,7 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
     city: "",
   })
 
+  // Función que actualiza el estado cuando el usuario escribe en un input
   const inputHandler = (nameProps, valueProps) => {
     setRegisterData({
       ...registerData,
@@ -20,36 +25,47 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
     })
   }
 
+  // Función para volver al menú inicial
   const backToLanding = () => {
     setMenuOptionsInit("INIT")
   }
 
+  // Función para enviar los datos al backend y registrar usuario
   const signupUser = async () => {
     try {
       const registerUser = await register(registerData)
+
+      // Si ocurre algún error en el registro mostramos alerta
       if (registerUser.status === "Failed" || registerUser.status === "Error") {
         alert(registerUser.message)
         console.log("Error en registro", registerUser.message)
         return
       }
+
+      // Registro exitoso
       console.log("Registro exitoso", registerUser)
       alert("Registro exitoso")
-      backToLanding()
+      backToLanding() // Volvemos al menú inicial
+
     } catch (error) {
-      console.error("Error de login:", error.message);
-      alert(error.message);
+      console.error("Error de login:", error.message)
+      alert(error.message)
     }
   }
 
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light px-3">
+      {/* card central del formulario */}
       <div
         className="card shadow-lg border-0 rounded-4 p-4 p-md-5"
         style={{ maxWidth: '500px', width: '100%' }}
       >
         <h3 className="text-center mb-4 fw-bold text-primary">Crear cuenta</h3>
 
+        {/* Formulario de registro */}
         <form className="register-form">
+
+          {/* Nombre */}
           <div className="form-group mb-3">
             <label className="fw-semibold text-secondary">Nombre</label>
             <input
@@ -62,6 +78,7 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
             />
           </div>
 
+          {/* Apellidos */}
           <div className="form-group mb-3">
             <label className="fw-semibold text-secondary">Apellidos</label>
             <input
@@ -74,6 +91,7 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
             />
           </div>
 
+          {/* Email */}
           <div className="form-group mb-3">
             <label className="fw-semibold text-secondary">Correo electrónico</label>
             <input
@@ -86,6 +104,7 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
             />
           </div>
 
+          {/* Fecha de nacimiento */}
           <div className="form-group mb-3">
             <label className="fw-semibold text-secondary">Fecha de nacimiento</label>
             <input
@@ -97,6 +116,7 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
             />
           </div>
 
+          {/* Contraseña */}
           <div className="form-group mb-3">
             <label className="fw-semibold text-secondary">Contraseña</label>
             <input
@@ -109,6 +129,7 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
             />
           </div>
 
+          {/* País */}
           <div className="form-group mb-3">
             <label className="fw-semibold text-secondary">País</label>
             <input
@@ -121,6 +142,7 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
             />
           </div>
 
+          {/* Ciudad */}
           <div className="form-group mb-4">
             <label className="fw-semibold text-secondary">Ciudad</label>
             <input
@@ -133,24 +155,24 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
             />
           </div>
 
+          {/* Botones de enviar y cancelar */}
           <div className="d-flex flex-column gap-3">
             <button
               type="submit"
               className="btn btn-primary w-100 rounded-3 fw-semibold shadow-sm"
-              onClick={(e) => { e.preventDefault(); signupUser() }}
+              onClick={(e) => { e.preventDefault(); signupUser() }} // Prevenimos refresh y llamamos a signupUser
             >
               Registrarse
             </button>
             <button
               type="button"
               className="btn btn-outline-primary w-100 rounded-3 fw-semibold"
-              onClick={backToLanding}
+              onClick={backToLanding} // Volvemos al menú inicial
             >
               Cancelar
             </button>
           </div>
 
-          
         </form>
       </div>
     </div>

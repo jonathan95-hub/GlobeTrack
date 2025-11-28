@@ -1,16 +1,21 @@
+// Importamos los hooks y las funciones necesarias
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { bestPost } from "../../core/services/homepage/Top10PostFetch";
 
 const ListBestPost = () => {
+  // Aquí guardamos los mejores posts que nos mande el backend
   const [topPost, setTopPost] = useState([]);
 
+  // Función que trae los posts destacados
   const TopBestPost = async () => {
     try {
       const data = await bestPost();
+
+      // Si vienen posts y es un array, los guardamos
       if (data.post && Array.isArray(data.post)) {
         setTopPost(data.post);
       } else {
+        // Si por lo que sea no vienen bien, dejamos el array vacío
         setTopPost([]);
       }
     } catch (error) {
@@ -19,17 +24,21 @@ const ListBestPost = () => {
     }
   };
 
+  // Cuando se carga el componente pedimos los posts destacados
   useEffect(() => {
     TopBestPost();
   }, []);
 
   return (
     <div className="container">
+      
+      {/* Si no hay posts mostramos un mensaje */}
       {topPost.length === 0 ? (
         <p className="text-center text-muted fw-semibold">
           No hay publicaciones destacadas
         </p>
       ) : (
+        // Si sí hay posts los pintamos en tarjetas
         <div className="d-flex flex-column gap-3">
           {topPost.map((p, idx) => (
             <div
@@ -40,7 +49,7 @@ const ListBestPost = () => {
                 borderRadius: "14px",
               }}
             >
-              {/* Encabezado */}
+              {/* Parte de arriba con la foto y nombre del usuario */}
               <div className="d-flex align-items-center p-2">
                 <img
                   src={p.user?.photoProfile}
@@ -60,7 +69,7 @@ const ListBestPost = () => {
                 </h6>
               </div>
 
-              {/* Imagen principal */}
+              {/* Imagen del post si tiene */}
               {p.image && (
                 <div className="overflow-hidden rounded my-2">
                   <img
@@ -76,7 +85,7 @@ const ListBestPost = () => {
                 </div>
               )}
 
-              {/* Contenido */}
+              {/* Contenido del post */}
               <div className="card-body p-2" style={{ paddingTop: "6px" }}>
                 <h5
                   className="card-title text-primary fw-bold"
@@ -90,7 +99,7 @@ const ListBestPost = () => {
                   style={{
                     fontSize: "1rem",
                     display: "-webkit-box",
-                    WebkitLineClamp: 3,
+                    WebkitLineClamp: 3, // Mostramos solo 3 líneas de texto
                     WebkitBoxOrient: "vertical",
                     overflow: "hidden",
                   }}
@@ -108,94 +117,3 @@ const ListBestPost = () => {
 
 export default ListBestPost;
 
-
-  //  <Carousel
-  //           showThumbs={false}
-  //           showStatus={false}
-  //           showIndicators={false}
-  //           infiniteLoop
-  //           swipeable
-  //           emulateTouch
-  //           showArrows={true}
-  //           centerMode={false}
-  //           autoFocus={false}
-  //           useKeyboardArrows
-  //           renderArrowPrev={(onClickHandler, hasPrev, label) =>
-  //             hasPrev && (
-  //               <button
-  //                 type="button"
-  //                 onClick={onClickHandler}
-  //                 title={label}
-  //                 className="carousel-arrow btn btn-outline-primary rounded-circle shadow position-absolute top-50 start-0 translate-middle-y"
-  //                 style={{ width: "40px", height: "40px" }}
-  //               >
-  //                 ‹
-  //               </button>
-  //             )
-  //           }
-  //           renderArrowNext={(onClickHandler, hasNext, label) =>
-  //             hasNext && (
-  //               <button
-  //                 type="button"
-  //                 onClick={onClickHandler}
-  //                 title={label}
-  //                 className="carousel-arrow btn btn-outline-primary rounded-circle shadow position-absolute top-50 end-0 translate-middle-y"
-  //                 style={{ width: "40px", height: "40px" }}
-  //               >
-  //                 ›
-  //               </button>
-  //             )
-  //           }
-  //           className="single-card-carousel w-100 position-relative"
-  //         >
-  //           {topPost.map((p, idx) => (
-  //             <div key={idx} className="d-flex justify-content-center">
-  //               <div
-  //                 className="card border-0 shadow-sm w-100 bg-light rounded-4 hover-shadow mb-5"
-  //                 style={{
-  //                   maxWidth: "95%",
-  //                   overflow: "hidden",
-  //                   transition: "transform 0.3s ease, box-shadow 0.3s ease",
-  //                 }}
-  //               >
-  //                 <div className="row g-2 p-3 align-items-start ">
-  //                   <div className="col-auto d-flex align-items-center">
-  //                     <img
-  //                       src={p.user?.photoProfile}
-  //                       alt={p.user?.name || "Perfil"}
-  //                       className="rounded-circle border border-2 border-primary"
-  //                       style={{
-  //                         width: "55px",
-  //                         height: "55px",
-  //                         objectFit: "cover",
-  //                       }}
-  //                     />
-  //                   </div>
-  //                   <div className="col d-flex flex-column">
-  //                     <h6 className="mb-1 text-dark fw-bold">
-  //                       {p.user?.name}
-  //                     </h6>
-  //                     <h5
-  //                       className="card-title text-truncate fw-bold text-primary"
-  //                       style={{ fontSize: "1.1rem" }}
-  //                     >
-  //                       {p.title}
-  //                     </h5>
-
-  //                     <p
-  //                       className="card-text text-secondary small"
-  //                       style={{
-  //                         WebkitLineClamp: 3,
-  //                         display: "-webkit-box",
-  //                         WebkitBoxOrient: "vertical",
-  //                         overflow: "hidden",
-  //                       }}
-  //                     >
-  //                       {p.text}
-  //                     </p>
-  //                   </div>
-  //                 </div>
-  //               </div>
-  //             </div>
-  //           ))}
-  //         </Carousel>

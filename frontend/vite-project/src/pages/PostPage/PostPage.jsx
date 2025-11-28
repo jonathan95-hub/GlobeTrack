@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+// Servicio para obtener todas las publicaciones
 import { allPostFetch } from "../../core/services/homepage/allPostFetch";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,9 +7,12 @@ import { changeMenuOption } from "../../components/MainLayaout/Header/headerActi
 import { likeAndUnlikePost } from "../../core/services/post/likePost";
 
 const PostPage = () => {
+  // Estado para guardar todas las publicaciones
   const [dataAllPost, setDataAllPost] = useState([]);
+  // Página actual y total de páginas
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  // Estado para abrir o cerrar el modal de comentarios
   const [openModal, setOpenModal] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
   
@@ -16,6 +20,7 @@ const PostPage = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.loginReducer);
 
+  // Función para ir al perfil de un usuario
   const goToProfileUser = (id) => {
     if (id === user.user._id) {
       dispatch(changeMenuOption(2));
@@ -28,51 +33,53 @@ const PostPage = () => {
     }
   };
 
+  // Función para dar o quitar like a una publicación
   const toggleLike = async (postId) => {
-  const userId = user?.user?._id;
-  if (!userId) return;
+    const userId = user?.user?._id;
+    if (!userId) return;
 
-  // Optimistic update: cambiar estado local antes de llamar al backend
-  setDataAllPost((prev) =>
-    prev.map((p) => {
-      if (p._id !== postId) return p;
-
-      const userLiked = p.likes.some(like => like._id === userId);
-      const updatedLikes = userLiked
-        ? p.likes.filter(like => like._id !== userId) // quitar like
-        : [...p.likes, { _id: userId }]; // añadir like
-
-      return { ...p, likes: updatedLikes };
-    })
-  );
-
-  // Llamada al backend
-  try {
-    await likeAndUnlikePost(postId);
-  } catch (error) {
-    console.error("Error al dar o quitar like:", error);
-    // Opcional: revertir cambio local si falla
+    // Actualiza el estado local antes de enviar la petición
     setDataAllPost((prev) =>
       prev.map((p) => {
         if (p._id !== postId) return p;
 
         const userLiked = p.likes.some(like => like._id === userId);
-        const revertedLikes = userLiked
-          ? p.likes.filter(like => like._id !== userId)
-          : [...p.likes, { _id: userId }];
+        const updatedLikes = userLiked
+          ? p.likes.filter(like => like._id !== userId) // quitar like
+          : [...p.likes, { _id: userId }]; // agregar like
 
-        return { ...p, likes: revertedLikes };
+        return { ...p, likes: updatedLikes };
       })
     );
-  }
-};
 
+    // Llamada al backend
+    try {
+      await likeAndUnlikePost(postId);
+    } catch (error) {
+      console.error("Error al dar o quitar like:", error);
+      // Revertir cambio si falla
+      setDataAllPost((prev) =>
+        prev.map((p) => {
+          if (p._id !== postId) return p;
 
+          const userLiked = p.likes.some(like => like._id === userId);
+          const revertedLikes = userLiked
+            ? p.likes.filter(like => like._id !== userId)
+            : [...p.likes, { _id: userId }];
+
+          return { ...p, likes: revertedLikes };
+        })
+      );
+    }
+  };
+
+  // Abrir el modal para comentarios
   const openCommentModal = (postId) => {
     setSelectedPostId(postId);
     setOpenModal(true);
   };
 
+  // Manejar opción del modal de comentarios
   const handleCommentOption = (option) => {
     setOpenModal(false);
     if (option === "create") {
@@ -82,6 +89,7 @@ const PostPage = () => {
     }
   };
 
+  // Función para obtener todas las publicaciones
   const getAllPost = async (token, pageToLoad = 1) => {
     try {
       const data = await allPostFetch(token, pageToLoad);
@@ -102,6 +110,7 @@ const PostPage = () => {
     }
   };
 
+  // Función para cargar más publicaciones
   const loadMore = () => {
     if (page < totalPages) {
       const token = localStorage.getItem("token");
@@ -110,6 +119,7 @@ const PostPage = () => {
     }
   };
 
+  // Cargar publicaciones al iniciar la página
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -126,6 +136,7 @@ const PostPage = () => {
       </h2>
 
       {dataAllPost.length === 0 ? (
+        // Mensaje si no hay publicaciones
         <p className="text-center text-muted fs-5">
           No hay publicaciones disponibles.
         </p>
@@ -140,7 +151,8 @@ const PostPage = () => {
               <div key={idx} className="col-md-8 mb-4">
                 <div className="card shadow-sm border-0 rounded-4">
                   <div className="card-body">
-                    {/* Info del usuario */}
+
+                    {/* Información del usuario */}
                     <div
                       className="d-flex align-items-center mb-3"
                       style={{ cursor: "pointer" }}
@@ -150,11 +162,7 @@ const PostPage = () => {
                         src={p.user?.photoProfile}
                         alt={p.user?.name}
                         className="rounded-circle shadow-sm me-3"
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          objectFit: "cover",
-                        }}
+                        style={{ width: "60px", height: "60px", objectFit: "cover" }}
                       />
                       <div>
                         <h6 className="mb-0 fw-bold text-primary">
@@ -164,6 +172,7 @@ const PostPage = () => {
                       </div>
                     </div>
 
+                    {/* Imagen de la publicación */}
                     {p.image && (
                       <div className="d-flex justify-content-center mb-3">
                         <img
@@ -178,7 +187,9 @@ const PostPage = () => {
                     <h5 className="fw-bold text-center mb-2">{p.title}</h5>
                     <p className="text-center text-secondary">{p.text}</p>
 
+                    {/* Botones de like y comentarios */}
                     <div className="d-flex justify-content-center align-items-center gap-4 mt-3">
+
                       {/* Like */}
                       <button
                         className="btn d-flex align-items-center justify-content-center p-0 border-0 bg-transparent"
@@ -191,16 +202,10 @@ const PostPage = () => {
                               : "/src/assets/ListBestPost/IconoLikeInactivoGlobeTrack.png"
                           }
                           alt="Like"
-                          style={{
-                            width: userLiked ? "26px" : "22px",
-                            transition: "all 0.2s ease",
-                          }}
+                          style={{ width: userLiked ? "26px" : "22px", transition: "all 0.2s ease" }}
                         />
                       </button>
-
-                      <span className="fw-bold text-dark">
-                        {p.likes?.length || 0}
-                      </span>
+                      <span className="fw-bold text-dark">{p.likes?.length || 0}</span>
 
                       {/* Comentarios */}
                       <button
@@ -214,6 +219,7 @@ const PostPage = () => {
                         />
                         <span>{p.comment?.length || 0}</span>
                       </button>
+
                     </div>
                   </div>
                 </div>
@@ -223,6 +229,7 @@ const PostPage = () => {
         </div>
       )}
 
+      {/* Botón para cargar más publicaciones */}
       {page < totalPages && (
         <div className="col-12 d-flex justify-content-center mb-5">
           <button className="btn btn-primary" onClick={loadMore}>
@@ -231,34 +238,22 @@ const PostPage = () => {
         </div>
       )}
 
-      {/* Modal Bootstrap */}
+      {/* Modal para opciones de comentarios */}
       {openModal && (
-        <div
-          className="modal fade show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
+        <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content p-4">
               <h5 className="text-center">Comentarios</h5>
               <div className="d-flex justify-content-around mt-4">
-                <button
-                  className="btn btn-success"
-                  onClick={() => handleCommentOption("create")}
-                >
+                <button className="btn btn-success" onClick={() => handleCommentOption("create")}>
                   Crear comentario
                 </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => handleCommentOption("view")}
-                >
+                <button className="btn btn-primary" onClick={() => handleCommentOption("view")}>
                   Ver comentarios
                 </button>
               </div>
               <div className="text-center mt-3">
-                <button
-                  className="btn btn-link text-danger"
-                  onClick={() => setOpenModal(false)}
-                >
+                <button className="btn btn-link text-danger" onClick={() => setOpenModal(false)}>
                   Cancelar
                 </button>
               </div>

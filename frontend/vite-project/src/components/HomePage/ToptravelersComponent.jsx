@@ -2,22 +2,28 @@ import React, { useEffect, useState } from "react";
 import { getTopUser } from "../../core/services/homepage/fetchgetUserTop";
 
 const ToptravelersComponent = () => {
+  // Aquí guardamos a los viajeros más top que vienen del backend
   const [topUser, setTopUser] = useState([]);
 
+  // Función que pide al backend los usuarios más viajeros
   const getUserTop = async () => {
     try {
       const data = await getTopUser();
+
+      // Comprobamos que llega un array válido antes de guardarlo
       if (data?.user && Array.isArray(data.user)) {
         setTopUser(data.user);
       } else {
         setTopUser([]);
       }
     } catch (error) {
+      // Si hay error lo ponemos en vacío
       console.error("Error", error);
       setTopUser([]);
     }
   };
 
+  // useEffect para que la función se ejecute solo al cargar el componente
   useEffect(() => {
     getUserTop();
   }, []);
@@ -28,18 +34,21 @@ const ToptravelersComponent = () => {
         className="w-100 h-100 bg-dark text-light rounded-4 shadow-lg p-3 d-flex flex-column flex-grow-1"
         style={{ border: "1px solid rgba(0,255,255,0.2)" }}
       >
+        {/* Título del componente */}
         <h5
           className="text-center fw-bold mb-3"
           style={{ color: "#00ffff", textShadow: "0 0 6px #00ffff" }}
         >
-          ✈️ Top Viajeros
+          Top Viajeros
         </h5>
 
+        {/* Si no hay usuarios mostramos un mensaje */}
         {topUser.length === 0 ? (
           <p className="text-muted text-center fw-semibold flex-grow-1 d-flex align-items-center justify-content-center">
             No hay viajeros destacados
           </p>
         ) : (
+          // Grid donde mostramos a los usuarios top
           <div
             className="flex-grow-1 overflow-auto"
             style={{
@@ -57,7 +66,7 @@ const ToptravelersComponent = () => {
                   border: "1px solid rgba(0,255,255,0.25)",
                 }}
               >
-                {/* Imagen ligeramente más pequeña */}
+                {/* Imagen del usuario */}
                 <div
                   className="rounded-circle border border-info overflow-hidden shadow-sm flex-shrink-0"
                   style={{ width: "68px", height: "68px" }}
@@ -70,7 +79,7 @@ const ToptravelersComponent = () => {
                   />
                 </div>
 
-                {/* Texto */}
+                {/* Texto con su nombre */}
                 <div className="d-flex flex-column">
                   <span
                     className="fw-bold text-light"

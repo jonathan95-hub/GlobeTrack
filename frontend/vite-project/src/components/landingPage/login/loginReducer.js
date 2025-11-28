@@ -1,45 +1,61 @@
-import { useSelector } from "react-redux";
-import { LOGIN, LOG_OUT, UPDATE_USER } from "./loginAction";
+import { useSelector } from "react-redux"; // Importamos useSelector de Redux (aunque no se usa aquí directamente)
+import { LOGIN, LOG_OUT, UPDATE_USER } from "./loginAction"; // Importamos las acciones definidas anteriormente
 
-const token = localStorage.getItem('token'); // Obtenemos el token del locarStorage
-const userStorage = localStorage.getItem("user") // Obtenemos el usuario del localStorage
+// Obtenemos el token guardado en localStorage
+const token = localStorage.getItem('token'); 
+
+// Obtenemos los datos del usuario guardados en localStorage
+const userStorage = localStorage.getItem("user"); 
+
+// Estado inicial del reducer
 const initialState = {
-    isLogued: !!token, // La doble negación hace que si hay token mantenga la sesion abierta si no lo hay te manda de vuelta al login
-    user: userStorage ? JSON.parse(userStorage) : null //Si hay datos del usuario guardados, los convertimos de texto a objeto con JSON.parse Si no hay nada, el usuario empieza en null
+    // isLogued será true si hay token, false si no hay
+    isLogued: !!token, // la doble negación convierte el token a true o false
+
+    // user se inicializa con los datos guardados si existen, sino null
+    user: userStorage ? JSON.parse(userStorage) : null 
 }
 
+// Reducer que maneja el estado de login
 const loginReducer = (state = initialState, action) => {
-const{type, payload} = action
-switch(type){
-    case LOGIN:
-        return{
-            ...state, 
-            isLogued: true,
-            user: payload.user,
-            token: payload.token,
-            token_refresh: payload.token_refresh,
-            isAdmin: payload.isAdmin
-            
-        }
-    case LOG_OUT:
-        // Al cerrar sesion borramos el token el token de refresco y el usuario del localStorage
-      localStorage.removeItem("token");
-      localStorage.removeItem("token_refresh");
-      localStorage.removeItem("user");
-        return{
-            ...state,
-            isLogued: false, // Ponemos is logued en false
-            user: null // Ponemos user en null
+    const { type, payload } = action; // Desestructuramos type y payload de la acción
+
+    switch(type){
+        case LOGIN:
+            // Cuando hacemos login:
+            return {
+                ...state, // Mantenemos el estado previo
+                isLogued: true, // Marcamos que está logueado
+                user: payload.user, // Guardamos los datos del usuario
+                token: payload.token, // Guardamos el token
+                token_refresh: payload.token_refresh, // Guardamos el token de refresco
+                isAdmin: payload.isAdmin // Guardamos si es admin
             }
-    case UPDATE_USER:
-        localStorage.setItem("user", JSON.stringify(payload))
-        return{
-            ...state,
-            user: payload
-        }
-    default:
-        return state
-}
+
+        case LOG_OUT:
+            // Cuando cerramos sesión:
+            // Borramos los datos guardados en localStorage
+            localStorage.removeItem("token");
+            localStorage.removeItem("token_refresh");
+            localStorage.removeItem("user");
+            return {
+                ...state,
+                isLogued: false, // Marcamos que no está logueado
+                user: null // Limpiamos los datos del usuario
+            }
+
+        case UPDATE_USER:
+            // Cuando se actualizan los datos del usuario:
+            localStorage.setItem("user", JSON.stringify(payload)); // Guardamos los nuevos datos en localStorage
+            return {
+                ...state,
+                user: payload // Actualizamos el usuario en el estado
+            }
+
+        default:
+            // Si la acción no coincide con nada, devolvemos el estado actual
+            return state;
+    }
 }
 
-export default loginReducer
+export default loginReducer; // Exportamos el reducer para usarlo en el store

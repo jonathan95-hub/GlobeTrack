@@ -7,91 +7,120 @@ const cloudinary = require("../config/configCloudinary")
 
 
 
-// VOLVER A COMENTAR SE MODIFICO LA FUNCIÓN 
 const createPost = async (req, res) => {
   try {
-    const{ip,userAgent} = getRequestInfo(req) // Destructuring de la funcion getRequestInfo con req como parametro
-    const userId = req.payload._id // Obtenmos el id del usuario por el token
-    const post = req.body; // recibimos por el body la publicacion
-    if(post.image){
+    // Obtenemos información de la petición: ip y navegador
+    const { ip, userAgent } = getRequestInfo(req);
+
+    // Obtenemos el id del usuario desde el token
+    const userId = req.payload._id;
+
+    // Recibimos los datos del post desde el body
+    const post = req.body;
+
+    // Si el post tiene imagen, la subimos a Cloudinary
+    if (post.image) {
       try {
-        const upload = await cloudinary.uploader.upload(post.image,{
-          folder: "Post_GlobeTracked"
-        })
-        post.image = upload.secure_url
+        const upload = await cloudinary.uploader.upload(post.image, {
+          folder: "Post_GlobeTracked" // Guardamos la imagen en la carpeta específica
+        });
+        post.image = upload.secure_url; // Reemplazamos la imagen base64 por la URL segura
       } catch (error) {
-        res.status(500).send({status: "Failed", error: error.message})
+        // Si falla la subida de imagen, devolvemos un error 500
+        res.status(500).send({ status: "Failed", error: error.message });
       }
     }
-    
-    const newPost = await postModel.create({...post,user: userId}); // creamos la constante newPost para crear un nuevo post con la informacion del body antes recogida como parametro
+
+    // Creamos un nuevo post en la base de datos con la información recibida y el id del usuario
+    const newPost = await postModel.create({ ...post, user: userId });
+
+    // Buscamos el post recién creado y hacemos populate para incluir nombre y foto del usuario
     const populatePost = await postModel
       .findById(newPost._id)
-      .populate("user", "name photoProfile"); // buscamos el nuevo post por su Id y hacemos populate con referencia a user y sacamos el nombre y la imagen del usuario
-      // Se creará un log tipo info con el mensaje de post creado exitosamente
-      // Se enviará el id, la ip, y el navegador del usuario el id del psot y eñ contenido del post
-      logger.info("Post created successfully",{
-        meta: {
-          userId,
-          endpoint: "/post/create",
-          postId: newPost._id,
-          content: post,
-          ip,
-          userAgent
-        }
-      })
-      // Devolvemos un 201 con el mensaje de post creado
-      res.status(201).send({
-        newPost: populatePost,
-        status: "Success",
-        message: "Created post",
-      }); // recibimos como respuesta el nuevo post con un mensaje de Creada nueva publicación
+      .populate("user", "name photoProfile");
+
+    // Registramos un log tipo info indicando que se creó el post exitosamente
+    // Incluye: id del usuario, endpoint, id del post, contenido del post, ip y navegador
+    logger.info("Post created successfully", {
+      meta: {
+        userId,
+        endpoint: "/post/create",
+        postId: newPost._id,
+        content: post,
+        ip,
+        userAgent
+      }
+    });
+
+    // Enviamos la respuesta al cliente con estado 201 y el post creado
+    res.status(201).send({
+      newPost: populatePost,
+      status: "Success",
+      message: "Created post",
+    });
+
   } catch (error) {
-    // Creamos un log tipo error para cualquier error del servidor
+    // Si hay un error general, registramos un log tipo error
     logger.error("Error creating post", {
       meta: {
         error: error.message,
         endpoint: "/post/create",
       },
     });
-    // Devolvemos un 500 para cualquier error del servidor
+
+    // Devolvemos un 500 indicando fallo en el servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 
 
-// volver a documentar
+
+// Función para obtener todas las publicaciones paginadas
 const getPost = async (req, res) => {
   try {
-     // Obtenemos el número de página desde query params, por defecto 1
+    // Obtenemos el número de página desde los query params, si no viene usamos 1
     const page = parseInt(req.query.page) || 1;
-    const limit = 10; // Número de posts por página
+
+    // Número de publicaciones que queremos mostrar por página
+    const limit = 10;
+
+    // Calculamos cuántos documentos debemos saltar según la página
     const skip = (page - 1) * limit;
-    // Buscamos todas las publicaciones con find y usamos populate para mostrar el usuario con su imagen y nombre
-    // tambien lo usamos para mostrar los comentarios con el nombre de usuario y la imagen
+
+    // Contamos el total de publicaciones en la base de datos
     const totalPosts = await postModel.countDocuments();
-   const allPost = await postModel
-  .find()
-  .populate({ path: "user", select: "name photoProfile" })
-  .populate({
-    path: "comment",
-    populate: { path: "user", select: "name photoProfile" },
-  })
-  .populate({ path: "likes", select: "_id" }) // <--- esto es clave
-  .sort({ createdAt: -1 })
-  .skip(skip)
-  .limit(limit);
-      // Devolcemos un 200 con el mensaje de todas las publicaciones obtenidas
-    res
-      .status(200)
-      .send({
-        allPost,
-        totalPages: Math.ceil(totalPosts / limit),
-        status: "Success",
-        message: "All publications have been obtained",
-      });
+
+    // Buscamos las publicaciones con find
+    // - Hacemos populate para traer datos del usuario (nombre y foto)
+    // - Hacemos populate de los comentarios con nombre y foto de cada usuario
+    // - Hacemos populate de los likes para obtener solo los ids de los usuarios que dieron like
+    // - Ordenamos por fecha de creación descendente (más recientes primero)
+    // - Aplicamos skip y limit para paginación
+    const allPost = await postModel
+      .find()
+      .populate({ path: "user", select: "name photoProfile" })
+      .populate({
+        path: "comment",
+        populate: { path: "user", select: "name photoProfile" },
+      })
+      .populate({ path: "likes", select: "_id" })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Enviamos la respuesta con:
+    // - Las publicaciones encontradas
+    // - El total de páginas según el total de publicaciones
+    // - Mensaje de éxito
+    res.status(200).send({
+      allPost,
+      totalPages: Math.ceil(totalPosts / limit),
+      status: "Success",
+      message: "All publications have been obtained",
+    });
+
   } catch (error) {
-    // Devolvemos un 500 para cualquier error del servidor
+    // Si ocurre un error en el servidor, devolvemos un 500 con el mensaje del error
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
@@ -159,35 +188,37 @@ const deletePost = async (req, res) => {
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
-// VOLVER A COMENTAR ESTA FUNCION PUES FUE RETOCADA
+// Función para dar o quitar like a una publicación
 const likePost = async (req, res) => {
   try {
-    const userId = req.payload._id;
-    const postId = req.params.postId;
+    const userId = req.payload._id; // Obtenemos el id del usuario desde el token
+    const postId = req.params.postId; // Obtenemos el id del post desde los parámetros
 
-    // Buscamos el post original con usuario y likes completos
+    // Buscamos el post por id, incluyendo usuario, likes y comentarios
     const post = await postModel
       .findById(postId)
-      .populate("likes", "_id name") // 🔹 Incluimos _id
-      .populate("user", "name lastName photoProfile country")
+      .populate("likes", "_id name") // Traemos los usuarios que dieron like
+      .populate("user", "name lastName photoProfile country") // Traemos los datos del creador
       .populate({
         path: "comment",
-        populate: { path: "user", select: "name lastName photoProfile" },
+        populate: { path: "user", select: "name lastName photoProfile" }, // Traemos los datos de cada usuario de los comentarios
       });
 
+    // Si no existe el post
     if (!post) {
       return res.status(404).send({ status: "Failed", message: "Post not found" });
     }
 
+    // Verificamos si el usuario ya ha dado like
     const alreadyLiked = post.likes.some(like => like._id.toString() === userId.toString());
 
     let updatedPost;
 
     if (alreadyLiked) {
-      // Quitar like
+      // Si ya le dio like, se quita
       updatedPost = await postModel
         .findByIdAndUpdate(postId, { $pull: { likes: userId } }, { new: true })
-        .populate("likes", "_id name") // 🔹 Incluimos _id
+        .populate("likes", "_id name")
         .populate("user", "name lastName photoProfile country")
         .populate({
           path: "comment",
@@ -197,16 +228,17 @@ const likePost = async (req, res) => {
       return res.status(200).send({ updatedPost, status: "Success", message: "You removed your like" });
     }
 
-    // Añadir like
+    // Si no ha dado like, se añade
     updatedPost = await postModel
       .findByIdAndUpdate(postId, { $addToSet: { likes: userId } }, { new: true })
-      .populate("likes", "_id name") // 🔹 Incluimos _id
+      .populate("likes", "_id name")
       .populate("user", "name lastName photoProfile country")
       .populate({
         path: "comment",
         populate: { path: "user", select: "name lastName photoProfile" },
       });
 
+    // Creamos notificación si el post no es del mismo usuario
     if (updatedPost.user._id.toString() !== userId.toString()) {
       const senderUser = await usersModel.findById(userId).select("name lastName");
       const fullName = `${senderUser.name} ${senderUser.lastName}`;
@@ -219,93 +251,97 @@ const likePost = async (req, res) => {
         message: `A ${fullName} le ha gustado tu publicación`,
       });
 
+      // Emitimos la notificación en tiempo real si hay socket
       if (req.io) {
         req.io.to(updatedPost.user._id.toString()).emit("newNotification", notification);
       }
     }
 
+    // Enviamos respuesta con el post actualizado
     res.status(200).send({ post: updatedPost, status: "Success", message: "Liked post" });
   } catch (error) {
+    // En caso de error devolvemos 500
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 
-// Volver a documentar!
-
+// Función para editar una publicación existente
 const editPost = async (req, res) => {
   try {
-    const{ip, userAgent} = getRequestInfo(req) // Destructuring de la funcion getRequestInfo con req como parametro
-    const userId = req.payload._id // Obtenemos el id del usuario por el token
-    const user = await usersModel.findById(userId) // Buscamos al usuario por el id
+    const { ip, userAgent } = getRequestInfo(req); // Obtenemos ip y navegador del usuario
+    const userId = req.payload._id; // Id del usuario desde token
+    const user = await usersModel.findById(userId); // Obtenemos datos del usuario
 
-    const postId = req.params.postId; // Buscamos el id del post por params
-    const newPost = req.body; 
-    const post = await postModel.findById(postId).populate("user") // Buscamos el post por su id
-    // Si no hay post
-    if(!post){
-      // Devolvemos un 404 con el mensaje de post no encontrado
+    const postId = req.params.postId; // Id del post desde parámetros
+    const newPost = req.body; // Datos que se quieren actualizar
+    const post = await postModel.findById(postId).populate("user"); // Obtenemos el post con usuario
+
+    // Si no existe el post
+    if (!post) {
       return res.status(404).send({ status: "Failed", message: "Post not found" });
     }
 
-    // Si el id no es igual al id del creador del post o el usuario no es administador 
-    if(post.user._id.toString() !== userId && user.isAdmin !== "admin" ){
-      // Creamos un log tipo warn y tendrá el mensaje de se intentó editar la publicación sin ser el creador o administrador
-        // Se enviará en el log el id, el nombre completo, email, ip y navegador del usuario
-      logger.warn("An attempt was made to edit the post without being the creator or administrator",{
+    // Verificamos que el usuario sea el creador o administrador
+    if (post.user._id.toString() !== userId && user.isAdmin !== "admin") {
+      logger.warn("An attempt was made to edit the post without being the creator or administrator", {
         meta: {
           _id: userId,
           user: `${user.name} ${user.lastName}`,
           email: user.email,
           endpoint: "/post/edit/:postId",
-          ip, 
-          userAgent
-        }
-      })
-      // Devolvemos un 401 con el mensaje de no puedes editar el post por que njo eres eñl autor o el administrador
-      return res.status(401).send({status: "Failed", message: "You cannot edit this post because you are not the owner or an administrator"})
+          ip,
+          userAgent,
+        },
+      });
+      return res.status(401).send({
+        status: "Failed",
+        message: "You cannot edit this post because you are not the owner or an administrator",
+      });
     }
 
-    // Creamos un post tipo info y tendrá el mensaje de post editado exitosamente 
-    // Se enviará en el log el id, el nombre completo, email, ip y navegador del usuario
-    logger.info("Post edited succesfully",{
-      meta:{
+    // Log de edición exitosa
+    logger.info("Post edited succesfully", {
+      meta: {
         _id: userId,
         user: `${user.name} ${user.lastName}`,
         email: user.email,
         endpoint: "/post/edit/:postId",
         ip,
-        userAgent
-      }
-    })
-      if (newPost.image) {
+        userAgent,
+      },
+    });
+
+    // Si el post tiene imagen nueva, la subimos a Cloudinary
+    if (newPost.image) {
       const uploadedImage = await cloudinary.uploader.upload(newPost.image, {
         folder: "Post_GlobeTracked",
       });
-      newPost.image = uploadedImage.secure_url; // reemplazamos Base64 por URL
+      newPost.image = uploadedImage.secure_url; // Reemplazamos la imagen
     }
-    // Se busaca el post por su id y lo actualizamos a con newPost 
-    const updatePost = await postModel.findByIdAndUpdate(postId, newPost, {new: true})
-    // Devolvemos un 200 con el nuevo post con el mensaje de post actualizado
+
+    // Actualizamos el post en la base de datos
+    const updatePost = await postModel.findByIdAndUpdate(postId, newPost, { new: true });
+
+    // Enviamos respuesta con el post actualizado
     res.status(200).send({ updatePost, status: "Success", message: "Post updated" });
   } catch (error) {
-    // Se creará un log tipo error  para cualquier error del servidor
+    // Log de error
     logger.error("Error creating post", {
       meta: {
         error: error.message,
         endpoint: "/post/edit/:postId",
       },
     });
-    // Devolvemos un 500 para cualquier error del servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };
 
-// Función para obtener el top 10 de posts con más likes y comentarios
-// IMPORTANTE VOLVER A DOCUMENTAR ESTA FUNCION PUES FUE MODIFICADA!!
+
+// Función para obtener el top 10 de publicaciones con más likes y comentarios
 const topPost = async (req, res) => {
   try {
     const post = await postModel.aggregate([
-      // 1️⃣ Calcula los totales antes de hacer lookup
+      // Calculamos totales de likes y comentarios por post
       {
         $project: {
           title: 1,
@@ -315,24 +351,24 @@ const topPost = async (req, res) => {
           numberComment: { $size: { $ifNull: ["$comment", []] } },
         },
       },
-      // 2️⃣ Ordena por los campos recién creados
+      // Ordenamos primero por likes y luego por comentarios
       { $sort: { numberLikes: -1, numberComment: -1 } },
-      // 3️⃣ Limita a 10
+      // Limitamos a los 10 primeros
       { $limit: 10 },
-      // 4️⃣ Une con la colección de usuarios
-  {
-  $lookup: {
-    from: "users",
-    let: { userId: { $toObjectId: "$user" } }, // convierte el string a ObjectId
-    pipeline: [
-      { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
-      { $project: { name: 1, photoProfile: 1 } }
-    ],
-    as: "user"
-  }
-},
-{ $unwind: "$user" },
-      // 6️⃣ Proyecta solo los campos necesarios
+      // Unimos con la colección de usuarios para obtener nombre y foto
+      {
+        $lookup: {
+          from: "users",
+          let: { userId: { $toObjectId: "$user" } },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+            { $project: { name: 1, photoProfile: 1 } },
+          ],
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      // Dejamos solo los campos que necesitamos
       {
         $project: {
           title: 1,
@@ -345,12 +381,14 @@ const topPost = async (req, res) => {
       },
     ]);
 
+    // Enviamos la respuesta con el top 10
     res.status(200).send({
       status: "Success",
       message: "Top 10 posts with most likes",
       post,
     });
   } catch (error) {
+    // Error en el servidor
     res.status(500).send({ status: "Failed", error: error.message });
   }
 };

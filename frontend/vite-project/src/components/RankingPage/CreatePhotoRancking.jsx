@@ -1,21 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { createPhoto } from "../../core/services/RankingPage/createPhotoRanking";
 import { getAllCountries } from "../../core/services/ProfilePage/getCountries";
-import { useNavigate } from "react-router-dom";
+
 
 const CreatePhotoRancking = (props) => {
-  const{
+
+  // obtengo las funciones atraves de props
+  const {
     setIsCreatePhoto,
     allPhoto
-  } = props
+  } = props;
+
+  // Guarda la imagen transformada a base64
   const [imageBase64, setImageBase64] = useState("");
+
+  // País seleccionado por el usuario
   const [country, setCountry] = useState("");
+
+  // Lista de países obtenidos de la API
   const [countriesList, setCountriesList] = useState([]);
 
 
 
-  const navigate = useNavigate();
-
+  // Obtiene todos los países de la API
   const allCountris = async () => {
     try {
       const data = await getAllCountries();
@@ -25,10 +32,12 @@ const CreatePhotoRancking = (props) => {
     }
   };
 
+  // Carga los países cuando el componente se monta
   useEffect(() => {
     allCountris();
   }, []);
 
+  // Convierte la imagen seleccionada en base64 para poder enviarla
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -38,6 +47,7 @@ const CreatePhotoRancking = (props) => {
     reader.readAsDataURL(file);
   };
 
+  // Envía la nueva foto al servidor
   const newPhoto = async () => {
     if (!imageBase64 || !country) {
       alert("Selecciona una imagen y un país.");
@@ -45,8 +55,13 @@ const CreatePhotoRancking = (props) => {
     }
 
     const result = await createPhoto(imageBase64, country);
-    setIsCreatePhoto(false)
-    allPhoto()
+
+    // Cierra el modal
+    setIsCreatePhoto(false);
+
+    // Recarga la lista de fotos en el componente padre
+    allPhoto();
+
     console.log(result);
   };
 
@@ -63,7 +78,7 @@ const CreatePhotoRancking = (props) => {
           Subir Foto al Ranking
         </h3>
 
-        {/* INPUT IMAGEN */}
+        {/* Input para seleccionar la imagen */}
         <div className="mb-3">
           <label className="form-label fw-semibold">
             Selecciona una imagen:
@@ -76,7 +91,7 @@ const CreatePhotoRancking = (props) => {
           />
         </div>
 
-        {/* PREVIEW */}
+        {/* Vista previa de la imagen seleccionada */}
         {imageBase64 && (
           <div className="mb-3 text-center">
             <img
@@ -91,34 +106,30 @@ const CreatePhotoRancking = (props) => {
           </div>
         )}
 
-        {/* SELECT DE PAÍSES */}
+        {/* Dropdown para seleccionar país */}
         <div className="mb-3">
           <label className="form-label fw-semibold">País:</label>
-         
-            <p className="text-muted">Cargando países...</p>
-           
-            <select
-              className="form-select"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            >
-              <option value="">Selecciona un país</option>
-              {countriesList.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-        
+
+          <select
+            className="form-select"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+          >
+            <option value="">Selecciona un país</option>
+            {countriesList.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
 
-       
+        {/* Botón para subir la foto */}
         <button
           className="btn btn-success w-100 fw-semibold"
           onClick={newPhoto}
-          
         >
-         Subir Foto
+          Subir Foto
         </button>
       </div>
     </div>

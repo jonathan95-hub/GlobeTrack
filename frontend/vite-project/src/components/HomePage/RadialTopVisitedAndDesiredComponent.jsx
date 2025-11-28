@@ -1,23 +1,35 @@
+// Importacion de hooks y funciones necesarias mas los componentes de la libreria para crear el grafico 
+
 import React, { useEffect, useState } from 'react'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+// Importacion de componentes necesarios de la libreria recharts
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts' 
 import { countryVisitedTopVisited } from '../../core/services/homepage/TopFiveCountryVisited'
 import { countryDesiredTopDesired } from '../../core/services/homepage/TopFiveDesiredCountry'
 
 const RadialTopVisitedComponent = () => {
+  // Colores para el gráfico de países visitados
   const ColorsVisited = [
     "#ff073a", "#ff00ff", "#ff4d00", "#03fa4d", "#e804fd"
   ]
+
+  // Colores para el gráfico de países deseados
   const ColorsDesired = [
     "#ff0090", "#F4D03F", "#7d00ff", "#00ff9d", "#ff6ec7"
   ]
 
+  // Constante para los cálculos de ángulos del label
   const RADIAN = Math.PI / 180
+
+  // Aquí guardamos los estados  ambos gráficos
   const [dataVisited, setDataVisited] = useState([])
   const [dataDesired, setDataDesired] = useState([])
 
+  // Trae los países más visitados desde el backend
   const fetchDataVisited = async () => {
     try {
       const info = await countryVisitedTopVisited()
+
+      // Si llega data válida, la formateamos para el gráfico
       if (info?.topVisited?.length) {
         const formatted = info.topVisited.map(country => ({
           name: country.name,
@@ -30,9 +42,11 @@ const RadialTopVisitedComponent = () => {
     }
   }
 
+  // Trae los países más deseados desde el backend
   const fecthDataDesired = async () => {
     try {
       const info = await countryDesiredTopDesired()
+
       if (info.topDesired.length) {
         const formatted = info.topDesired.map(country => ({
           name: country.name,
@@ -45,15 +59,18 @@ const RadialTopVisitedComponent = () => {
     }
   }
 
+  // Al cargar el componente hacemos las dos peticiones
   useEffect(() => {
     fetchDataVisited()
     fecthDataDesired()
   }, [])
 
+  // Función que dibuja los números (%) dentro de cada porción del gráfico
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5
     const x = cx + radius * Math.cos(-midAngle * RADIAN)
     const y = cy + radius * Math.sin(-midAngle * RADIAN)
+
     return (
       <text
         x={x}
@@ -63,15 +80,14 @@ const RadialTopVisitedComponent = () => {
         dominantBaseline="central"
         fontSize={14}
         fontWeight="bold"
-        style={{
-          textShadow: '0 0 8px rgba(0, 255, 255, 0.8)',
-        }}
+        style={{ textShadow: '0 0 8px rgba(0, 255, 255, 0.8)' }}
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     )
   }
 
+  // Si aún no hay datos mostramos un mensaje
   if (!dataVisited.length) return <p className="text-center mt-4 text-light">Cargando...</p>
 
   return (
@@ -85,7 +101,7 @@ const RadialTopVisitedComponent = () => {
       }}
     >
 
-      {/* Gráfico: Países más visitados */}
+      {/* grafico países más visitados */}
       <div
         className="d-flex flex-column align-items-center p-4 rounded-4 shadow-lg"
         style={{
@@ -100,13 +116,11 @@ const RadialTopVisitedComponent = () => {
       >
         <h2
           className="fw-bold text-center mb-3"
-          style={{
-            color: '#00ffff',
-            textShadow: '0 0 10px rgba(0,255,255,0.6)',
-          }}
+          style={{ color: '#00ffff', textShadow: '0 0 10px rgba(0,255,255,0.6)' }}
         >
           Países más Visitados
         </h2>
+
         <div style={{ width: '100%', height: '250px' }}>
           <ResponsiveContainer>
             <PieChart>
@@ -126,24 +140,26 @@ const RadialTopVisitedComponent = () => {
                   <Cell key={entry.name} fill={ColorsVisited[idx % ColorsVisited.length]} />
                 ))}
               </Pie>
-         <Tooltip
-  contentStyle={{
-    backgroundColor: '#aaa9a9ff',
-    border: '1px solid #00ffff',
-    borderRadius: '8px',
-    color: '#fff',
-  }}
-  formatter={(value, name, props) => [
-    `${value} visitas`,      // texto principal
-    props.payload.name       // nombre del país
-  ]}
-/>
+
+              {/* Tooltip cuando pasas el ratón */}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#aaa9a9ff',
+                  border: '1px solid #00ffff',
+                  borderRadius: '8px',
+                  color: '#fff',
+                }}
+                formatter={(value, name, props) => [
+                  `${value} visitas`,
+                  props.payload.name
+                ]}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Gráfico: Países más deseados */}
+      {/* --------- GRÁFICO: Países Más Deseados --------- */}
       <div
         className="d-flex flex-column align-items-center p-4 rounded-4 shadow-lg"
         style={{
@@ -158,13 +174,11 @@ const RadialTopVisitedComponent = () => {
       >
         <h2
           className="fw-bold text-center mb-3"
-          style={{
-            color: '#ff6ec7',
-            textShadow: '0 0 10px rgba(255,105,180,0.6)',
-          }}
+          style={{ color: '#ff6ec7', textShadow: '0 0 10px rgba(255,105,180,0.6)' }}
         >
           Países más Deseados
         </h2>
+
         <div style={{ width: '100%', height: '250px' }}>
           <ResponsiveContainer>
             <PieChart>
@@ -184,19 +198,20 @@ const RadialTopVisitedComponent = () => {
                   <Cell key={entry.name} fill={ColorsDesired[idx % ColorsDesired.length]} />
                 ))}
               </Pie>
-             <Tooltip
-  contentStyle={{
-    backgroundColor: '#aaa9a9ff',
-    border: '1px solid #ff6ec7',
-    borderRadius: '8px',
-    color: '#fff',
-  }}
-  formatter={(value, name, props) => [
-    `${value} deseado(s)`,
-    props.payload.name
-  ]}
-/>
 
+              {/* Tooltip del gráfico deseado */}
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#aaa9a9ff',
+                  border: '1px solid #ff6ec7',
+                  borderRadius: '8px',
+                  color: '#fff',
+                }}
+                formatter={(value, name, props) => [
+                  `${value} deseado(s)`,
+                  props.payload.name
+                ]}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>

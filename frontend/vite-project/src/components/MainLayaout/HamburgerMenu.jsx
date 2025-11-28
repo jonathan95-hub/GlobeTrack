@@ -1,27 +1,37 @@
+// Importamos React y hooks necesarios
 import React, { useState } from 'react'
+
+// Importamos acción para cambiar la opción del menú en Redux
 import { changeMenuOption } from './Header/headerAction'
+
+// Importamos hooks de Redux
 import { useDispatch, useSelector } from 'react-redux'
 
+// Componente del menú hamburguesa
 const HamburgerMenu = (props) => {
-  const{
+  // Desestructuramos las funciones que nos pasan por props para navegar
+  const {
     goToHome,
     goToPost,
     goToProfile,
     goToGroupPage,
     goToRancking
-    
   } = props
-  const dispatch = useDispatch()
-  const [isOpen, setIsOpen] = useState(false)
-  const {menuOptionsHeader} = useSelector(state => state.menuReducerHeader)
+
+  const dispatch = useDispatch() // Hook para despachar acciones
+  const [isOpen, setIsOpen] = useState(false) // Estado para saber si el menú está abierto
+  const { menuOptionsHeader } = useSelector(state => state.menuReducerHeader) // Obtenemos la opción de menú seleccionada del store
+
+  // Función para abrir/cerrar el menú hamburguesa
   const toggle = () => {
-    setIsOpen(!isOpen) 
+    setIsOpen(!isOpen) // Cambiamos el estado a su opuesto
   }
 
+  // Funciones que navegan a cada sección y cierran el menú
   const handleGoToPost = () => {
-    goToPost()
-    dispatch(changeMenuOption(1)) 
-    setIsOpen(false)
+    goToPost() // Navegamos a publicaciones
+    dispatch(changeMenuOption(1)) // Cambiamos opción del menú en Redux
+    setIsOpen(false) // Cerramos el menú
   }
 
   const handleGoToHome = () => {

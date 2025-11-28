@@ -1,49 +1,65 @@
-import React, { useState } from "react";
-import HamburgerMenu from "../HamburgerMenu";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
-import { doLoginOutAction } from "../../landingPage/login/loginAction";
-import { changeMenuOption } from "./headerAction";
-import { useEffect } from "react";
-import { getNotification } from "../../../core/services/notification/getNotification";
-import { deletedNotification } from "../../../core/services/notification/deleteNotification";
+// Importamos hooks, componentes y funciones necesarias
+import React, { useState } from "react"; // useState para manejar estado local
+import HamburgerMenu from "../HamburgerMenu"; // Componente del menú hamburguesa
+import { useDispatch, useSelector } from "react-redux"; // Redux hooks para manejar estado global
+import { useNavigate } from "react-router"; // Hook para navegar entre rutas
+import { doLoginOutAction } from "../../landingPage/login/loginAction"; // Acción para cerrar sesión
+import { changeMenuOption } from "./headerAction"; // Acción para cambiar la opción del menú
+import { useEffect } from "react"; // useEffect para ejecutar efectos secundarios
+import { getNotification } from "../../../core/services/notification/getNotification"; // Función para obtener notificaciones
+import { deletedNotification } from "../../../core/services/notification/deleteNotification"; // Función para borrar notificaciones
 
 const HeadersComponent = () => {
+  // Estado para mostrar u ocultar el modal de notificaciones
   const [showNotifications, setShowNotifications] = useState(false);
+  
+  // Estado donde se guardan las notificaciones recibidas
   const [notifications, setNotifications] = useState([]);
+  
+  // Estado para mostrar spinner o loading mientras cargan notificaciones
   const [loading, setLoading] = useState(false);
 
+  // Obtenemos el usuario actual del store
   const user = useSelector((state) => state.loginReducer);
+
+  // Hook para navegar entre rutas
   const navigate = useNavigate();
+
+  // Hook para despachar acciones de Redux
   const dispatch = useDispatch();
+
+  // Obtenemos la opción del menú seleccionada del store
   const { menuOptionsHeader } = useSelector((state) => state.menuReducerHeader);
 
+  // Función para traer las notificaciones desde el backend
   const fetchNotifications = async () => {
     try {
-      setLoading(true);
-      const data = await getNotification();
-      console.log("Notificaciones recibidas:", data); // para depuración
-      setNotifications(data.notification || []); // <--- aquí estaba el problema
+      setLoading(true); // Activamos el loading
+      const data = await getNotification(); // Llamada al backend
+      console.log("Notificaciones recibidas:", data); // Para depuración
+      setNotifications(data.notification || []); // Guardamos las notificaciones en el estado
     } catch (err) {
       console.error("Error al cargar notificaciones:", err);
     } finally {
-      setLoading(false);
+      setLoading(false); // Desactivamos loading
     }
   };
 
+  // Función para mostrar/ocultar modal de notificaciones
   const handleToggleNotifications = () => {
-    setShowNotifications(!showNotifications);
+    setShowNotifications(!showNotifications); // Cambiamos el estado
     if (!showNotifications) {
-      fetchNotifications();
+      fetchNotifications(); // Si lo abrimos, cargamos las notificaciones
     }
   };
 
+  // Función que se ejecuta al hacer click en una notificación
   const handleNotificationClick = async (notificationId) => {
     try {
-      // Eliminamos en el backend
+      // Eliminamos la notificación en el backend
       await deletedNotification(notificationId);
 
-      // Eliminamos de la lista en tiempo real
+      // Eliminamos la notificación de la lista en tiempo real
       setNotifications((prev) =>
         prev.filter((notification) => notification._id !== notificationId)
       );
@@ -52,57 +68,60 @@ const HeadersComponent = () => {
     }
   };
 
+  // Función para cerrar sesión
   const logOut = () => {
+    // Eliminamos tokens del localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("token_refresh");
+
+    // Despachamos acción de logout al store
     dispatch(doLoginOutAction());
+
+    // Eliminamos la opción del menú
     localStorage.removeItem("menuOption");
+
+    // Navegamos al landing page
     setTimeout(() => {
-      // Asegura desmontar todo con tiempo
       navigate("/");
-    }, 50);
+    }, 50); // Se usa timeout para asegurar que todo se desmonte correctamente
   };
 
+  // Funciones para navegar a diferentes páginas y actualizar el menú
   const goToPost = () => {
-    navigate("/post");
-    localStorage.getItem("token");
-    dispatch(changeMenuOption(1));
-    localStorage.setItem("menuOption", 1);
+    navigate("/post"); // Navegamos a publicaciones
+    dispatch(changeMenuOption(1)); // Actualizamos opción de menú
+    localStorage.setItem("menuOption", 1); // Guardamos en localStorage
   };
 
   const goToHome = () => {
     navigate("/home");
-    localStorage.getItem("token");
     dispatch(changeMenuOption(0));
     localStorage.setItem("menuOption", 0);
   };
 
   const goToProfile = () => {
     navigate("/profile");
-    localStorage.getItem("Token");
     dispatch(changeMenuOption(2));
     localStorage.setItem("menuOption", 2);
   };
 
   const goToGroupPage = () => {
     navigate("/group");
-    localStorage.getItem("token");
     dispatch(changeMenuOption(4));
     localStorage.setItem("menuOption", 4);
   };
 
   const goToRancking = () => {
     navigate("/ranking");
-    localStorage.getItem("token");
     dispatch(changeMenuOption(5));
     localStorage.setItem("menuOption", 5);
   };
 
   const goToControl = () => {
-    navigate("/control");
-    localStorage.getItem("token");
+    navigate("/control"); // Solo admin
   };
 
+  // useEffect para cargar opción de menú guardada al iniciar
   useEffect(() => {
     const savedOption = localStorage.getItem("menuOption");
     if (savedOption) {
@@ -110,10 +129,12 @@ const HeadersComponent = () => {
     }
   }, []);
 
+  // useEffect para cargar notificaciones al inicio
   useEffect(() => {
-    fetchNotifications(); // Carga notificaciones al inicio
+    fetchNotifications();
   }, []);
 
+  // Calculamos cantidad de notificaciones sin leer
   const unreadNotifications = notifications.filter((n) => !n.isRead).length;
 
   return (
@@ -130,16 +151,16 @@ const HeadersComponent = () => {
           </div>
 
           <div className="d-flex d-lg-none align-items-center justify-content-center">
-            <HamburgerMenu
+            <HamburgerMenu  // Pasamos las funciones por props al componente hamburguer menu
               goToHome={goToHome}
               goToPost={goToPost}
               goToProfile={goToProfile}
               goToGroupPage={goToGroupPage}
               goToRancking={goToRancking}
               menuOptionsHeader={menuOptionsHeader}
-              notifications={notifications} // <- PASAR
-              unreadNotifications={unreadNotifications} // <- PASAR
-              handleToggleNotifications={handleToggleNotifications} // <- PASAR
+              notifications={notifications} 
+              unreadNotifications={unreadNotifications} 
+              handleToggleNotifications={handleToggleNotifications} 
             />
           </div>
 
@@ -195,7 +216,7 @@ const HeadersComponent = () => {
               </ul>
             </nav>
           </div>
-
+          
           <div className="d-flex align-items-center gap-3 me-3">
             {/* Botón Panel de Control solo si es admin */}
             {user.user?.isAdmin === "admin" && (

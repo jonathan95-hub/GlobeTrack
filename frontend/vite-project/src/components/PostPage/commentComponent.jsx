@@ -1,25 +1,34 @@
+// Importamos React y hooks necesarios
 import React, { useEffect, useState } from 'react';
+// Importamos navegación y ubicación para usar history y obtener estado de la ruta
 import { useNavigate, useLocation } from 'react-router-dom';
+// Importamos servicios para manejar comentarios
 import { getComment } from '../../core/services/post/getComent';
 import { useSelector } from 'react-redux';
 import { deletedComment } from '../../core/services/post/deletedComment';
 import { editComment } from '../../core/services/post/editComment';
 
 const CommentComponent = () => {
+  // Estado para guardar todos los comentarios
   const [dataComment, setDataComment] = useState([]);
+  // Estado para mostrar/ocultar modal de edición
   const [editModal, setEditModal] = useState(false);
+  // Estado para texto editable del comentario
   const [editText, setEditText] = useState("");
+  // Estado para almacenar el id del comentario a editar
   const [editCommentId, setEditCommentId] = useState(null);
 
-  const navigate = useNavigate();
-  const location = useLocation();
-  const postId = location.state?.postId;
-  const from = location.state?.from;
-  const otherUserId = location.state?.otherUserId;
+  const navigate = useNavigate(); // Hook para navegación
+  const location = useLocation(); // Hook para obtener datos de la ruta
+  const postId = location.state?.postId; // Obtenemos postId desde location
+  const from = location.state?.from; // Obtenemos origen de navegación
+  const otherUserId = location.state?.otherUserId; // Id de otro usuario si aplica
 
+  // Obtenemos datos del usuario logueado desde Redux
   const user = useSelector(state => state.loginReducer);
-  const currentUserId = user?.user?._id;
+  const currentUserId = user?.user?._id; // Id del usuario actual
 
+  // Función para volver a la página correspondiente según origen
   const goToPostPage = () => {
     if (from === "myProfile") {
       navigate("/profile");
@@ -32,68 +41,69 @@ const CommentComponent = () => {
     }
   };
 
+  // Función para obtener todos los comentarios del post
   const allComment = async (postId) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token"); // Revisamos token
     if (!token) {
-      alert("Token inválido");
+      alert("Token inválido"); // Si no hay token, redirige al login
       navigate("/");
       return;
     }
 
     if (!postId) {
-      console.warn("No hay postId");
+      console.warn("No hay postId"); // Si no hay postId, avisamos
       return;
     }
 
     try {
-      const data = await getComment(postId);
-      const comments = data?.getComment || [];
-      setDataComment(comments);
+      const data = await getComment(postId); // Llamada al backend
+      const comments = data?.getComment || []; // Guardamos comentarios o array vacío
+      setDataComment(comments); // Actualizamos estado
     } catch (error) {
       console.error("Error al obtener comentarios:", error);
     }
   };
 
-  // 👉 ABRE MODAL CON EL TEXTO DEL COMENTARIO
+  // Función para abrir modal con el comentario a editar
   const openModalEdit = (comment) => {
-    setEditCommentId(comment._id);
-    setEditText(comment.text);
-    setEditModal(true);
+    setEditCommentId(comment._id); // Guardamos id del comentario
+    setEditText(comment.text); // Ponemos texto actual en textarea
+    setEditModal(true); // Abrimos modal
   };
 
-  // 👉 EDITA EL COMENTARIO
- const handleEditComment = async () => {
-  try {
-    await editComment(editCommentId, editText);
+  // Función para editar comentario
+  const handleEditComment = async () => {
+    try {
+      await editComment(editCommentId, editText); // Llamada al backend
 
-    // actualizar la UI en tiempo real
-    setDataComment(prev =>
-      prev.map(c =>
-        c._id === editCommentId ? { ...c, text: editText } : c
-      )
-    );
+      // Actualizamos la UI en tiempo real
+      setDataComment(prev =>
+        prev.map(c =>
+          c._id === editCommentId ? { ...c, text: editText } : c
+        )
+      );
 
-    setEditModal(false);
-  } catch (error) {
-    console.log("Error editando comentario", error);
-  }
-};
-
+      setEditModal(false); // Cerramos modal
+    } catch (error) {
+      console.log("Error editando comentario", error);
+    }
+  };
 
   // Función para eliminar comentario
   const commentDelete = async (commentId) => {
     try {
-      const comment = await deletedComment(commentId);
+      const comment = await deletedComment(commentId); // Llamada al backend
       if (!comment) {
-        console.log("Comment not found");
+        console.log("Comment not found"); // Si no existe, avisamos
         return;
       }
-      setDataComment(prev => prev.filter(c => c._id !== commentId));
+      setDataComment(prev => prev.filter(c => c._id !== commentId)); // Actualizamos estado
     } catch (error) {
       console.log(error.name);
     }
   };
 
+  // useEffect para cargar comentarios cuando cambia postId
   useEffect(() => {
     if (postId) {
       allComment(postId);

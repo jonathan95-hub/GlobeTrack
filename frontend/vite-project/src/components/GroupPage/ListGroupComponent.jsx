@@ -1,13 +1,18 @@
+// Importacion de hooks y funciones de llamadas al backend necesarias
+
 import React, { useEffect, useState } from 'react';
 import { listGroup } from '../../core/services/GroupPage/listGroup';
 import { enterGroupAndExitGroup } from "../../core/services/GroupPage/enterAndExitGroup";
 import { useNavigate } from "react-router-dom";
 
 const ListGroupComponent = () => {
+  //Estado para guardar los grupos
   const [dataGroup, setDataGroup] = useState([]);
+  //Estado para seleccionar un grupo
   const [selectedGroup, setSelectedGroup] = useState(null);
   const navigate = useNavigate();
 
+  // Funcion para obtener los grupos
   const obtainedGroup = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -16,29 +21,32 @@ const ListGroupComponent = () => {
       return;
     }
 
-    const group = await listGroup();
-    if (!group || !group.listGroup) return;
-
+    const group = await listGroup(); // Llamada a la funcion del backend que trae los grupos
+    if (!group || !group.listGroup) return; // Si no hay grupos cortamos el codigo
+    // Si si hay grupos seteamos dataGroup con el resulstado de la llamada 
     setDataGroup(group.listGroup);
   };
 
+  // Llamada a la funcion de obtener grupos cuando se recarga el componente
   useEffect(() => {
     obtainedGroup();
   }, []);
 
-  const enterAndExitGroup = async (groupId) => {
+
+  // Funcion para unirse o dejar un grupo
+  const enterAndExitGroup = async (groupId) => { // le pasamos por parametro el id del grupo
     try {
-      await enterGroupAndExitGroup(groupId);
-      setSelectedGroup(groupId);
-      obtainedGroup();
+      await enterGroupAndExitGroup(groupId); // llamada a la funcion que hace la llamada al backend pasandole el id del grupo
+      setSelectedGroup(groupId); // seteamos el estado de selccionar grupo pasandole el id del grupo como parametro
+      obtainedGroup(); // llamamos de nuevo a la funcion de obtener los grupos para que nos de la lista actualizada
     } catch (err) {
       console.error(err);
       alert("Error al unirte al grupo");
     }
   };
-
+ // Funcion pra navegar hasta el chat del grupo
   const goToChat = () => {
-    navigate(`/group/chat/${selectedGroup}`);
+    navigate(`/group/chat/${selectedGroup}`); 
     setSelectedGroup(null);
   };
 

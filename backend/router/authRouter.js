@@ -7,6 +7,6 @@ const { verificationRefresh } = require('../middelwares/middelwareRefreshToken')
 
 router.post("/signup", signup) // Creamos la peticion post con router, añadimos la ruta y la funcion que ejecuta el registro
 router.post("/login", loginLimiter, login)  // Creamos la petición post con router, añadimos la ruta y la funcion que ejecuta el login
-router.post("/refreshtoken", verificationRefresh, refreshToken)
+router.post("/refreshtoken", verificationRefresh, refreshToken) // Endpoint para refrescar el token
 
 module.exports = router // exportamos router

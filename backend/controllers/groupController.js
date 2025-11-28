@@ -469,7 +469,7 @@ const editGroup = async (req, res) => {
 };
 
 // Es solo para administradores para poder obtener una lista completa de los grupos
-// No se òne la validacion de si el usuario es administrador por que en la ruta ya hay un middelware que se encarga de ello
+// No se pone la validacion de si el usuario es administrador por que en la ruta ya hay un middelware que se encarga de ello
 const allGroup = async(req,res) => {
   try {
     const allGroup = await groupModel.find({}).populate('creatorGroup', 'name') // Se buscan todos los grupos

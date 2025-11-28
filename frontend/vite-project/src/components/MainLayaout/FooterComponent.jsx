@@ -5,7 +5,7 @@ const FooterComponent = () => {
     <footer className="footer bg-primary text-light py-4 mt-auto shadow-lg border-top border-primary">
       <div className="container-fluid d-flex flex-column flex-md-row justify-content-center align-items-center text-center px-3 gap-2">
         
-        {/* Texto central */}
+        {/* Texto */}
         <div className="flex-grow-1">
           <span className="fw-semibold fs-5 text-uppercase  d-block">
             Explora, Conecta y Vive 

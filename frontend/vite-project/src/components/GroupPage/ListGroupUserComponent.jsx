@@ -1,3 +1,4 @@
+// Importacion de hooks y funciones necesarias
 import React, { useEffect, useState } from "react";
 import { listGroupIncludesUser } from "../../core/services/GroupPage/listGroup";
 import { useNavigate } from "react-router";
@@ -6,27 +7,33 @@ import { deleteMygroup } from "../../core/services/GroupPage/deleteGroup";
 import { enterGroupAndExitGroup } from "../../core/services/GroupPage/enterAndExitGroup";
 
 const ListGroupUserComponent = () => {
+  // Estado donde se guardan los grupos 
   const [myGroups, setMyGroups] = useState([]);
   const navigate = useNavigate();
+  // Estado para abrir o cerrar modal
   const [showModal, setShowModal] = useState(false);
+    // Estado para abrir o cerrar modal de dejar grupo 
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  // Estado donde guardamos el ID del grupo que queremos eliminar
   const [groupToDelete, setGroupToDelete] = useState(null);
+
   const [groupToLeave, setGroupToLeave] = useState(null);
+ // Estado donde guardamos el ID del grupo que queremos dejar
+  const user = useSelector(state => state.loginReducer); // usuario actual
 
-  const user = useSelector(state => state.loginReducer);
-
+  //Fucion de mi lista de grupos
   const myList = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
+      if (!token) { // Si no hay toquen mandamos a la landinPage
         alert("Token invalid");
         navigate("/");
         return;
       }
 
-      const myGroup = await listGroupIncludesUser();
+      const myGroup = await listGroupIncludesUser(); // llamada  a la funcion del backend que trae los grupos del usuario
       const groupsData = myGroup.listGroup || myGroup.groups || [];
-      setMyGroups(groupsData);
+      setMyGroups(groupsData); // setemos el Estado de mis grupos con groupData
 
     } catch (err) {
       console.error("Error en myList:", err);
@@ -34,10 +41,13 @@ const ListGroupUserComponent = () => {
     }
   };
 
+   // Función para entrar o salir de un grupo
   const enterAndExitGroupFn = async (groupId) => {
     try {
       const res = await enterGroupAndExitGroup(groupId);
+       // Si el backend dice que salimos del grupo, lo quitamos del estado
       if (res.left) setMyGroups(prev => prev.filter(g => g._id !== groupId));
+      // Llamamos de nuevo a la lista de mis grupos para traerla actualizada
       myList();
     } catch (err) {
       console.error(err);
@@ -45,17 +55,21 @@ const ListGroupUserComponent = () => {
     }
   };
 
+  
+  // Confirmación final para dejar grupo (llamamos a la función principal)
   const confirmLeaveGroup = () => {
     enterAndExitGroupFn(groupToLeave);
     setShowLeaveModal(false);
     setGroupToLeave(null);
   };
 
+   // Abrimos el modal de salir del grupo pasandole como parametro el id del grupo
   const openLeaveModal = (groupId) => {
     setGroupToLeave(groupId);
     setShowLeaveModal(true);
   };
 
+   // Función que elimina el grupo si somos el creador del grupo
   const deleteGroup = async () => {
     try {
       await deleteMygroup(groupToDelete);
@@ -67,14 +81,15 @@ const ListGroupUserComponent = () => {
       alert(err.message || "Error al eliminar el grupo");
     }
   };
-
+// Abrimos el modal para eliminar el grupo
   const openDeleteModal = (groupId) => {
     setGroupToDelete(groupId);
     setShowModal(true);
   };
-
+  // Navegamos a crear grupo
   const goToCreate = () => navigate("/group/create");
 
+  // cargamos mis grupos cada vez que entramos a la pagina
   useEffect(() => { myList(); }, []);
 
   return (

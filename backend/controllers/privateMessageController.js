@@ -69,66 +69,6 @@ const sendMessagePrivate = async (req, res) => {
     }
 };
 
-const deletedMessagePrivate = async(req, res) => {
-try {
-    const{ip, userAgent} = getRequestInfo(req)
-    const userId = req.payload._id
-    const messageId = req.params.messageId
-    const message = await privateMessageModel.findById(messageId)
-    const user = await usersModel.findById(userId)
-    
-    if(!message){
-        logger.warn("An attempt was made to delete a message that does not exist",{
-            meta:{
-            _id: userId,
-            user: `${user.name} ${user.lastName}`,
-            email: user.email,
-            endpoint: "privatemessage/delete/:messageId",
-            ip,
-            userAgent
-            }
-        })
-        return res.status(404).send({status:"Failed", message: "Message not found"})
-    }
-
-    if(message.sender.toString() !== userId.toString()){
-        logger.warn("An attempt was made to delete a private message without being the owner",{
-            meta:{
-            _id: userId,
-            user: `${user.name} ${user.lastName}`,
-            email: user.email,
-            endpoint: "privatemessage/delete/:messageId",
-            ip,
-            userAgent
-        }
-            
-        })
-        return res.status(403).send({status: "Failed", message: "you can't delete this message"})
-    }
-     req.io.to(message.sender.toString()).emit("messageDeleted", { messageId });
-     req.io.to(message.receiver.toString()).emit("messageDeleted", { messageId });
-     await privateMessageModel.findByIdAndDelete(messageId)
-     logger.info("The message was successfully deleted",{
-        meta:{
-            _id: userId,
-            user: `${user.name} ${user.lastName}`,
-            email: user.email,
-            endpoint: "privatemessage/delete/:messageId",
-            ip,
-            userAgent
-        }
-     })
-     res.status(200).send({status: "Success", message: "Message deleted", messageId})
-} catch (error) {
-       logger.error("Error deleting private message", {
-      meta: {
-        error: error.message,
-        endpoint: "privatemessage/delete/:messageId",
-      },
-    });
-     res.status(500).send({ status: "Failed", error: error.message });
-}
-}
 
 
 const getPrivateMessageForUser = async(req, res) => {

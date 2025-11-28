@@ -6,12 +6,17 @@ import "leaflet/dist/leaflet.css";
 import { allPostFetch } from "../../core/services/homepage/allPostFetch";
 
 const MapGlobal = () => {
+  // Punto central del mapa (España)
   const spainCenter = [40.4, -3.7];
+
+  // Aquí guardamos todas las publicaciones que nos devuelve la API
   const [post, setPost] = useState([]);
 
+  // Función que trae los posts del backend
   const fetchPosts = async (token) => {
     try {
       const data = await allPostFetch(token);
+      // Guardamos los posts en el estado
       setPost(data.allPost);
     } catch (error) {
       console.error("Error cargando publicaciones", error);
@@ -19,6 +24,7 @@ const MapGlobal = () => {
     }
   };
 
+  // Icono personalizado para los pines individuales
   const icono = L.icon({
     iconUrl: "/src/assets/Map/PinGlobeTrack.png",
     iconSize: [55, 90],
@@ -29,15 +35,13 @@ const MapGlobal = () => {
     shadowAnchor: [27, 90],
   });
 
+  // Icono para cuando hay un grupo de pines juntos
   const iconCluster = (cluster) => {
     const count = cluster.getChildCount();
+
     return L.divIcon({
       html: `
-        <div style="
-          width: 48px;
-          height: 78px;
-          position: relative;
-        ">
+        <div style="width: 48px; height: 78px; position: relative;">
           <img src="/src/assets/Map/PinPrueba.png" style="width: 48px; height: 78px;" />
           <span style="
             position: absolute;
@@ -60,8 +64,10 @@ const MapGlobal = () => {
     });
   };
 
+  // Al cargar el componente, intentamos traer los posts
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (token) {
       fetchPosts(token);
     } else {
@@ -70,7 +76,6 @@ const MapGlobal = () => {
   }, []);
 
   return (
-    
     <div
       className="map-wrapper position-relative rounded-4 shadow-lg overflow-hidden"
       style={{
@@ -81,12 +86,7 @@ const MapGlobal = () => {
         boxShadow: "0 0 25px rgba(0,255,255,0.1)",
       }}
     >
-  
-
-      {/* Título del mapa */}
-  
-
-      {/* Contenedor del mapa */}
+      {/* Mapa */}
       <MapContainer
         center={spainCenter}
         zoom={6}
@@ -99,6 +99,7 @@ const MapGlobal = () => {
         ]}
         maxBoundsViscosity={1.0}
       >
+        {/* Capa del mapa (fotos satélite) */}
         <TileLayer
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           attribution='Tiles © Esri'
@@ -106,6 +107,8 @@ const MapGlobal = () => {
           maxZoom={30}
           noWrap={true}
         />
+
+        {/* Capa de etiquetas (nombres de sitios) */}
         <TileLayer
           url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
           attribution="Labels © Esri"
@@ -114,24 +117,25 @@ const MapGlobal = () => {
           noWrap={true}
         />
 
+        {/* Grupo que junta los pines cuando hay muchos cerca */}
         <MarkerClusterGroup
           chunkedLoading
           iconCreateFunction={iconCluster}
           maxClusterRadius={80}
           disableClusteringAtZoom={10}
         >
+          {/* Ponemos los pines recorriendo los posts */}
           {post.map((p) => {
+            // Si no hay coordenadas, no ponemos nada
             if (!p.location?.coordinates) return null;
+
+            // ¡Ojo el backend manda [lng, lat], y leaflet necesita [lat, lng]!
             const [lng, lat] = p.location.coordinates;
+
             return (
               <Marker key={p._id} position={[lat, lng]} icon={icono}>
                 <Popup>
-                  <div
-                    style={{
-                      textAlign: "center",
-                      minWidth: "150px",
-                    }}
-                  >
+                  <div style={{ textAlign: "center", minWidth: "150px" }}>
                     <h6
                       style={{
                         fontWeight: "bold",
@@ -141,8 +145,14 @@ const MapGlobal = () => {
                     >
                       {p.title}
                     </h6>
+
+                    {/* Imagen del post */}
                     <img src={p.image} alt="" />
-                    <p style={{ fontSize: "0.9rem", color: "#333" }}>{p.text}</p>
+
+                    {/* Texto del post */}
+                    <p style={{ fontSize: "0.9rem", color: "#333" }}>
+                      {p.text}
+                    </p>
                   </div>
                 </Popup>
               </Marker>
@@ -151,7 +161,7 @@ const MapGlobal = () => {
         </MarkerClusterGroup>
       </MapContainer>
 
-      {/* Overlay inferior */}
+      
       <div
         className="map-overlay-bottom position-absolute bottom-0 start-0 w-100"
         style={{

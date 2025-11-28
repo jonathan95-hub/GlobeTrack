@@ -1,19 +1,28 @@
+// Importamos useEffect, useState y useRef desde react
 import React, { useEffect, useState, useRef } from "react";
+// Importamos las funciones que hacen la llamadas la backend para obtener los mensajes y la que los envia
 import { getMessageGroup, sendMessageGroup } from "../../core/services/GroupPage/messagesGroup";
+// Hooks de React Router para coger el ID del grupo y navegar
 import { useNavigate, useParams } from "react-router-dom";
+// Importamos useSelector para obtener el usuario logueado desde Redux
 import { useSelector } from "react-redux";
+// Socket.io para tiempo real
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3000"); // socket global
+// Creamos un socket global que se conecta al backend
+const socket = io("http://localhost:3000");
 
 const ChatGroup = () => {
-  const { groupId } = useParams();
+  const { groupId } = useParams(); // Obtenemos el id del grupo desde la url 
   const navigate = useNavigate();
-  const user = useSelector(state => state.loginReducer);
+  const user = useSelector(state => state.loginReducer); // usuario actual
+  //Estado donde guardamos los mensajes
   const [messages, setMessages] = useState([]);
+  //Estado del input donde se escribe el mensaje
   const [messageText, setMessageText] = useState('');
+    // Referencia para hacer scroll automático al último mensaje
   const messagesEndRef = useRef(null);
-
+    // Función que hace scroll hacia abajo
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
 
   // Cargar mensajes iniciales
@@ -43,7 +52,7 @@ const ChatGroup = () => {
     }
   };
 
-  // Inicializar socket
+  // Inicializamos socket
   useEffect(() => {
     if (!user?.user?._id || !groupId) return;
 
@@ -64,7 +73,7 @@ const ChatGroup = () => {
   const goToGroups = () => {
     navigate("/group")
   }
-
+ // Cargamos los mensajes cada vez que entramos en esta pagina
   useEffect(() => {
     loadMessages();
   }, [groupId]);

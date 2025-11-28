@@ -2,22 +2,29 @@ import React, { useState, useEffect } from "react";
 import { topFiveGroup } from "../../core/services/homepage/fetchTopGroup";
 
 const TopGroups = () => {
+  // Aquí guardamos los grupos que nos manda el backend
   const [dataGroups, setDataGroups] = useState([]);
 
+  // Función que pide los grupos top y los mete en el estado
   const getGroups = async () => {
     try {
       const data = await topFiveGroup();
+
+      // Comprobamos que lo que llega es un array
       if (data.FiveGroup && Array.isArray(data.FiveGroup)) {
         setDataGroups(data.FiveGroup);
       } else {
+        // Si no viene como esperamos, lo dejamos vacío
         setDataGroups([]);
       }
     } catch (error) {
+      // Si hay cualquier error, lo dejamos vacío también
       console.error("Error:", error);
       setDataGroups([]);
     }
   };
 
+  // useEffect para que los grupos se pidan solo cuando cargamos este componente
   useEffect(() => {
     getGroups();
   }, []);
@@ -30,6 +37,7 @@ const TopGroups = () => {
         fontSize: "0.9rem",
       }}
     >
+      {/* Título de la sección */}
       <h5
         className="fw-bold text-center mb-4"
         style={{
@@ -40,6 +48,7 @@ const TopGroups = () => {
         🌐 Top Grupos
       </h5>
 
+      {/* Aquí recorremos los grupos y los mostramos */}
       <div className="row g-3">
         {dataGroups.map((g, idx) => (
           <div key={idx} className="col-12 col-md-6">
@@ -50,7 +59,7 @@ const TopGroups = () => {
                 minHeight: "100px",
               }}
             >
-              {/* Imagen más pequeña */}
+              {/* Foto del grupo, pequeñita y cuadrada */}
               <div
                 className="rounded overflow-hidden border border-info flex-shrink-0"
                 style={{
@@ -66,12 +75,12 @@ const TopGroups = () => {
                 />
               </div>
 
-              {/* Texto */}
+              {/* Parte del texto del grupo */}
               <div
                 className="d-flex flex-column justify-content-between flex-grow-1"
                 style={{ height: "100%", overflow: "hidden" }}
               >
-                {/* Título */}
+                {/* Nombre del grupo */}
                 <span
                   className="fw-bold text-light"
                   style={{
@@ -86,7 +95,7 @@ const TopGroups = () => {
                   {g.name}
                 </span>
 
-                {/* Miembros */}
+                {/* Número de miembros */}
                 <span
                   className="text-info"
                   style={{
@@ -100,7 +109,7 @@ const TopGroups = () => {
                   👥 {g.membersCount} miembros
                 </span>
 
-                {/* Descripción */}
+                {/* Descripción del grupo */}
                 <span
                   className="text-secondary"
                   style={{

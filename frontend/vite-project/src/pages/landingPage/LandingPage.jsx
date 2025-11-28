@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
+// Componentes para registro e inicio de sesión
 import RegisterComponent from '../../components/landingPage/RegisterComponent';
 import LoginComponent from '../../components/landingPage/login/LoginComponent';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const LandingPage = () => {
+  // Estado para controlar qué vista mostrar: INIT, REGISTER o LOGIN
   const [menuOptiosInit, setMenuOptionsInit] = useState("INIT");
 
-  const register = () => setMenuOptionsInit("REGISTER");
-  const login = () => setMenuOptionsInit("LOGIN");
+   // Funciones para cambiar la vista
+  const register = () => setMenuOptionsInit("REGISTER"); // Mostrar formulario de registro
+  const login = () => setMenuOptionsInit("LOGIN");       // Mostrar formulario de login
 
   return (
     <>
       {menuOptiosInit === "INIT" ? (
         <div className="container-fluid d-flex flex-column flex-md-row min-vh-100 p-0">
-          {/* 🌊 Sección de texto con degradado */}
+          {/* Sección de texto  */}
           <div
             className="text-section d-flex flex-column align-items-center justify-content-center text-center text-md-start col-12 col-md-6 p-5 text-white"
             style={{
@@ -33,7 +36,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          {/* 🏝️ Sección de imagen + botones con fondo arena */}
+          {/* Sección de imagen y  botones  */}
           <div
             className="image-section d-flex flex-column align-items-center justify-content-center col-12 col-md-6 p-5"
             style={{
@@ -85,7 +88,7 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* 🧭 Formulario con fondo claro tipo pergamino */}
+          {/*  Formulario */}
           <div
             className="d-flex align-items-center justify-content-center col-12 col-md-6 p-4"
             style={{ backgroundColor: "#fffaf2" }}
@@ -95,7 +98,7 @@ const LandingPage = () => {
         </div>
       ) : menuOptiosInit === "LOGIN" ? (
         <div className="container-fluid d-flex flex-column flex-md-row min-vh-100 p-0">
-          {/* 🌍 Texto lateral con fondo turquesa */}
+          {/*  Texto lateral  */}
           <div
             className="text-section d-flex align-items-center justify-content-center text-center text-md-start col-12 col-md-6 p-5 text-white"
             style={{
@@ -110,7 +113,7 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* 🗺️ Formulario de login con fondo arena */}
+          {/*  Formulario de login  */}
           <div
             className="d-flex align-items-center justify-content-center col-12 col-md-6 p-4"
             style={{ backgroundColor: "#fff4e6" }}
