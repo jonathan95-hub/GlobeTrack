@@ -84,10 +84,11 @@ const HamburgerMenu = (props) => {
           {menuOptionsHeader === 0 ? (
             <nav>
               <ul className="d-flex flex-column gap-2 m-0 p-0">
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Mi perfil</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li style={{ position: "relative" }}>
   <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
     Notificaciones
@@ -114,9 +115,10 @@ const HamburgerMenu = (props) => {
             <nav>
               <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Mi perfil</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li style={{ position: "relative" }}>
   <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
     Notificaciones
@@ -146,6 +148,7 @@ const HamburgerMenu = (props) => {
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
+                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li style={{ position: "relative" }}>
   <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
     Notificaciones
@@ -173,8 +176,8 @@ const HamburgerMenu = (props) => {
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li style={{ position: "relative" }}>
   <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
     Notificaciones
@@ -201,8 +204,9 @@ const HamburgerMenu = (props) => {
                <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li style={{ position: "relative" }}>
   <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
     Notificaciones
@@ -230,8 +234,9 @@ const HamburgerMenu = (props) => {
                <ul className="d-flex flex-column gap-2 m-0 p-0">
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
-                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
+                 <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
                 <li style={{ position: "relative" }}>
   <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
     Notificaciones
@@ -254,7 +259,35 @@ const HamburgerMenu = (props) => {
 
               </ul>
               </nav>
-            ) : (null)}
+            ) : menuOptionsHeader === 6 ? (<nav>
+              <ul className="d-flex flex-column gap-2 m-0 p-0">
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToHome}>Home</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToPost}>Publicaciones</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToGroupPage}>Grupos</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToRancking}>Ranking</button></li>
+                <li><button className="btn btn-light w-100 fw-semibold" onClick={handleGoToProfile}>Perfil</button></li>
+                <li style={{ position: "relative" }}>
+  <button className="btn btn-light w-100 fw-semibold" onClick={props.handleToggleNotifications}>
+    Notificaciones
+  </button>
+  {props.unreadNotifications > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: "8px",
+        right: "10px",
+        width: "10px",
+        height: "10px",
+        borderRadius: "50%",
+        backgroundColor: "red",
+        display: "inline-block",
+      }}
+    ></span>
+  )}
+</li>
+
+              </ul>
+            </nav>) : (null)}
         </div>
       )}
     </div>

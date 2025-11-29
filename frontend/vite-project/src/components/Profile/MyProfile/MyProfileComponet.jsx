@@ -661,31 +661,49 @@ const toggleLike = async (postId) => {
       </div>
 
       {/*Modal para marcar pais como visitado o deseado */}
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Marcar país</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="text-center">
-          <p className="fw-semibold">
-            ¿Qué quieres hacer con{" "}
-            <span className="text-primary">{selectedCountry?.name}</span>?
-          </p>
-          <div className="d-flex justify-content-center gap-3 mt-3">
-            <Button
-              variant="success"
-              onClick={() => handleMarkCountry("visitado")}
-            >
-              Marcar como visitado
-            </Button>
-            <Button
-              variant="warning"
-              onClick={() => handleMarkCountry("deseado")}
-            >
-              Marcar como deseado
-            </Button>
-          </div>
-        </Modal.Body>
-      </Modal>
+     <Modal show={showModal} onHide={handleCloseModal} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Marcar país</Modal.Title>
+      </Modal.Header>
+      <Modal.Body className="text-center">
+        <p className="fw-semibold">
+          ¿Qué quieres hacer con{" "}
+          <span className="text-primary">{selectedCountry?.name}</span>?
+        </p>
+        <div className="d-flex justify-content-center gap-3 mt-3">
+          {/* Ajuste: cambia texto dinámicamente si ya está marcado */}
+          <Button
+            variant={user.user.visitedDestinations.some(
+              (v) => v.geoId === selectedCountry?._id
+            )
+              ? "danger"
+              : "success"}
+            onClick={() => handleMarkCountry("visitado")}
+          >
+            {user.user.visitedDestinations.some(
+              (v) => v.geoId === selectedCountry?._id
+            )
+              ? "Desmarcar como visitado"
+              : "Marcar como visitado"}
+          </Button>
+
+          <Button
+            variant={user.user.desiredDestinations.some(
+              (d) => d.geoId === selectedCountry?._id
+            )
+              ? "danger"
+              : "warning"}
+            onClick={() => handleMarkCountry("deseado")}
+          >
+            {user.user.desiredDestinations.some(
+              (d) => d.geoId === selectedCountry?._id
+            )
+              ? "Desmarcar como deseado"
+              : "Marcar como deseado"}
+          </Button>
+        </div>
+      </Modal.Body>
+    </Modal>
 
       {openModal && (
         <div

@@ -81,7 +81,6 @@ const { verification } = require('../middelwares/middelwareAuthentication')
  *                   example: "Error message from server"
  */
 router.get("/new", verification, getNotification)
-
 /**
  * @swagger
  * /notification/delete/{notificationId}:

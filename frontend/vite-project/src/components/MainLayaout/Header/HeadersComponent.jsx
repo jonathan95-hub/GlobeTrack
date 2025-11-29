@@ -119,6 +119,8 @@ const HeadersComponent = () => {
 
   const goToControl = () => {
     navigate("/control"); // Solo admin
+    dispatch(changeMenuOption(6))
+    localStorage.setItem("menuOption", 6)
   };
 
   // useEffect para cargar opción de menú guardada al iniciar
@@ -128,6 +130,8 @@ const HeadersComponent = () => {
       dispatch(changeMenuOption(Number(savedOption)));
     }
   }, []);
+
+  
 
   // useEffect para cargar notificaciones al inicio
   useEffect(() => {
@@ -157,6 +161,7 @@ const HeadersComponent = () => {
               goToProfile={goToProfile}
               goToGroupPage={goToGroupPage}
               goToRancking={goToRancking}
+              goToControl={goToControl}
               menuOptionsHeader={menuOptionsHeader}
               notifications={notifications} 
               unreadNotifications={unreadNotifications} 
@@ -260,6 +265,7 @@ const HeadersComponent = () => {
               goToProfile={goToProfile}
               goToGroupPage={goToGroupPage}
               goToRancking={goToRancking}
+              goToControl={goToControl}
               menuOptionsHeader={menuOptionsHeader}
               notifications={notifications} // <- PASAR
               unreadNotifications={unreadNotifications} // <- PASAR
@@ -363,6 +369,7 @@ const HeadersComponent = () => {
               goToProfile={goToProfile}
               goToGroupPage={goToGroupPage}
               goToRancking={goToRancking}
+              goToControl={goToControl}
               menuOptionsHeader={menuOptionsHeader}
               notifications={notifications} // <- PASAR
               unreadNotifications={unreadNotifications} // <- PASAR
@@ -467,6 +474,7 @@ const HeadersComponent = () => {
               goToProfile={goToProfile}
               goToGroupPage={goToGroupPage}
               goToRancking={goToRancking}
+              goToControl={goToControl}
               menuOptionsHeader={menuOptionsHeader}
               notifications={notifications} // <- PASAR
               unreadNotifications={unreadNotifications} // <- PASAR
@@ -572,6 +580,7 @@ const HeadersComponent = () => {
               goToProfile={goToProfile}
               goToGroupPage={goToGroupPage}
               goToRancking={goToRancking}
+              goToControl={goToControl}
               menuOptionsHeader={menuOptionsHeader}
               notifications={notifications} // <- PASAR
               unreadNotifications={unreadNotifications} // <- PASAR
@@ -673,6 +682,7 @@ const HeadersComponent = () => {
               goToProfile={goToProfile}
               goToGroupPage={goToGroupPage}
               goToRancking={goToRancking}
+              goToControl={goToControl}
               menuOptionsHeader={menuOptionsHeader}
               notifications={notifications} // <- PASAR
               unreadNotifications={unreadNotifications} // <- PASAR
@@ -756,7 +766,108 @@ const HeadersComponent = () => {
             </button>
           </div>
         </header>
-      ) : null}
+      ) : menuOptionsHeader === 6 ? ( <header className="d-flex flex-wrap align-items-center justify-content-between py-2 w-100 bg-primary shadow-sm">
+          <div className="d-flex align-items-center ms-2">
+            <img
+              className="headerLogo img-fluid"
+              src="/src/assets/HeaderAndFooter/LogoGlobeTracked.png"
+              alt="Logo"
+              style={{ height: "60px" }}
+            />
+          </div>
+
+          <div className="d-flex d-lg-none align-items-center justify-content-center">
+            <HamburgerMenu
+              goToHome={goToHome}
+              goToPost={goToPost}
+              goToProfile={goToProfile}
+              goToGroupPage={goToGroupPage}
+              goToRancking={goToRancking}
+              goToControl={goToControl}
+            
+              menuOptionsHeader={menuOptionsHeader}
+              notifications={notifications} 
+              unreadNotifications={unreadNotifications} 
+              handleToggleNotifications={handleToggleNotifications} 
+            />
+          </div>
+
+          <div className="d-none d-lg-block flex-grow-1">
+            <nav className="nav justify-content-center">
+              <ul className="d-flex gap-3 list-unstyled m-0">
+                <li>
+                  <button className="btn btn-outline-light" onClick={goToHome}>
+                    Home
+                  </button>
+                </li>
+                <li>
+                  <button className="btn btn-outline-light" onClick={goToPost}>
+                    Publicaciones
+                  </button>
+                </li>
+                 <li>
+                  <button
+                    className="btn btn-outline-light"
+                    onClick={goToGroupPage}
+                  >
+                    Grupos
+                  </button>
+                </li>
+                <li>
+                  <button className="btn btn-outline-light" onClick={goToRancking}>Ranking</button>
+                </li>
+                <li>
+                  <button
+                    className="btn btn-outline-light"
+                    onClick={goToProfile}
+                  >
+                    Perfil
+                  </button>
+                </li>
+               
+                <li style={{ position: "relative" }}>
+                  <button
+                    className="btn btn-outline-light position-relative"
+                    onClick={handleToggleNotifications}
+                  >
+                    Notificaciones
+                    {unreadNotifications > 0 && (
+                      <span
+                        className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                        style={{ width: "10px", height: "10px" }}
+                      ></span>
+                    )}
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+          <div className="d-flex align-items-center gap-3 me-3">
+            {/* Botón Panel de Control solo si es admin */}
+            {user.user?.isAdmin === "admin" && (
+              <img
+                style={{ width: "20px", cursor: "pointer" }}
+                onClick={goToControl}
+                src="/src/assets/HeaderAndFooter/engranaje.png"
+                alt=""
+              />
+            )}
+
+            <img
+              className="headerImage rounded-circle border border-light"
+              src={
+                user.user?.photoProfile?.trim() ||
+                "/public/images/ImgDefaultProfile.png"
+              }
+              alt="Perfil"
+              style={{ width: "40px", height: "40px", objectFit: "cover" }}
+            />
+            <button className="btn btn-danger" onClick={logOut}>
+              Cerrar Sesión
+            </button>
+          </div>
+        </header>) : null}
       {showNotifications && (
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"

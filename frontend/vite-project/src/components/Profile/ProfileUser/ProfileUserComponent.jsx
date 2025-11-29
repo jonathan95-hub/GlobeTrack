@@ -317,10 +317,10 @@ const ProfileUserComponent = () => {
               {countries.map((country) => {
                 if (!country.geoJson?.coordinates) return null;
 
-                const visited = viewUser.visitedDestinations.some(
+                const visited = viewUser?.visitedDestinations?.some(
                   (v) => v.geoId === country._id
                 );
-                const desired = viewUser.desiredDestinations.some(
+                const desired = viewUser?.desiredDestinations?.some(
                   (d) => d.geoId === country._id
                 );
 
