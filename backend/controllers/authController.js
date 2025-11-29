@@ -193,12 +193,12 @@ const generateToken = (payload, isRefresh) => { // le pasamos por parametros el 
       
  }
 const refreshToken = (req, res) => {
-     console.log("🔥 Entró a refreshToken. Payload recibido:", req.payload);
+     
   try {
     // Si no existe req.payload o req.payload._id o req.payload.name 
     if (!req.payload || !req.payload._id || !req.payload.name) {
         // devolvemos un 400 con el mensaje de payload invalido no se puede refrescar el token
-         console.log("❌ Payload inválido en refreshToken:", req.payload);
+        
       return res.status(400).send({
         status: "Failed",
         message: "Invalid payload, cannot refresh token"
@@ -214,7 +214,7 @@ const refreshToken = (req, res) => {
     const token = generateToken(payload, false);
     // Creamos la constante token refresh que es la llamada de generateToken con payload y true
     const token_refresh = generateToken(payload, true);
-      console.log("✔️ Nuevos tokens generados");
+      
 
     // Devolvemos un 200 con el token, el refresh token y el mensaje e token refreescado exitosamente
     res.status(200).send({ token, token_refresh, status: "Success", message: "	Tokens refreshed successfully" });
