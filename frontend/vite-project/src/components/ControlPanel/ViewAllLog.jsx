@@ -9,6 +9,9 @@ import { deleteAllLog, deletedInfo, deletedWarning, deletedError } from '../../c
 
 const ViewAllLog = () => {
 
+  // Estado y modal para manejo de errores
+     const [messageInfo, setMessageInfo] = useState("")
+     const [modalMessageInfo, setModalMessageInfo] = useState(false)
   // Estado donde se guardan todos los logs que vienen del backend
   const [logData, setLogData] = useState([])
 
@@ -31,6 +34,8 @@ const ViewAllLog = () => {
     } catch (error) {
       console.error(error.message)
       setLogData([]) // si falla, el estado trae un array vacio
+       setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 
@@ -49,6 +54,8 @@ const ViewAllLog = () => {
       await allLogs() // llamada para traer de nuevo los logs
     } catch (error) {
       console.error(error.message)
+       setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 // Elimina los logs tipo Info
@@ -58,6 +65,8 @@ const ViewAllLog = () => {
       await allLogs()
     } catch (error) {
       console.error(error.message)
+       setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 // Elimina los logs tipo warn
@@ -67,6 +76,8 @@ const ViewAllLog = () => {
       await allLogs()
     } catch (error) {
       console.error(error.message)
+       setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 // Elimina los logs tipo error
@@ -76,6 +87,8 @@ const ViewAllLog = () => {
       await allLogs()
     } catch (error) {
       console.error(error.message)
+       setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 
@@ -194,6 +207,29 @@ const ViewAllLog = () => {
       ) : (
         <p>No hay registros disponibles para el filtro seleccionado.</p>
       )}
+             {modalMessageInfo && (
+  <div 
+    className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+    style={{ 
+      zIndex: 1100, 
+      width: '90%', 
+      maxWidth: '400px', 
+      backgroundColor:  '#ff4d4f', 
+      color: '#fff',
+      borderRadius: '12px',
+      boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+      textAlign: 'center'
+    }}
+  >
+    <div className="d-flex justify-content-between align-items-start">
+      <div style={{ flex: 1 }}>{messageInfo}</div>
+      <button 
+        className="btn-close btn-close-white"
+        onClick={() => setModalMessageInfo(false)}
+      />
+    </div>
+  </div>
+)}
     </div>
   )
 }

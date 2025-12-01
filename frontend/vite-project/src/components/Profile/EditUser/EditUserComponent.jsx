@@ -16,6 +16,10 @@ const EditUserComponnet = (props) => {
 
   // Estado para previsualizar la imagen de perfil
   const [previewImage, setPreviewImage] = useState(user.user.photoProfile);
+   // Estado y modal para manejo de errores
+                const [messageInfo, setMessageInfo] = useState("")
+                const [modalMessageInfo, setModalMessageInfo] = useState(false)
+                const [isSuccess, setIsSuccess] = useState(false)
 
   // Estado con datos del usuario editable
   const [dataUser, setDataUser] = useState({
@@ -51,15 +55,22 @@ const EditUserComponnet = (props) => {
   const edit = async () => {
     try {
       const res = await editUser(user.user._id, dataUser); // Llamada al backend
-      alert("Perfil Actualizado");
+      setMessageInfo("Perfil Actualizado");
+      setIsSuccess(true)
+      setModalMessageInfo(true)
+      setTimeout(() => {
+    setModalMessageInfo(false);
+    setIsSuccess(false); // Reseteamos el estado de éxito
+  }, 2000);
       dispatch(updateUser(res.user)); // Actualiza Redux con nuevos datos
 
       if (res.user.photoProfile) setPreviewImage(res.user.photoProfile); // Actualiza preview si hay nueva foto
       console.log(res);
       setIsEdit(false); // Cierra modo edición
     } catch (error) {
-      console.error("Error al actualizar:", error);
-      alert("Error al actualizar perfil: " + error.message);
+      setMessageInfo("Error al actualizar:", error);
+      setModalMessageInfo(true)
+      
     }
   };
 
@@ -136,6 +147,29 @@ const EditUserComponnet = (props) => {
         </div>
 
       </div>
+       {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: isSuccess ? '#28a745' : '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -9,6 +9,7 @@ const MapGlobal = () => {
   // Punto central del mapa (España)
   const spainCenter = [40.4, -3.7];
 
+
   // Aquí guardamos todas las publicaciones que nos devuelve la API
   const [post, setPost] = useState([]);
 
@@ -20,7 +21,7 @@ const MapGlobal = () => {
       setPost(data.allPost);
     } catch (error) {
       console.error("Error cargando publicaciones", error);
-      alert("Error al obtener las publicaciones");
+      
     }
   };
 
@@ -71,7 +72,8 @@ const MapGlobal = () => {
     if (token) {
       fetchPosts(token);
     } else {
-      alert("No hay token");
+       console.error(error.message)
+       
     }
   }, []);
 
@@ -162,15 +164,8 @@ const MapGlobal = () => {
       </MapContainer>
 
       
-      <div
-        className="map-overlay-bottom position-absolute bottom-0 start-0 w-100"
-        style={{
-          height: "50px",
-          background:
-            "linear-gradient(to top, rgba(0,255,255,0.15), rgba(0,0,0,0))",
-          zIndex: 400,
-        }}
-      />
+      <div/>
+
     </div>
   );
 };

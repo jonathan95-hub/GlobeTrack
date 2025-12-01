@@ -6,6 +6,10 @@ import { register } from '../../core/services/landinPage/registerFetch'
 // Componente de registro
 const RegisterComponent = ({ setMenuOptionsInit }) => {
 
+    const [isSuccess, setIsSuccess] = useState(false)
+
+    const [messageInfo, setMessageInfo] = useState("")
+    const [modalMessageInfo, setModalMessageInfo] = useState(false)
   // Estado donde guardamos los datos del formulario
   const [registerData, setRegisterData] = useState({
     name: "",
@@ -31,27 +35,35 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
   }
 
   // Función para enviar los datos al backend y registrar usuario
-  const signupUser = async () => {
-    try {
-      const registerUser = await register(registerData)
+ const signupUser = async () => {
+  try {
+    const registerUser = await register(registerData)
 
-      // Si ocurre algún error en el registro mostramos alerta
-      if (registerUser.status === "Failed" || registerUser.status === "Error") {
-        alert(registerUser.message)
-        console.log("Error en registro", registerUser.message)
-        return
-      }
+   if (registerUser.status === "Failed" || registerUser.status === "Error") {
+  setIsSuccess(false) // si hay algun error el succeso es falso
+  setMessageInfo(registerUser.message)
+  setModalMessageInfo(true)
+  return
+}
 
-      // Registro exitoso
-      console.log("Registro exitoso", registerUser)
-      alert("Registro exitoso")
-      backToLanding() // Volvemos al menú inicial
+// si el registro es exitoso
+setIsSuccess(true) // seteamos isSuccess en true
+setMessageInfo("Registro exitoso")
+setModalMessageInfo(true)
 
-    } catch (error) {
-      console.error("Error de login:", error.message)
-      alert(error.message)
-    }
+// Esperar 2 segundos y luego volver al menú
+setTimeout(() => {
+  setModalMessageInfo(false)
+  backToLanding()
+}, 2000)
+
+  } catch (error) {
+    console.error("Error de registro:", error.message)
+    setMessageInfo(error.message)
+    setModalMessageInfo(true)
   }
+}
+
 
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light px-3">
@@ -175,6 +187,30 @@ const RegisterComponent = ({ setMenuOptionsInit }) => {
 
         </form>
       </div>
+      {modalMessageInfo && (
+  <div 
+    className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+    style={{ 
+      zIndex: 1100, 
+      width: '90%', 
+      maxWidth: '400px', 
+      backgroundColor: isSuccess ? '#28a745' : '#ff4d4f', // verde si el registro es exitoso, rojo si hay algun error
+      color: '#fff',
+      borderRadius: '12px',
+      boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+      textAlign: 'center'
+    }}
+  >
+    <div className="d-flex justify-content-between align-items-start">
+      <div style={{ flex: 1 }}>{messageInfo}</div>
+      <button 
+        className="btn-close btn-close-white"
+        onClick={() => setModalMessageInfo(false)}
+      />
+    </div>
+  </div>
+)}
+
     </div>
   )
 }

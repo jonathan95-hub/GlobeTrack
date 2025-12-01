@@ -37,10 +37,10 @@ const ProfileUserComponent = () => {
   // Función para obtener info del usuario desde backend
   const getUser = async () => {
     const token = localStorage.getItem("token");
-    if (!token) return alert("Token invalid");
+    if (!token) return console.error("Token invalid");
 
     const dataUser = await getInfoUser(userId);
-    if (!dataUser) return alert("Information of the user not found");
+    if (!dataUser) return console.error("Information of the user not found");
 
     setViewUser(dataUser.getUser);
   };
@@ -75,7 +75,7 @@ const ProfileUserComponent = () => {
   // Función para seguir o dejar de seguir
   const follow = async (userId) => {
     const token = localStorage.getItem("token");
-    if (!token) return alert("Token invalid");
+    if (!token) return console.error("Token invalid");
 
     try {
       await followAndUnfollow(userId); // Llamada al backend
@@ -83,7 +83,7 @@ const ProfileUserComponent = () => {
       setViewUser(dataUser.getUser);
       setFollower(dataUser.getUser.followers.includes(user.user._id));
     } catch (err) {
-      console.error("Error al seguir/dejar de seguir:", err);
+      console.error("Error", err);
     }
   };
 
@@ -162,7 +162,7 @@ const ProfileUserComponent = () => {
   // Abrir modal de mensaje o ir a conversación existente
   const openMessage = async () => {
     const info = await getMessagePrivate();
-    if (!info) return alert("Error al obtener conversaciones");
+    if (!info) return console.error("Error al obtener conversaciones");
 
     const conversationsArray = Object.values(info.conversations);
     const existingConversation = conversationsArray.find(
@@ -192,7 +192,7 @@ const ProfileUserComponent = () => {
       if (conversation) navigate("/message", { state: { conversation } });
     } catch (error) {
       console.error("Error al enviar mensaje:", error);
-      alert(error.message);
+      
     }
   };
 

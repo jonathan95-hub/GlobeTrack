@@ -45,7 +45,7 @@ const CommentComponent = () => {
   const allComment = async (postId) => {
     const token = localStorage.getItem("token"); // Revisamos token
     if (!token) {
-      alert("Token inválido"); // Si no hay token, redirige al login
+      console.error("Token inválido"); // Si no hay token, redirige al login
       navigate("/");
       return;
     }
@@ -210,7 +210,7 @@ const CommentComponent = () => {
           </div>
         </div>
       )}
-
+      
     </div>
   );
 };

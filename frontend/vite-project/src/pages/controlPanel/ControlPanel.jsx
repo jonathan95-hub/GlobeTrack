@@ -86,7 +86,7 @@ const ControlPanel = () => {
             {/* TITULO DEL PANEL */}
             <h2 className="fw-bold mb-4 text-center">Panel de Control</h2>
 
-            {/* CARDS DE INFORMACIÓN: muestran cantidad de usuarios, grupos y logs */}
+            {/*  muestran cantidad de usuarios, grupos y logs */}
             <div className="d-flex flex-column flex-md-row gap-3 w-100 mb-4">
 
                 <div className="card shadow-sm text-center p-3 flex-fill">
@@ -106,7 +106,7 @@ const ControlPanel = () => {
 
             </div>
 
-            {/* BOTONES DE NAVEGACIÓN: permiten cambiar entre vistas */}
+            {/*  permiten cambiar entre vistas */}
             <div className="d-flex gap-3 mb-4 flex-wrap justify-content-center">
 
                 {!isViewUser && (

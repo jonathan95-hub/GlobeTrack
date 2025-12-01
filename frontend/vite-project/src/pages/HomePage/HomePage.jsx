@@ -9,7 +9,7 @@ import TopGroups from '../../components/HomePage/TopGroups'; // Ranking de top g
 const HomePage = () => {
   return (
     <div className="container-fluid bg-light py-4 min-vh-100">
-      {/* Contenedor principal con altura mínima de pantalla y fondo claro */}
+      {/* Contenedor principal c*/}
       <div className="row g-4 h-100">
 
         {/* ----------------- Columna izquierda ----------------- */}

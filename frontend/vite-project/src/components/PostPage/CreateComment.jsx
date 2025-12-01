@@ -13,6 +13,10 @@ const CreateCommentComponent = () => {
   const user = useSelector(state => state.loginReducer); // Obtenemos usuario logueado desde Redux
   const from = location.state?.from; // Página de origen
   const otherUserId = location.state?.otherUserId; // Id de otro usuario si aplica
+     // Estado y modal para manejo de errores
+            const [messageInfo, setMessageInfo] = useState("")
+            const [modalMessageInfo, setModalMessageInfo] = useState(false)
+            const [isSuccess, setIsSuccess] = useState(false)
 
   // Función para volver a la página correspondiente según origen
   const goToPostPage = () => {
@@ -35,22 +39,31 @@ const CreateCommentComponent = () => {
   // Función para crear comentario
   const handleCreateComment = async () => {
     if (!text.trim()) { // Validación de texto vacío
-      alert("El comentario no puede estar vacío");
+      setMessageInfo("El comentario no puede estar vacío");
+      setModalMessageInfo(true)
       return;
     }
 
     if (!postId) { // Validación de postId
-      alert("PostId no definido");
+      setMessageInfo("PostId no definido");
+      setModalMessageInfo(true)
       return;
     }
 
     try {
       const comment = await createCommentService(postId, text, user.user._id); // Llamada al backend
-      alert("Comentario creado correctamente");
-      navigate(-1); // Volvemos a la página anterior
+      setMessageInfo("Comentario creado correctamente");
+      setIsSuccess(true)
+
+       setTimeout(() => {
+    setModalMessageInfo(false)
+    setIsSuccess(false); // Cerramos el modal
+    navigate(-1); // Volvemos a la página anterior
+  }, 2000);
     } catch (error) {
       console.error(error);
-      alert("Error al crear el comentario");
+      setMessageInfo("Error al crear el comentario");
+      setModalMessageInfo(true)
     }
   };
 
@@ -79,6 +92,29 @@ const CreateCommentComponent = () => {
           </button>
         </div>
       </div>
+              {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: isSuccess ? '#28a745' : '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

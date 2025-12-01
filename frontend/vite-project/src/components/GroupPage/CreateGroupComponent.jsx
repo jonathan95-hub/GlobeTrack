@@ -21,6 +21,10 @@ const CreateGroupComponent = () => {
   const [isEditGroup, setIsEditGroup] = useState(!!groupToEdit);
 
 
+  const [messageInfo, setMessageInfo] = useState("")
+                  const [modalMessageInfo, setModalMessageInfo] = useState(false)
+                  const [isSuccess, setIsSuccess] = useState(false)
+
   // Función para cuando el usuario sube un archivo
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -43,7 +47,8 @@ const CreateGroupComponent = () => {
    // Cuando el usuario presiona guardar o crear grupo
   const handleSubmit = async () => {
     if (!title.trim() || !description.trim()) {
-      alert("Completa el nombre y la descripción.");
+      setMessageInfo("Completa el nombre y la descripción.");
+      setModalMessageInfo(true)
       return;
     }
 
@@ -52,17 +57,25 @@ const CreateGroupComponent = () => {
       if (isEditGroup) {
         // Editar grupo existente
         await editGroup(groupToEdit._id, { name: title, photoGroup: imageBase64, description });
-        alert("Grupo editado correctamente");
+        setMessageInfo("Grupo editado correctamente");
+        setIsSuccess(true)
+        setTimeout(() => {
+  setModalMessageInfo(false)
+  setIsSuccess(false)
+}, 2000)
       } else {
         // Si estamos Creando llama a la funcion del backend para Crear grupo
         await createNewGroup(title, imageBase64, description);
-        alert("Grupo creado correctamente");
+        setMessageInfo("Grupo creado correctamente");
+        setIsSuccess(true)
+        setTimeout(() => {
+        setIsSuccess(false)
+        }, 2000)
       }
 
       navigate("/group"); // volver a lista de grupos
     } catch (err) {
       console.error(err);
-      alert("Error al guardar el grupo");
     }
   };
 
@@ -123,6 +136,29 @@ const CreateGroupComponent = () => {
           </div>
         </div>
       </div>
+      {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: isSuccess ? '#28a745' : '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -24,6 +24,9 @@ const ChatGroup = () => {
   const messagesEndRef = useRef(null);
     // Función que hace scroll hacia abajo
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // Estado y modal para manejo de errores
+    const [messageInfo, setMessageInfo] = useState("")
+    const [modalMessageInfo, setModalMessageInfo] = useState(false)
 
   // Cargar mensajes iniciales
   const loadMessages = async () => {
@@ -31,9 +34,10 @@ const ChatGroup = () => {
       const data = await getMessageGroup(groupId);
       setMessages(data.messages || []);
       scrollToBottom();
-    } catch (err) {
-      console.error(err);
-      alert("Error cargando mensajes");
+    } catch (error) {
+      console.error(error);
+      setMessageInfo(error.message)
+       setModalMessageInfo(true)
     }
   };
 
@@ -46,9 +50,10 @@ const ChatGroup = () => {
       await sendMessageGroup(groupId, { content: messageText });
       setMessageText('');
       // no agregamos el mensaje localmente, llega desde socket
-    } catch (err) {
-      console.error(err);
-      alert("Error enviando mensaje");
+    } catch (error) {
+      console.error(error);
+       setMessageInfo(error.message)
+       setModalMessageInfo(true)
     }
   };
 
@@ -132,7 +137,31 @@ const ChatGroup = () => {
           style={{ width: "40px", height: "40px", objectFit: "cover" }}
         />
       )}
+         {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
+    
   );
 })}
         <div ref={messagesEndRef} />

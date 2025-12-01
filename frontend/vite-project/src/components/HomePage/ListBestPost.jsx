@@ -1,55 +1,51 @@
-// Importamos los hooks y las funciones necesarias
 import React, { useEffect, useState } from "react";
 import { bestPost } from "../../core/services/homepage/Top10PostFetch";
 
 const ListBestPost = () => {
-  // Aquí guardamos los mejores posts que nos mande el backend
   const [topPost, setTopPost] = useState([]);
+   
 
-  // Función que trae los posts destacados
   const TopBestPost = async () => {
     try {
       const data = await bestPost();
-
-      // Si vienen posts y es un array, los guardamos
       if (data.post && Array.isArray(data.post)) {
         setTopPost(data.post);
       } else {
-        // Si por lo que sea no vienen bien, dejamos el array vacío
         setTopPost([]);
       }
     } catch (error) {
       console.error("Error:", error);
       setTopPost([]);
+       
     }
   };
 
-  // Cuando se carga el componente pedimos los posts destacados
   useEffect(() => {
     TopBestPost();
   }, []);
 
   return (
     <div className="container">
-      
-      {/* Si no hay posts mostramos un mensaje */}
       {topPost.length === 0 ? (
         <p className="text-center text-muted fw-semibold">
           No hay publicaciones destacadas
         </p>
       ) : (
-        // Si sí hay posts los pintamos en tarjetas
+        
         <div className="d-flex flex-column gap-3">
+          <h3 className="fw-bold text-center mb-3 text-primary"
+          >Top Publicaiones</h3>
           {topPost.map((p, idx) => (
             <div
               key={idx}
               className="card bg-dark shadow-sm border-0"
               style={{
-                padding: "14px",
                 borderRadius: "14px",
+                maxHeight: "400px", // Limite de altura de la card
+                overflow: "hidden", // Evita que se salga del contenedor
               }}
             >
-              {/* Parte de arriba con la foto y nombre del usuario */}
+              {/* Parte superior: foto + nombre */}
               <div className="d-flex align-items-center p-2">
                 <img
                   src={p.user?.photoProfile}
@@ -69,24 +65,15 @@ const ListBestPost = () => {
                 </h6>
               </div>
 
-              {/* Imagen del post si tiene */}
-              {p.image && (
-                <div className="overflow-hidden rounded my-2">
-                  <img
-                    src={p.image}
-                    alt={p.title}
-                    style={{
-                      width: "100%",
-                      height: "220px",
-                      objectFit: "cover",
-                      borderRadius: "10px",
-                    }}
-                  />
-                </div>
-              )}
-
               {/* Contenido del post */}
-              <div className="card-body p-2" style={{ paddingTop: "6px" }}>
+              <div
+                className="card-body p-2"
+                style={{
+                  paddingTop: "6px",
+                  maxHeight: "250px", // Limite de altura del contenido
+                  overflowY: "auto", // Scroll si hay mucho texto
+                }}
+              >
                 <h5
                   className="card-title text-primary fw-bold"
                   style={{ fontSize: "1.2rem" }}
@@ -98,22 +85,42 @@ const ListBestPost = () => {
                   className="card-text text-secondary"
                   style={{
                     fontSize: "1rem",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3, // Mostramos solo 3 líneas de texto
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
+                    wordBreak: "break-word", // Evita que palabras largas rompan el layout
                   }}
                 >
                   {p.text}
                 </p>
+
+                {/* Comentarios si los hay */}
+                {p.comment && p.comment.length > 0 && (
+                  <div
+                    className="mt-2"
+                    style={{
+                      maxHeight: "100px",
+                      overflowY: "auto",
+                      padding: "4px",
+                      borderTop: "1px solid #555",
+                    }}
+                  >
+                    {p.comment.map((c, index) => (
+                      <p
+                        key={index}
+                        className="text-light mb-1"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        <strong>{c.user?.name || "Usuario"}:</strong> {c.text}
+                      </p>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
+
     </div>
   );
 };
 
 export default ListBestPost;
-

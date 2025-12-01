@@ -73,7 +73,7 @@ const LandingPage = () => {
         </div>
       ) : menuOptiosInit === "REGISTER" ? (
         <div className="container-fluid d-flex flex-column flex-md-row min-vh-100 p-0">
-          {/* 🌅 Texto lateral con fondo azul suave */}
+          {/*  Texto lateral  */}
           <div
             className="text-section d-flex align-items-center justify-content-center text-center text-md-start col-12 col-md-6 p-5 text-white"
             style={{

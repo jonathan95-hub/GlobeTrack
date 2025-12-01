@@ -31,6 +31,10 @@ const CreatePost = (props) => {
   const [title, setTitle] = useState("");             // Título del post
   const [text, setText] = useState("");               // Texto del post
   const [imageBase64, setImageBase64] = useState(null); // Imagen en Base64
+  // Estado y modal para manejo de errores
+              const [messageInfo, setMessageInfo] = useState("")
+              const [modalMessageInfo, setModalMessageInfo] = useState(false)
+              const [isSuccess, setIsSuccess] = useState(false)
 
   // Icono personalizado para marcador
   const markerIcon = L.icon({
@@ -55,7 +59,8 @@ const CreatePost = (props) => {
     const file = e.target.files[0];
     if (!file) return; // Si no selecciona nada
     if (!file.type.startsWith("image/")) {
-      alert("Por favor selecciona un archivo de imagen válido.");
+      setMessageInfo("Por favor selecciona un archivo de imagen válido.");
+      setModalMessageInfo(true)
       return;
     }
 
@@ -80,7 +85,7 @@ const CreatePost = (props) => {
 
   // Función para editar un post existente
   const edit = async () => {
-    if (!postToEdit?._id) return alert("No hay post seleccionado");
+    if (!postToEdit?._id) return ;
 
     try {
       const payload = { title, text };
@@ -94,11 +99,12 @@ const CreatePost = (props) => {
         setIsCreatePost(false);
         setPostToEdit(null);
       } else {
-        alert("❌ Error al editar la publicación");
+        setMessageInfo(" Error al editar la publicación");
+        setModalMessageInfo(true)
       }
     } catch (error) {
       console.error(error);
-      alert("⚠️ Error al editar la publicación");
+      
     }
   };
 
@@ -106,7 +112,9 @@ const CreatePost = (props) => {
   const newPost = async () => {
     try {
       if (!title || !text || !location) {
-        return alert("Por favor completa todos los campos antes de publicar.");
+         setMessageInfo("Por favor completa todos los campos antes de publicar.");
+         setModalMessageInfo(true)
+         return
       }
 
       // Convertimos ubicación a formato GeoJSON
@@ -118,14 +126,21 @@ const CreatePost = (props) => {
       const data = await createNewPost(title, text, imageBase64, locationFormatted);
 
       if (data.status === "Success") {
-        alert("✅ Publicación creada con éxito!");
-        setIsCreatePost(false);
-      } else {
-        alert("❌ Error al crear la publicación");
-      }
+  setMessageInfo("¡Publicación creada con éxito!");
+  setIsSuccess(true);
+  setModalMessageInfo(true); // Mostramos el modal
+  setIsCreatePost(false);
+
+  // Cerramos el modal automáticamente después de 2 segundos
+  setTimeout(() => {
+    setModalMessageInfo(false);
+    setIsSuccess(false); // Reseteamos el estado de éxito
+  }, 2000);
+} 
+
     } catch (error) {
       console.error("Error creando el post:", error);
-      alert("⚠️ Ha ocurrido un error al crear el post");
+
     }
   };
 
@@ -256,7 +271,7 @@ const CreatePost = (props) => {
           </div>
         </div>
       ) : (
-        // 📝 Formulario de creación
+        //  Formulario de creación
         <div className="container my-5">
           <div className="card shadow-lg border-0 rounded-4">
             <div className="card-body p-4">
@@ -356,6 +371,29 @@ const CreatePost = (props) => {
               </div>
             </div>
           </div>
+               {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: isSuccess ? '#28a745' : '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
+          </div>
+        </div>
+      )}
         </div>
       )}
     </>

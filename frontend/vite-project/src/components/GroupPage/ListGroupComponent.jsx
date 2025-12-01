@@ -11,6 +11,9 @@ const ListGroupComponent = () => {
   //Estado para seleccionar un grupo
   const [selectedGroup, setSelectedGroup] = useState(null);
   const navigate = useNavigate();
+  // Estado y modal para manejo de errores
+      const [messageInfo, setMessageInfo] = useState("")
+      const [modalMessageInfo, setModalMessageInfo] = useState(false)
 
   // Funcion para obtener los grupos
   const obtainedGroup = async () => {
@@ -39,9 +42,10 @@ const ListGroupComponent = () => {
       await enterGroupAndExitGroup(groupId); // llamada a la funcion que hace la llamada al backend pasandole el id del grupo
       setSelectedGroup(groupId); // seteamos el estado de selccionar grupo pasandole el id del grupo como parametro
       obtainedGroup(); // llamamos de nuevo a la funcion de obtener los grupos para que nos de la lista actualizada
-    } catch (err) {
-      console.error(err);
-      alert("Error al unirte al grupo");
+    } catch (error) {
+      console.error(error);
+      setMessageInfo(error.message)
+       setModalMessageInfo(true)
     }
   };
  // Funcion pra navegar hasta el chat del grupo
@@ -141,6 +145,30 @@ const ListGroupComponent = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+        {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
           </div>
         </div>
       )}

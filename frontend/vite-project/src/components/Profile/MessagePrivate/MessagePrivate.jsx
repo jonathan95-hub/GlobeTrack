@@ -109,7 +109,7 @@ const MessagePrivate = () => {
       scrollToBottom();
     } catch (error) {
       console.error("Error sending message:", error.message);
-      alert(error.message);
+      
     }
   };
 

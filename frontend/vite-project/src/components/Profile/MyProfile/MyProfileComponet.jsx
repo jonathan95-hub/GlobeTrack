@@ -24,7 +24,9 @@ import { deleteUser } from "../../../core/services/ControlPanel/deleteUser";
 
 const MyProfileComponent = (props) => {
   const { setIsCreatePost, setIsEdit, setIsEditPost, setPostToEdit } = props; // Props necesarios 
-
+   // Estado y modal para manejo de errores
+                  const [messageInfo, setMessageInfo] = useState("")
+                  const [modalMessageInfo, setModalMessageInfo] = useState(false)
   const [dataPostUser, setDataPostUser] = useState([]); // Publicaciones del usuario
   const [countries, setCountries] = useState([]); // Lista de países
   const [selectedCountry, setSelectedCountry] = useState(null); // País seleccionado en el mapa
@@ -48,8 +50,6 @@ const MyProfileComponent = (props) => {
   // Funciones para mostrar seguidores y seguidos
   const handleShowFollowers = async (userId) => {
     const res = await obtainedFollowers(userId);
-
-    console.log("📥 respuesta followers:", res);
 
     if (res && Array.isArray(res.followers)) {
       setDataFollowers(res.followers);
@@ -108,7 +108,7 @@ const toggleLike = async (postId) => {
     // Llamada al backend para registrar el like o quitar el lioke
     await likeAndUnlikePost(postId);
   } catch (error) {
-    console.error("Error al dar o quitar like:", error);
+    console.error("Error", error);
 
     // por si falla la llamada al backend
     setDataPostUser((prev) =>
@@ -151,10 +151,10 @@ const toggleLike = async (postId) => {
       // Actualizamos el estadoquitando el post eliminado
       setDataPostUser((prevPosts) => prevPosts.filter((p) => p._id !== postId));
 
-      alert("Publicación eliminada correctamente");
+      
     } catch (error) {
       console.error("Error al eliminar la publicación:", error);
-      alert("No se pudo eliminar la publicación: " + error.message);
+      
     }
   };
 
@@ -267,7 +267,8 @@ const toggleLike = async (postId) => {
     try {
       const res = await deleteUser(userId);
       if (!res.ok) {
-        alert("The user could not be deleted.");
+        setMessageInfo("The user could not be deleted.");
+        setModalMessageInfo(true)
       }
       localStorage.removeItem("token");
       localStorage.removeItem("token_refresh");
@@ -328,11 +329,9 @@ const toggleLike = async (postId) => {
     if (token && userId) {
       postUser(userId);
       getCountries();
-    } else {
-      alert("Token is invalid");
-    }
+    } 
   }, []);
-  console.log("USER REDUX:", user);
+  
   return (
     <div className="container my-4">
       {/* MAPA */}
@@ -898,6 +897,29 @@ const toggleLike = async (postId) => {
           </Button>
         </Modal.Footer>
       </Modal>
+       {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

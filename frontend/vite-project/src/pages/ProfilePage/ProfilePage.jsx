@@ -16,7 +16,7 @@ const ProfilePage = () => {
   const [isEditPost, setIsEditPost]  = useState(false); // editar un post existente
   const [postToEdit, setPostToEdit] = useState(null); // post seleccionado para editar
 
-  // 🔹 Determinar vista inicial según desde dónde se navega
+  //  Determinar vista inicial según desde dónde se navega
   useEffect(() => {
     const saveComponent = localStorage.getItem("currentProfileView");
 
@@ -31,14 +31,14 @@ const ProfilePage = () => {
     }
   }, [location.state]);
 
-  // 🔹 Guardar la vista actual en localStorage para mantener estado al recargar
+  //  Guardar la vista actual en localStorage para mantener estado al recargar
   useEffect(() => {
     if (isCreatePost) localStorage.setItem("currentProfileView", "createPost");
     else if (isEdit) localStorage.setItem("currentProfileView", "edit");
     else localStorage.setItem("currentProfileView", "profile");
   }, [isCreatePost, isEdit, isMyProfile]);
 
-  // 🔹 Renderizado condicional según estado
+  //  Renderizado condicional según estado
   return (
     <div className="container my-4">
       {isMyProfile ? (

@@ -38,8 +38,8 @@ const HeadersComponent = () => {
       const data = await getNotification(); // Llamada al backend
       console.log("Notificaciones recibidas:", data); // Para depuración
       setNotifications(data.notification || []); // Guardamos las notificaciones en el estado
-    } catch (err) {
-      console.error("Error al cargar notificaciones:", err);
+    } catch (error) {
+      console.error("Error al cargar notificaciones:", error);
     } finally {
       setLoading(false); // Desactivamos loading
     }

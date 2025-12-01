@@ -13,6 +13,9 @@ import { Modal } from 'react-bootstrap'
 
 
 const ViewAllGroup = () => {
+  // Estado y modal para manejo de errores
+   const [messageInfo, setMessageInfo] = useState("")
+   const [modalMessageInfo, setModalMessageInfo] = useState(false)
 
   // Estado donde guardamos todos los grupos
   const [dataAllGroup, setDataAllGroup] = useState([])
@@ -53,7 +56,8 @@ const ViewAllGroup = () => {
         setDataAllGroup(res.allGroup)
       }
     } catch (error) {
-      console.error(error.message)
+      setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 
@@ -74,7 +78,9 @@ const ViewAllGroup = () => {
         setShowModal(true)
       }
     } catch (error) {
-      console.error(error.message)
+      console.error(error)
+      setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 
@@ -92,9 +98,10 @@ const ViewAllGroup = () => {
       }
       // aparece el modal de mensajes
       setModalMessage(true)
-    } catch (err) {
-      console.error("Error cargando mensajes:", err)
-      alert("Error cargando mensajes")
+    } catch (error) {
+      console.error(error)
+      setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 
@@ -107,6 +114,8 @@ const ViewAllGroup = () => {
       setDataMembers(prev => prev.filter(m => m._id !== userIdToRemove))
     } catch (error) {
       console.error(error.message)
+       setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 
@@ -118,6 +127,8 @@ const ViewAllGroup = () => {
       getAllGroup()
     } catch (error) {
       console.error(error.message)
+       setMessageInfo(error.message)
+      setModalMessageInfo(true)
     }
   }
 
@@ -328,7 +339,29 @@ const ViewAllGroup = () => {
 
         </Modal.Body>
       </Modal>
-
+          {modalMessageInfo && (
+  <div 
+    className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+    style={{ 
+      zIndex: 1100, 
+      width: '90%', 
+      maxWidth: '400px', 
+      backgroundColor:  '#ff4d4f', 
+      color: '#fff',
+      borderRadius: '12px',
+      boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+      textAlign: 'center'
+    }}
+  >
+    <div className="d-flex justify-content-between align-items-start">
+      <div style={{ flex: 1 }}>{messageInfo}</div>
+      <button 
+        className="btn-close btn-close-white"
+        onClick={() => setModalMessageInfo(false)}
+      />
+    </div>
+  </div>
+)}
     </div>
   )
 }

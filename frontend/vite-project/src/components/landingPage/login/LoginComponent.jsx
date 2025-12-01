@@ -20,9 +20,9 @@ const LoginComponent = ({ setMenuOptionsInit }) => {
   // Estados locales para guardar email y password
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
-  // Obtenemos el estado actual del menú (aunque no se usa en este componente)
-  const { menuOptionsHeader } = useSelector((state) => state.menuReducerHeader)
+  const [messageInfo, setMessageInfo] = useState("")
+  const [modalMessageInfo, setModalMessageInfo] = useState(false)
+  
 
   // Función que se ejecuta al hacer login
   const login = async () => {
@@ -51,7 +51,8 @@ const LoginComponent = ({ setMenuOptionsInit }) => {
     } catch (error) {
       // Mostramos error si algo falla
       console.error('Error de login:', error.message)
-      alert(error.message)
+      setMessageInfo(error.message)
+       setModalMessageInfo(true)
     }
   }
 
@@ -110,6 +111,29 @@ const LoginComponent = ({ setMenuOptionsInit }) => {
         </div>
 
       </div>
+              {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

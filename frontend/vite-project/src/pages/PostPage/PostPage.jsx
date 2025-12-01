@@ -105,7 +105,7 @@ const PostPage = () => {
         setDataAllPost([]);
       }
     } catch (error) {
-      alert("Error al obtener las publicaciones");
+     
       console.error("Error cargando publicaciones", error);
     }
   };

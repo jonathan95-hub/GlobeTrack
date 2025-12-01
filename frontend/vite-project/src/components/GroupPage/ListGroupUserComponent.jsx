@@ -20,6 +20,9 @@ const ListGroupUserComponent = () => {
   const [groupToLeave, setGroupToLeave] = useState(null);
  // Estado donde guardamos el ID del grupo que queremos dejar
   const user = useSelector(state => state.loginReducer); // usuario actual
+    // Estado y modal para manejo de errores
+        const [messageInfo, setMessageInfo] = useState("")
+        const [modalMessageInfo, setModalMessageInfo] = useState(false)
 
   //Fucion de mi lista de grupos
   const myList = async () => {
@@ -35,9 +38,11 @@ const ListGroupUserComponent = () => {
       const groupsData = myGroup.listGroup || myGroup.groups || [];
       setMyGroups(groupsData); // setemos el Estado de mis grupos con groupData
 
-    } catch (err) {
-      console.error("Error en myList:", err);
+    } catch (error) {
+      console.error(error);
       setMyGroups([]);
+       setMessageInfo(error.message)
+       setModalMessageInfo(true)
     }
   };
 
@@ -49,9 +54,10 @@ const ListGroupUserComponent = () => {
       if (res.left) setMyGroups(prev => prev.filter(g => g._id !== groupId));
       // Llamamos de nuevo a la lista de mis grupos para traerla actualizada
       myList();
-    } catch (err) {
-      console.error(err);
-      alert("Error al unirte o salir del grupo");
+    } catch (error) {
+      console.error(error);
+       setMessageInfo(error.message)
+       setModalMessageInfo(true)
     }
   };
 
@@ -76,9 +82,10 @@ const ListGroupUserComponent = () => {
       setMyGroups(prev => prev.filter(g => g._id !== groupToDelete));
       setShowModal(false);
       setGroupToDelete(null);
-    } catch (err) {
-      console.error(err);
-      alert(err.message || "Error al eliminar el grupo");
+    } catch (error) {
+      console.error(error);
+       setMessageInfo(error.message)
+       setModalMessageInfo(true)
     }
   };
 // Abrimos el modal para eliminar el grupo
@@ -213,7 +220,29 @@ const ListGroupUserComponent = () => {
           </div>
         </div>
       )}
-
+      {modalMessageInfo && (
+        <div 
+          className="position-absolute top-50 start-50 translate-middle-x mt-4 p-3"
+          style={{ 
+            zIndex: 1100, 
+            width: '90%', 
+            maxWidth: '400px', 
+            backgroundColor: '#ff4d4f', 
+            color: '#fff',
+            borderRadius: '12px',
+            boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+            textAlign: 'center'
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-start">
+            <div style={{ flex: 1 }}>{messageInfo}</div>
+            <button 
+              className="btn-close btn-close-white"
+              onClick={() => setModalMessageInfo(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
