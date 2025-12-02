@@ -1,103 +1,125 @@
-# GlobeTracked
+GlobeTracked
+
 GlobeTracked es una red social de viajes donde los usuarios registran en un mapa interactivo los lugares visitados, marcan destinos soñados y comparten experiencias, fotos y consejos. Permite conectar con otros viajeros, descubrir rutas y encontrar compañeros de viaje, creando una comunidad global unida por la pasión de explorar.
 
-1. Tecnologias usadas:
+1. Tecnologías usadas:
+1.2 Frontend: El frontend está construido con React y varias librerías para ofrecer una interfaz interactiva y responsiva.
 
-1.2 Frontend: El frontend está construido con React y varias librerias para ofrecer una interfaz interactiva y responsiva.
-Las tecnologias usadas son.
+Las tecnologías usadas son:
 
--React: Para construir la interfaz.
--Vite: Como entorno de desarrollo.
--React-router: Para manejar la navegacion dentro de la app.
--Redux y React-Redux: Para manejo de estado global para datos de los usuarios 
--Bootstrap 5 y React-bootstrap : Para estilizado de la app y darle estilos responsivos
--Leaflet: Para mostrar mapas interactivos.
--React-Leaflet: Para integrar Leaflet con React y poder usar los mapas dentro de los componentes.
--React-Leaflet-MarkerCluster: Para agrupar los marcadores.
--Leaflet GeoSearch: Para permitir búsquedas de ubicaciones dentro del mapa.
--Recharts: Para mostrar gráficos dentro de la app.
--Socket.io-client: Para comunicación en tiempo real con el backend.
--JWT-Decode: Para decodificar los tokens JWT y manejar la información del usuario en el frontend.
+React: Para construir la interfaz.
 
+Vite: Como entorno de desarrollo.
+
+React-router: Para manejar la navegación dentro de la app.
+
+Redux y React-Redux: Para manejo de estado global para datos de los usuarios.
+
+Bootstrap 5 y React-bootstrap: Para estilizado de la app y darle estilos responsivos.
+
+Leaflet: Para mostrar mapas interactivos.
+
+React-Leaflet: Para integrar Leaflet con React y poder usar los mapas dentro de los componentes.
+
+React-Leaflet-MarkerCluster: Para agrupar los marcadores.
+
+Leaflet GeoSearch: Para permitir búsquedas de ubicaciones dentro del mapa.
+
+Recharts: Para mostrar gráficos dentro de la app.
+
+Socket.io-client: Para comunicación en tiempo real con el backend.
+
+JWT-Decode: Para decodificar los tokens JWT y manejar la información del usuario en el frontend.
 
 1.3 Backend: El backend está construido con Node.js y Express para manejar las rutas y la lógica del servidor.
 
--Node.js y Express: Para crear el servidor y manejar las rutas de la app.
--Mongoose: Para conectarnos a la base de datos MongoDB y manejar los modelos de datos.
--bcrypt: Para encriptar las contraseñas de los usuarios de manera segura.
--jsonwebtoken (JWT): Para autenticar a los usuarios y manejar sesiones seguras.
--cors: Para permitir que el frontend y el backend puedan comunicarse sin problemas de seguridad.
--dotenv: Para manejar variables de entorno como claves y URLs de la base de datos.
--multer: Para manejar la subida de archivos, como imágenes de las publicaciones.
--cloudinary: Para almacenar las imágenes en la nube de manera sencilla.
--nodemailer: Para enviar correos electrónicos desde la app (Para correo de bienvenida).
--socket.io: Para comunicación en tiempo real entre el servidor y los clientes.
--express-rate-limit: Para limitar la cantidad de peticiones a la API y mejorar la seguridad.
--winston: Para registrar logs del servidor y tener seguimiento de errores o eventos importantes.
--nodemon: Herramienta de desarrollo que reinicia automáticamente el servidor cuando cambias el código.
+Node.js y Express: Para crear el servidor y manejar las rutas de la app.
 
+Mongoose: Para conectarnos a la base de datos MongoDB y manejar los modelos de datos.
 
-2. Instalación del proyecto: 
+bcrypt: Para encriptar las contraseñas de los usuarios de manera segura.
 
-Para la instalacion del proyecto se debe de clonar este repositorio: https://github.com/jonathan95-hub/GlobeTrack
+jsonwebtoken (JWT): Para autenticar a los usuarios y manejar sesiones seguras.
+
+cors: Para permitir que el frontend y el backend puedan comunicarse sin problemas de seguridad.
+
+dotenv: Para manejar variables de entorno como claves y URLs de la base de datos.
+
+multer: Para manejar la subida de archivos, como imágenes de las publicaciones.
+
+cloudinary: Para almacenar las imágenes en la nube de manera sencilla.
+
+nodemailer: Para enviar correos electrónicos desde la app (Para correo de bienvenida).
+
+socket.io: Para comunicación en tiempo real entre el servidor y los clientes.
+
+express-rate-limit: Para limitar la cantidad de peticiones a la API y mejorar la seguridad.
+
+winston: Para registrar logs del servidor y tener seguimiento de errores o eventos importantes.
+
+nodemon: Herramienta de desarrollo que reinicia automáticamente el servidor cuando cambias el código.
+
+2. Instalación del proyecto:
+
+Para la instalación del proyecto se debe clonar este repositorio:
+https://github.com/jonathan95-hub/GlobeTrack
 
 2.1 Entrar en la carpeta backend e instalar dependencias:
 
-En la terminal usar comando "cd backend" para entrar en la carpeta 
-una vez en la carpeta backend usar el comando "npm install" para instalar las dependencisas.
+En la terminal usar el comando cd backend para entrar en la carpeta.
+Una vez en la carpeta backend usar npm install para instalar las dependencias.
 
 2.2 Entrar en la carpeta frontend e instalar dependencias:
 
-En la terminal usar el comando "cd frontend/vite-project" para entrar en la carpeta,
-una vez dentro usar otra vez "npm install" para instalar las dependencias.
+En la terminal usar el comando cd frontend/vite-project para entrar en la carpeta.
+Una vez dentro usar otra vez npm install para instalar las dependencias.
 
-Se debe de crear un archivo .env en la raiz del proyecto con la siguiente estructura:
-
+Se debe crear un archivo .env en la raíz del proyecto con la siguiente estructura:
+``` text
 MONGO_URL = <tu_uri_de_mongodb>
-
-SECRET_TOKEN = <palabra secreta para el token>
-
-SECRET_TOKEN_REFRESH = <palabra secreta para el token dew refresco>
-
-PORT = 3000
+SECRET_TOKEN = <palabra_secreta_para_el_token>
+SECRET_TOKEN_REFRESH = <palabra_secreta_para_el_token_de_refresco>
+PORT = <Puerto_a_usar>
+```
 
 
-"¡Ojo se debera de tener una cuenta en cloudinary para poder ejecutar esto!
-dejo un enlace por si no tienes cuenta: https://cloudinary.com/"
-
+¡Ojo! Se deberá tener una cuenta en Cloudinary para poder ejecutar esto!
+Dejo un enlace por si no tienes cuenta: https://cloudinary.com/
+``` text
 CLOUDINARY_CLOUD_NAME = <tu_cloud_name>
 CLOUDINARY_API_KEY = <tu_api_key>
 CLOUDINARY_API_SECRET = <tu_api_key_secret>
-
+```
 
 3. Uso del proyecto
+
 Para usar GlobeTracked en tu máquina local, una vez que lo hayas instalado como se explica en la sección de instalación, sigue estos pasos:
 
-1- Asegúrate de tener corriendo el backend (desde la carpeta backend).
+Asegúrate de tener corriendo el backend (desde la carpeta backend).
 
-2- Asegúrate de que tu base de datos MongoDB y configuración de env estén correctas (URL, keys, Cloudinary, etc.).
+Asegúrate de que tu base de datos MongoDB y configuración de env estén correctas (URL, keys, Cloudinary, etc.).
 
-3- Ejecuta el frontend (desde frontend/vite‑project) para abrir la app en el navegador.
+Ejecuta el frontend (desde frontend/vite-project) para abrir la app en el navegador.
 
-4- Abre la URL que indique Vite (por ejemplo http://localhost:5173) en tu navegador.
+Abre la URL que indique Vite (por ejemplo http://localhost:5173
+) en tu navegador.
 
-4 Endpoint en el Backend:
+4. Endpoint en el Backend:
 
-El backend de GlobeTracked cuenta con 56 endpoints los cuales describiremos su funcionalidad, pondre aqui la parte del endpoint ten en cuenta que todos llevaran delante la url tipo "http://localhost:[Tu_Puerto] ejecutandose en local.
-Aclarar que en las rutas hay unos middelwares que verifican si hay token en la carpeta router encontramos todas las rutas de cada enpoint se veria asi;
-- En router:  router.post("/createcomment/:postId", verification, createComment)
+El backend de GlobeTracked cuenta con 59 endpoints los cuales describiremos su funcionalidad. Pondré aquí la parte del endpoint; ten en cuenta que todos llevarán delante la URL tipo http://localhost:[Tu_Puerto] ejecutándose en local.
+Aclarar que en las rutas hay unos middlewares que verifican si hay token. En la carpeta router encontramos todas las rutas de cada endpoint; se vería así:
 
-Este router es importado al index que es el que tiene el prefijo de la ruta completa ejemplo:
+En router: router.post("/createcomment/:postId", verification, createComment)
 
-- En index: app.use("/comment", commentRouter)
+Este router es importado al index que es el que tiene el prefijo de la ruta completa. Ejemplo:
 
+En index: app.use("/comment", commentRouter)
 
-el router es importado al index en la constante commentRouter y asi conseguimos que todas las rutas de router tengan el mismo prefijo.
+El router es importado al index en la constante commentRouter y así conseguimos que todas las rutas de router tengan el mismo prefijo.
 
+4. Estructura del Proyecto:
 
-4. Estructura del Poryecto:
-
-Este proyecto se divide en dos carpetas, una para el backend y otra para el frontend. La estructura seria asi:
+Este proyecto se divide en dos carpetas, una para el backend y otra para el frontend. La estructura sería así:
 ``` text
 GLOBETRACK/
 |
@@ -448,7 +470,7 @@ GLOBETRACK/
 ├── LICENSE -> "Archivo que indica los derechos de uso del proyecto"
 └── README.md -> "Archivo donde se describe el proyecto, su instalación, estructura y cualquier información necesaria para utilizarlo."
 ```
-5. Explicación de endpoint:
+## 5 Explicación de endpoints:
 
 1. "/auth/signup" Este endpoint es tipo Post y sirve para el registro de un nuevo usuarios.
 
@@ -456,201 +478,189 @@ GLOBETRACK/
 
 3. "/refreshtoken" Este endpoint es tipo Post y sirve para refrescar el token y mantener la sesion abierta.
 
-"Los endpoint que aparezcan tipo ":postID", "commentId"
-significa que son endpoint que les pasamos el id por parametro."
+4. "Los endpoint que aparezcan tipo ":postID", "commentId" significa que son endpoint que les pasamos el id por parametro."
 
-4. "comment/createcomment/:postId" Este endpoint es tipo Post y sirve para crear un comentario en cualquier publicación.
+5. "comment/createcomment/:postId" Este endpoint es tipo Post y sirve para crear un comentario en cualquier publicación.
 
-5. "comment/delete/:commentId" Este endpoint es tipo Delete y sirve para eliminar un comentario eres el autor del comentario.
+6. "comment/delete/:commentId" Este endpoint es tipo Delete y sirve para eliminar un comentario eres el autor del comentario.
 
-6.  "comment/edit/:commentId" Este endpoint es tipo Patch y sirtve para editar un comentario cuando eres el autor del comentario.
+7. "comment/edit/:commentId" Este endpoint es tipo Patch y sirtve para editar un comentario cuando eres el autor del comentario.
 
-7. "/country/allCountries" Este endpoint es tipo Get y sirve para traer todos los paises, basicamente es usado para poder usar los datos geoJson en el mapa interactivo.
+8. "/country/allCountries" Este endpoint es tipo Get y sirve para traer todos los paises, basicamente es usado para poder usar los datos geoJson en el mapa interactivo.
 
-8. "/country/topdesired" Este endpoint es tipo Get y sirve para traer los 5 países más deseados por los usuarios y con los datos de este endpoint podemos pintar la gráfica radial en el frontend.
+9. "/country/topdesired" Este endpoint es tipo Get y sirve para traer los 5 países más deseados por los usuarios y con los datos de este endpoint podemos pintar la gráfica radial en el frontend.
 
-9.  "/country/topvisited"  Este endpoint es tipo Get y sirve para traer los 5 países más visitados por los usuarios y con los datos de este endpoint podemos pintar la gráfica radial en el frontend.
+10. "/country/topvisited" Este endpoint es tipo Get y sirve para traer los 5 países más visitados por los usuarios y con los datos de este endpoint podemos pintar la gráfica radial en el frontend.
 
-10. "/country/create" Este endpoint es tipo post, sirve para añadir un país en la base de datos, este endpoint es solo para usuarios administradores y solo se usa para el desarrollo, o tiene función real en el frontend.
+11. "/country/create" Este endpoint es tipo post, sirve para añadir un país en la base de datos, este endpoint es solo para usuarios administradores y solo se usa para el desarrollo, o tiene función real en el frontend.
 
-11. "/country/:countryId" Este endpoint es tipo Delete, sirve par aeliminar un pais en la base de datos pero es solo para desarrollo y solo lo puede usar un usuario administrador no tiene funcion real en el frontend.
+12. "/country/:countryId" Este endpoint es tipo Delete, sirve par aeliminar un pais en la base de datos pero es solo para desarrollo y solo lo puede usar un usuario administrador no tiene funcion real en el frontend.
 
-12. "/country/visited/:countryId" Este endpoint es tipo Post, sirve para marcar o desmarcar un país como visitado.
+13. "/country/visited/:countryId" Este endpoint es tipo Post, sirve para marcar o desmarcar un país como visitado.
 
-13.  "/country/desired/:countryId" Este endpoint es tipo post, sirve para marcar o desmarcar un país como deseado.
+14. "/country/desired/:countryId" Este endpoint es tipo post, sirve para marcar o desmarcar un país como deseado.
 
-14.  "/groupmessage/getmessage/:groupId"  Este encpoint es tipo Get, sirve para traer todos los mensajes enviados a un grupo.
+15. "/groupmessage/getmessage/:groupId" Este encpoint es tipo Get, sirve para traer todos los mensajes enviados a un grupo.
 
-15. "/groupmessage/send/:groupId" Este endpoint es tipo Post, sirve para enviar un mensaje aun grupo.
+16. "/groupmessage/send/:groupId" Este endpoint es tipo Post, sirve para enviar un mensaje aun grupo.
 
-16.  "/group/newgroup" Este endpoint es tipo Post, sirve par crear un nuevo grupo.
+17. "/group/newgroup" Este endpoint es tipo Post, sirve par crear un nuevo grupo.
 
-17. "/group/topgroup" Este endpoint es tipo get, sirve para traer los cinco grupos con más miembros.
+18. "/group/topgroup" Este endpoint es tipo get, sirve para traer los cinco grupos con más miembros.
 
-18. "/group/listgroup" Este endpoint es tipo get, sirve para traer los grupos a los cuales el usuario no pertenece.
+19. "/group/listgroup" Este endpoint es tipo get, sirve para traer los grupos a los cuales el usuario no pertenece.
 
-19. "/group/usergroup" Este endpoint es tipo get, sirve para traer los grupos a los cuales el usuario pertenece.
+20. "/group/usergroup" Este endpoint es tipo get, sirve para traer los grupos a los cuales el usuario pertenece.
 
-20. "/group/all" Este enpoint es tipo Get, sirve para traer todos los grupo, se usa en el panel de control de administradores.
+21. "/group/all" Este enpoint es tipo Get, sirve para traer todos los grupo, se usa en el panel de control de administradores.
 
-21. "/group/edit/:groupId" Este endpoint es tipo Patch, sirve par apoder editar un grupo si eres el creador del grupo.
+22. "/group/edit/:groupId" Este endpoint es tipo Patch, sirve par apoder editar un grupo si eres el creador del grupo.
 
-22. "/group/totalmembers/:groupId" Este endpoint es tipo Get, sirve para traer todos los miembros de un grupo.
+23. "/group/totalmembers/:groupId" Este endpoint es tipo Get, sirve para traer todos los miembros de un grupo.
 
-23. "/group/expelmembers/:groupId" Este enpoint es tipo Post, sirve para expulsar a un miembro de un grupo.
+24. "/group/expelmembers/:groupId" Este enpoint es tipo Post, sirve para expulsar a un miembro de un grupo.
 
-24. "/group/delete/:groupId" Este endpoint es tipo Delete, sirve para eliminar un grupo solo lo pueden usar el creador del grupo o un usuario administrador.
+25. "/group/delete/:groupId" Este endpoint es tipo Delete, sirve para eliminar un grupo solo lo pueden usar el creador del grupo o un usuario administrador.
 
-25. "/group/addandexit/:groupId" Este endpoint es tipo Post, sirve para unirse o dejar un grupo.
+26. "/group/addandexit/:groupId" Este endpoint es tipo Post, sirve para unirse o dejar un grupo.
 
-26. "/audit/allLog" Este endpoint es tipo Get, sirve para traer todos los logs. solo lo pueden usar usuarios administradores en el panel de control.
+27. "/audit/allLog" Este endpoint es tipo Get, sirve para traer todos los logs. solo lo pueden usar usuarios administradores en el panel de control.
 
-27. "/audit/delete/alllog" Este endpoint es tipo Delete, sirve para eliminar todos los logs. solo para administradores.
+28. "/audit/delete/alllog" Este endpoint es tipo Delete, sirve para eliminar todos los logs. solo para administradores.
 
 Estos tres endpoint son tipo Delete, sirven para eliminar los logs por tipo cada uno, tipo Info, tipo Warn y tipo Error.
 
-28. "/audit/delete/logInfo"
-29. "/audit/delete/logWarn"
-30. "/audit/delete/logError"
+29. "/audit/delete/logInfo"
 
-31. "/notification/new" Este endpoint es tipo get, sirve para traer las notificaciones.
+30. "/audit/delete/logWarn"
 
-32. "/notification/delete/:notificationId" Este endpoint es tipo Delete, sirve para eliminar notificaciones.
+31. "/audit/delete/logError"
 
-33. "/post/allpost" Este enpoint es tipo Get, sirve para traer todas las publicaciones de todos los usuarios.
+32. "/notification/new" Este endpoint es tipo get, sirve para traer las notificaciones.
 
-34. "/post/top" Este endpoint es tipo Get y sirve para traer las diez publicaciones con más me gustas.
+33. "/notification/delete/:notificationId" Este endpoint es tipo Delete, sirve para eliminar notificaciones.
 
-35. "/post/create" Este endpoint es tipo Post, sirve para crear una nueva publicación.
+34. "/post/allpost" Este enpoint es tipo Get, sirve para traer todas las publicaciones de todos los usuarios.
 
-36. "/post/userPost/:userID" este endpoint es tipo Get, sirve para traer las publicaciónes de un usuario en concreto.
+35. "/post/top" Este endpoint es tipo Get y sirve para traer las diez publicaciones con más me gustas.
 
-37. "/post/userpost/comment/:postId" Este endpoint es tipo Get, sirve para traer los comentarios de una publicación en concreto.
+36. "/post/create" Este endpoint es tipo Post, sirve para crear una nueva publicación.
 
-38. "/post/:postId" Este endpoint es tipo Patch, sirve para editar una publicación si eres el creador de dicha publicación.
+37. "/post/userPost/:userID" este endpoint es tipo Get, sirve para traer las publicaciónes de un usuario en concreto.
 
-39. "/post/like/:postId" Este endpoint es tipo Post, sirve para dar y quitar like a una publicación en concreto.
+38. "/post/userpost/comment/:postId" Este endpoint es tipo Get, sirve para traer los comentarios de una publicación en concreto.
 
-40. "/post/delete/:postId" Este endpoint es tipo Delete, sirve para eliminar una publicación si eres el creador de ella.
+39. "/post/:postId" Este endpoint es tipo Patch, sirve para editar una publicación si eres el creador de dicha publicación.
 
-41. "/privatemessage/sendprivate/:receptorUserId" Este endpoint es tipo Post, sirve para enviar un mensaje a un usuario en concreto.
+40. "/post/like/:postId" Este endpoint es tipo Post, sirve para dar y quitar like a una publicación en concreto.
 
-42. "/privatemessage/obtainedmessage" Este endpoint es tipo Get, sirve para obtener los mensajes de una conversacion con un usaurio en concreto.
+41. "/post/delete/:postId" Este endpoint es tipo Delete, sirve para eliminar una publicación si eres el creador de ella.
 
-43. "/ranking/allphotos" Este endpoint es tipo Get, sirve para traer todas las fotos del ranking ordenadas con las que mas votos tienen primero.
+42. "/privatemessage/sendprivate/:receptorUserId" Este endpoint es tipo Post, sirve para enviar un mensaje a un usuario en concreto.
 
-44. "/ranking/create" Este endpoint es tipo Post, sirve para crear una foto en el ranking.
+43. "/privatemessage/obtainedmessage" Este endpoint es tipo Get, sirve para obtener los mensajes de una conversacion con un usaurio en concreto.
 
-45. "/raking/:photoId" Este endpoitn es tipo Post, sirve para dar o quitar voto a una foto del ranking.
+44. "/ranking/allphotos" Este endpoint es tipo Get, sirve para traer todas las fotos del ranking ordenadas con las que mas votos tienen primero.
 
-46. "/ranking/delete/:photoId" Este endpoint es tipo Delete, sirve para eliminar una foto del ranking si eres el creador de ella.
+45. "/ranking/create" Este endpoint es tipo Post, sirve para crear una foto en el ranking.
 
-47. "/user/morefollowers" Este endpoint es tipo Get, sirve para traer los diez usuarios con más seguidores.
+46. "/raking/:photoId" Este endpoitn es tipo Post, sirve para dar o quitar voto a una foto del ranking.
 
-48. "/user/all" Este endpoint es tipo Get, sirve para traer todos lso usuarios que hay registrados, solo lo pueden usar los usuarios administradores. 
+47. "/ranking/delete/:photoId" Este endpoint es tipo Delete, sirve para eliminar una foto del ranking si eres el creador de ella.
 
-49. "/user/delete/:id" Este endpoint es tipo Delete, sirve para elimianr un usuario registrado, solo lo puedne usar el propio usuario para eliminar su cuenta o un usuario administrador.
+48. "/user/morefollowers" Este endpoint es tipo Get, sirve para traer los diez usuarios con más seguidores.
 
-50. "/user/edit/:userId" Este endpoint es tipo Patch, sirve para editar tu usuario.
+49. "/user/all" Este endpoint es tipo Get, sirve para traer todos lso usuarios que hay registrados, solo lo pueden usar los usuarios administradores.
 
-51. "/user/:userId" Este endpoint es tipo Get, sirve para traer la informacion de un usuario en concreto.
+50. "/user/delete/:id" Este endpoint es tipo Delete, sirve para elimianr un usuario registrado, solo lo puedne usar el propio usuario para eliminar su cuenta o un usuario administrador.
 
-52. "/user/followers/:userId" Este endpoint es tipo Get, sirve para traer los seguidores del usuario.
+51. "/user/edit/:userId" Este endpoint es tipo Patch, sirve para editar tu usuario.
 
-53. "/user/following/:userId" Este endpoint es tipo Get, sirve para traer los usuarios que sigeun al usuario.
+52. "/user/:userId" Este endpoint es tipo Get, sirve para traer la informacion de un usuario en concreto.
 
-54. "/user/countryvisited/:userId" Este endpoint es Get, sirve para traer los paises que a visitado el usuario.
+53. "/user/followers/:userId" Este endpoint es tipo Get, sirve para traer los seguidores del usuario.
 
-55. "/user/countrydesired/:userId" Este endpoint es Get, sirve para traer los paises que desea el usuario.
+54. "/user/following/:userId" Este endpoint es tipo Get, sirve para traer los usuarios que sigeun al usuario.
 
-56. "/user/:userId/follow" Este endpoint es tipo Post, sirve para seguir y dejar de seguir a un usuario.
+55. "/user/countryvisited/:userId" Este endpoint es Get, sirve para traer los paises que a visitado el usuario.
 
-57. "/user/otheruserfollowers/:userId" Este endpoint es tipo Get, sirve para traer los seguidores de otro usuario distinto al nuestro.
+56. "/user/countrydesired/:userId" Este endpoint es Get, sirve para traer los paises que desea el usuario.
 
-58. "/user//otheruserfollowing/:userId" Este endpoint es tipo Get, sirve para traer los usuarios que siguen a otro usuario distinto al nuestro.
+57. "/user/:userId/follow" Este endpoint es tipo Post, sirve para seguir y dejar de seguir a un usuario.
 
+58. "/user/otheruserfollowers/:userId" Este endpoint es tipo Get, sirve para traer los seguidores de otro usuario distinto al nuestro.
 
+59. "/user//otheruserfollowing/:userId" Este endpoint es tipo Get, sirve para traer los usuarios que siguen a otro usuario distinto al nuestro.
 
-
-6 LandinPage:
+## 6 LandingPage
 
 La página landingPage es la principal al llegar a la web.
-dentro de ella aparecerán a un lado izquierdo un mensaje sobre la web.
-En el lado derecho aparecerá una imagen con dos botones  abajo, Iniciar sesión y Registrarse.
+Dentro de ella aparecerá, a la izquierda, un mensaje sobre la web. En el lado derecho aparecerá una imagen con dos botones abajo: Iniciar sesión y Registrarse.
 
-Si queremos registrar un usario clickamos el boton de Registrarse, y la vista cambiara añadiendo el componente de registro.
-Rellenaremos los datos y clickamos el boton Registrarse y se hara una llamada al backend pora registrar un usuario en la base de datos.
+Si queremos registrar un usuario, clicamos el botón Registrarse, y la vista cambiará añadiendo el componente de registro. Rellenaremos los datos y clicamos el botón Registrarse y se hará una llamada al backend para registrar un usuario en la base de datos.
 
+Una vez ya tenemos un usuario registrado, si queremos acceder a la web deberemos loguear con nuestro email y contraseña. Al pulsar el botón Acceder se hará una llamada al backend para loguearse con el usuario que corresponda con el email, que es único (no puede haber dos usuarios con el mismo email), y verificará si la contraseña coincide. De ser así, nos redirigirá a la HomePage.
 
-Una vez ya tenemos un usuario registrado si queremos acceder a la web deberemos de loguear con nuestro usuario, con nuestro email y contraseña. Al pulsar el boton acceder se hara una llamada al backend para loguearse con el usuario qeu corresponda con el email, que es unico no puede a ver dos usuarios con el mismo email, y verificara si la contraseña coincide, de ser asi n
+## 7 HomePage
 
-Al pulsar el boton acceder se hara una llamada al backend para loguearse con el usuario qeu corresponda con el email, que es unico no puede a ver dos usuarios con el mismo email, y verificara si la contraseña coincide, de ser asi nos redirigira a la HomePage.
+En la HomePage encontraremos en la parte superior el header con un logo a la izquierda; en el centro, unos botones indicando a qué página navegan —se quedarán con el fondo blanco indicando en qué página te encuentras en ese momento—. Los botones de navegación son: Home, Publicaciones, Grupos, Ranking, Perfil y Notificaciones.
 
-7 HomePage:
- En la HomePage encontraremos en la parte superior el header con un logo a la izquierda del todo en el centro unos botones indicando a que página navegan se quedaran con el fondo blanco indicando en que página te encuentras en ese momento,
- los botones de navegación son Home, Publicaiones, Grupos, Ranking, Perfil y Notificaciones.
+En la parte derecha encontraremos la imagen de tu usuario y, al lado derecho de ella, el botón para cerrar sesión. Si el usuario es administrador aparecerá un engranaje a la izquierda de la foto; sirve para navegar al panel de control.
 
- En la parte derecha encontraremos la imagen de tu usuario y al lado derecho de ella el boton para cerrar sesión, si el usuario es administrador aparecera un engranje a la izquierda de la foto, sirve para navegar al panel de control.
+En la HomePage, a la izquierda, encontraremos el mapa global: un mapa interactivo con vista satelital que muestra las publicaciones de todos los usuarios con el icono de un pin. Están agrupados y, conforme se hace zoom, se van desagrupando para ver cada una de las publicaciones con la localización exacta. Si se clickea en el pin mostrará el título, la foto y la descripción de la publicación. En la parte derecha se muestra una lista de las diez mejores publicaciones, que son las que más likes tienen. Este componente se extiende hasta el final de la página.
 
- Encontraremos en la HomePage a la izquierda el mapa global, un mapa interctivo y con vista satelital el cual muestra las publicaciones de todos los usuarios con el icono de un pin, estan agrupados y conforme se hace zoom se van desagrupando para ver cada una de las publicaciones con la localizacion exacata, si se clicka en el pin mostrara el titulo, la foto y la descripcion de la publicación.
- En la parte derecha se muestra una lista de las mejores diez publicaciones, que son las que mas likes tienen. Este componente se extiende hasta el final de la página.
- Volviendo a la parte izquierda, justo debajo del mapa global, se ecnuentran los dos gráficos radiales de los cinco paises mas visitados de los usuarios y los cinco mas deseados, mostrando el porcentaje de usaurios que lo visitaron y visitaron.
- 
- Debajo de las graficas, se muestran dos componentes más El top Grupos, con los grupos con mas miembros y el Top viajeros que muestar los usuarios con mas seguidores.
+Justo debajo del mapa global se encuentran los dos gráficos radiales de los cinco países más visitados por los usuarios y los cinco más deseados, mostrando el porcentaje de usuarios que los visitaron y los desean.
 
- Esta pagina es a titulo informativo y para mostrar estadisticas.
+Debajo de las gráficas se muestran dos componentes más: Top Grupos (con los grupos con más miembros) y Top Viajeros (que muestra los usuarios con más seguidores).
 
- 8 PostPage :
-  
-  Al clickar en publicaciones del header navegamos a la pagina de publicaciones donde mostrara todas las publicaciones de todos los usuarios pudiendo comentarlas y dar like si nos gustan.
-  las publicaciones se traen de diez en diez desde el backend para ver más se debe de pulsar le boton de cargar más.
-  Si clickamos en la imagen del usuario nos redirigira al perfil de dicho usuario.
-  si clickamos en comentarios se nos abrira un modal en el que nos da la opción de ver los comentarios de la publicación o crear un nuevo comentario, si elegimos la opcion ver comentarios veremso todos los comentarios de dicha publicacion, y si hay algún comentario nuestro aparecera con las opciones de elimianar el comentario o editarlo.
-  Si elegimos la opción de crear nos llevara a la pagina de crear comentario.
-  Si clickamos en el boton de like daremos like a la publicacion y quedara el corazon marcado de rojo, si volvemos a darle quitaremos el like y el corazon del boton quedara solo la silueta.
+Esta página es a título informativo y para mostrar estadísticas.
 
-  9 Grupos: 
-  Si damos al boton grupos navegamos hasta la GroupPage, apareciendo primeramente la lsita de grupos en los que nuestro usuario no pertence, nos mostrara una lista de cards de los grupos mostrando la imagen del grupo, el titulo, la descripcion, el número de miembros y el nombre del creador.
-  tambien incluye un boton que pone unirse para ser miembro de ese grupo una vez le des al boton saldrá un modal que dirá si quieres entrar en el chat de ese grupo si, clickas en si, entrar al chat, navegaras hasta el chat de grupo.
-  
-  La página incluye un boton que pone ir a mis grupos si clickamos sobre el nos mostrará los grupos a los cuales pertenecemos, mostrando unas cards como las anteriores, pero tiene los botones entrar la chat y dejar grupo, en caso de ser un grupo que tu has creado mostrará los botones, entrar la chat, editar grupo y eliminar grupo.
+## 8 PostPage
 
-  10 Ranking:
+Al clicar en Publicaciones desde el header navegamos a la página de publicaciones donde se mostrarán todas las publicaciones de todos los usuarios pudiendo comentarlas y dar like si nos gustan. Las publicaciones se traen de diez en diez desde el backend; para ver más se debe pulsar el botón Cargar más.
 
-  Al navegar hacia ranking nos mostraráuna página donde veremos unas fotos con el nombre del usuario  que ala creó el país al que pertence la foto y el numero de votos que tiene, las fotos estan ordenadas de forma que la foto con más votos se mostrará la primera, tendrá un boton que cambia dinámicamente para votar, si no has votado pondrá votar, si ya votaste pondra quitar voto, en caso que el creador de la foto seas tu tambien te saldra un boton eliminar.
+Si clicamos en la imagen del usuario nos redirigirá al perfil de dicho usuario. Si clicamos en Comentarios se nos abrirá un modal en el que nos da la opción de ver los comentarios de la publicación o crear un nuevo comentario. Si elegimos la opción Ver comentarios veremos todos los comentarios de dicha publicación, y si hay algún comentario nuestro aparecerá con las opciones de eliminar el comentario o editarlo. Si elegimos la opción de crear nos llevará a la página de crear comentario.
 
-  arriba a la izquierda de las cards hay un boton que pone crear foto, si clickamos en el navegaremos hasta el componente que se encarga de crear las fotos, alli hay un formulario en el que podremos insertar una imagen y un selector con una lista de paises para seleccionar de que pais es la foto, abajo del todo hay un boton que pone subir foto si clickamos crearemos una nueva foto para el ranking.
+Si clicamos en el botón de like daremos like a la publicación y quedará el corazón marcado de rojo; si volvemos a darle quitaremos el like y el corazón del botón quedará solo la silueta.
 
-  11 Perfil:
+## 9 Grupos
 
-  Si clickamos en perfil navegaremos hasta la pagina de nuestro perfin el la cual aparecerá un mapa con pin marcando nuestras publicaciones y el mapa sera interacctivo, vemos que los paises estan marcados con un contorno gris, si clickamos sobre el saldra un modal con dos botones, marcar como visitado y maracar como deseado si clickamos como visitado el area de dicho pais se pintará de verde, y si marcamos como deseado se pintará de amarillo, si marcamos ambos se pintará de turquesa, los botones del modal cambiarán dianamicamente segun este marcado o no si ya esta marcado pondra desmarcar y podras desmarcar el pais tanto de vistado como de deseado. 
+Si damos al botón Grupos navegamos hasta la GroupPage, apareciendo primeramente la lista de grupos en los que nuestro usuario no pertenece. Nos mostrará una lista de cards de los grupos mostrando la imagen del grupo, el título, la descripción, el número de miembros y el nombre del creador. También incluye un botón que pone Unirse para ser miembro de ese grupo. Una vez le des al botón saldrá un modal que dirá si quieres entrar en el chat de ese grupo; si clicas en Sí, entrar al chat, navegarás hasta el chat de grupo.
 
-  Mas abajo encontramos nuestra imagen de usuario con unos botones arriba que ponen editar y mensajes, si clicamos editar podremos editar la informacion de nuestro usuario, si clickamos en mensajes podremos ver las conversaciones que tenemos con otros usuarios y enviarles mensajes.
-  debajo de la foto de perfil tenemos otros dos botones Seguidores y seguidos si clickamos sobre ellos nos abrira un modal en el que podremos ver los nombres e imagen del usuario y un boton que nos permite navegar hasta el perfil de dicho usuario.
+La página incluye un botón que pone Ir a mis grupos; si clicamos sobre él nos mostrará los grupos a los cuales pertenecemos, mostrando unas cards como las anteriores, pero con los botones Entrar al chat y Dejar grupo. En caso de ser un grupo que tú has creado mostrará los botones Entrar al chat, Editar grupo y Eliminar grupo.
 
-  Cuando estamos en el perfil de otro usuario es practicamente lo mismo solo que no podremos marcar ni desmarcar nada de su mapa, podremos ver que paises visito y cuales son sus deseados eso si y los pin de sus publicaciones. Los botones de encima de la fotro del perfil cambian a seguir, boton para seguir al usuario que cambia dinamicamente, si ya lo sigues pondrá dejar de seguir y el otro boton pondrá enviar mensaje que si es el primer mensaje e saldra un modal para que escribas el mensaje, si ya escribiste un mensaje a ese usuario te llevara a tus mensajes.
+## 10 Ranking
 
-  eso es lo unico que cambia en el componente de un usuario distinto al nuestro,
+Al navegar hacia Ranking nos mostrará una página donde veremos fotos con el nombre del usuario que la creó, el país al que pertenece la foto y el número de votos que tiene. Las fotos están ordenadas de forma que la foto con más votos se mostrará la primera. Tendrá un botón que cambia dinámicamente para votar: si no has votado pondrá Votar, si ya votaste pondrá Quitar voto; en caso de que el creador de la foto seas tú también te saldrá un botón Eliminar.
 
-  Continuando con la explicacion del componente de Perfil debajo de los botones de seguidore y seguidos aparece la informacion del usuario.
-  Si es tu perfil aparecerá un boton para eliminar tu cuenta, si clickamos en el te saldra un modal que te preguntara si estas seguro de esa accion, si aceptas, regresaras al login y tu cuenta habrá sido eliminada de la base de datos.
+Arriba a la izquierda de las cards hay un botón que pone Crear foto; si clicamos en él navegaremos hasta el componente que se encarga de crear las fotos. Allí hay un formulario en el que podremos insertar una imagen y un selector con una lista de países para seleccionar de qué país es la foto. Abajo del todo hay un botón que pone Subir foto; al clicarlo crearemos una nueva foto para el ranking.
 
-  Más abajo apareceran las publicaciones d edicho usuario y podremos interactuar con el danod like y viendo o creando comentarios.
-  habrá un boton en la parte superior derecha que sirve para navegar al componente de creación de publicaciones.
+## 11 Perfil
 
-  11 Notificaciones: 
+Si clicamos en Perfil navegaremos hasta la página de nuestro perfil, en la cual aparecerá un mapa con pins marcando nuestras publicaciones y el mapa será interactivo. Vemos que los países están marcados con un contorno gris; si clicamos sobre uno saldrá un modal con dos botones: Marcar como visitado y Marcar como deseado. Si clicamos Marcar como visitado el área de dicho país se pintará de verde, y si marcamos Deseado se pintará de amarillo; si marcamos ambos se pintará de turquesa. Los botones del modal cambiarán dinámicamente según esté marcado o no; si ya está marcado pondrá Desmarcar y podrás desmarcar el país tanto de visitado como de deseado.
 
-  Si clickamos en el boton notificaciones dle header nos abre un modal con las notificaciones que tenemos.
-  si clickamos sobre la notificacion se eliminara, las notificaciones nos avisan de cosas como usuario dio like a tu publicacion o comento en tu publicacion, te siguio, te envio un mensaje o hay nuevos mensajes en el grupo.
+Más abajo encontramos nuestra imagen de usuario con unos botones arriba que ponen Editar y Mensajes. Si clicamos Editar podremos editar la información de nuestro usuario; si clicamos Mensajes podremos ver las conversaciones que tenemos con otros usuarios y enviarles mensajes. Debajo de la foto de perfil tenemos otros dos botones: Seguidores y Seguidos. Si clicamos sobre ellos nos abrirá un modal en el que podremos ver los nombres e imagen del usuario y un botón que nos permite navegar hasta el perfil de dicho usuario.
 
-  12 Panel de control:
+Cuando estamos en el perfil de otro usuario es prácticamente lo mismo, solo que no podremos marcar ni desmarcar nada de su mapa; podremos ver qué países visitó y cuáles son sus deseados, y los pins de sus publicaciones. Los botones encima de la foto del perfil cambian a Seguir (botón para seguir al usuario, que cambia dinámicamente: si ya lo sigues pondrá Dejar de seguir) y el otro botón pondrá Enviar mensaje —si es el primer mensaje se mostrará un modal para que escribas el mensaje; si ya escribiste un mensaje a ese usuario te llevará a tus mensajes.
 
-  Si eres un usuario administrador, te aparecera el boton con un engranaje, si clickamos sobre el navegaremos al panel de control en el que nos aparecera nos saldrán tres bloques en el que muestran los usuarios registrados, otro con el numero de grupos activos y el ultimo con el numero de logs que hay.
-  apareceran dos botones que cambian dinamiacamente depende en la seccion que estes uno sirve para ver el listado de todos los grupos de la web aparecera una lista con cards similares a las de la seccion grupos pero los botones que aparecen son ver miembros que si clickas te sale una lista de miembros que hay en el grupo con un boton para expulsarlo, otro boton que pone ver mensajes que te trae una lista con los mensajes que se enviaron al grupo y el ultimo boton que pone eliminar grupo, para eliminar el grupo en la base de datos 
-  
-  Otro boton sirve para ver la lista de todos los usuarios que hay en la web, donde nos muestra un poco de informacion sobre el usuario, hay dos botones uno para banear al usuario, eliminarlod e la web y otro que pone detalle para ver la informacion al completo del usuario.
+Eso es lo único que cambia en el componente de un usuario distinto al nuestro.
 
-  El ultimo boton sirve para ver los logs de la web, si clickamos veremos una lista con todos los logs que se crearon podremos filtrar por tipo y eliminar todos los logs o eliminar los logs por tipo.
+Continuando con la explicación del componente de Perfil: debajo de los botones de seguidores y seguidos aparece la información del usuario. Si es tu perfil aparecerá un botón para eliminar tu cuenta; si clicamos en él te saldrá un modal que te preguntará si estás seguro de esa acción. Si aceptas, regresarás al login y tu cuenta habrá sido eliminada de la base de datos.
 
-  Con esto creo que esta mas que explicado el funcionamiento de la web ya que la mayoria de las funcionalidades son intuitivas.
-  Como punto final todo el estilado demla web fue echo con bootstrap 5.
+Más abajo aparecerán las publicaciones de dicho usuario y podremos interactuar con ellas dando like y viendo o creando comentarios. Habrá un botón en la parte superior derecha que sirve para navegar al componente de creación de publicaciones.
+
+## 12 Notificaciones
+
+Si clicamos en el botón Notificaciones del header se abre un modal con las notificaciones que tenemos. Si clicamos sobre la notificación se eliminará. Las notificaciones nos avisan de cosas como: un usuario dio like a tu publicación o comentó en tu publicación, te siguió, te envió un mensaje o hay nuevos mensajes en el grupo.
+
+## 13 Panel de control
+
+Si eres un usuario administrador te aparecerá el botón con un engranaje; si clicamos sobre él navegaremos al panel de control en el que nos aparecerán tres bloques que muestran los usuarios registrados, otro con el número de grupos activos y el último con el número de logs que hay.
+
+Aparecerán botones que cambian dinámicamente dependiendo de la sección en la que estés. Uno sirve para ver el listado de todos los grupos de la web; aparecerá una lista con cards similares a las de la sección Grupos, pero los botones que aparecen son Ver miembros (que si clicas te sale una lista de miembros del grupo con un botón para expulsarlo), Ver mensajes (que te trae una lista con los mensajes que se enviaron al grupo) y Eliminar grupo (para eliminar el grupo en la base de datos).
+
+Otro botón sirve para ver la lista de todos los usuarios de la web, donde se muestra un poco de información sobre cada usuario. Hay dos botones: uno para banear al usuario (eliminarlo de la web) y otro que pone Detalle para ver la información completa del usuario.
+
+El último botón sirve para ver los logs de la web; si clicamos veremos una lista con todos los logs que se crearon, podremos filtrar por tipo y eliminar todos los logs o eliminar los logs por tipo.
+
+Con esto creo que está más que explicado el funcionamiento de la web, ya que la mayoría de las funcionalidades son intuitivas. Como punto final, todo el estilado de la web fue hecho con Bootstrap 5.
