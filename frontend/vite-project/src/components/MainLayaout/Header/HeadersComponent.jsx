@@ -926,20 +926,3 @@ const HeadersComponent = () => {
 
 export default HeadersComponent;
 
-// VER MAÑANA PARA VER SI LO PONEMOS
-
-// notifications.map((n) => (
-//   <div
-//     key={n._id}
-//     onClick={() => handleNotificationClick(n._id)}
-//     className="border-bottom py-2 px-2 rounded"
-//     style={{ cursor: "pointer", transition: "background 0.2s" }}
-//     onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f1f1")}
-//     onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-//   >
-//     <span style={{ fontWeight: 'bold', marginRight: '5px', textTransform: 'capitalize' }}>
-//       {n.type}:
-//     </span>
-//     <span>{n.message}</span>
-//   </div>
-// ))
